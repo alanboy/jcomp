@@ -188,9 +188,10 @@ class analisis_lexico{
 			{
 			//encontro un caracter ke no esta en el alfabeto
 			//System.out.println("He encontrado un caracter que no pertenece al alfabeto.");
-			Help.notInAlphabet( c );
-			System.out.println("Linea: " + linea);
-			System.out.println("Caracter: [" + c +"]");
+			Help.notInAlphabet( c, linea );
+			//Help.showLine((linea));
+			//system.out.println("Linea: " + linea);
+			//System.out.println("Caracter: [" + c +"]");
 			return 1;
 			}
 
@@ -313,9 +314,9 @@ class analisis_lexico{
 							s += st.nextToken();
 					}catch(Exception e)
 					{
-						Help.unfinishedString();
+						Help.unfinishedString ( Integer.parseInt( numero_linea ) );
 						//System.out.println("Error, no encontre el fin de la cadena.");
-						System.out.println("Linea: "+numero_linea);
+						//System.out.println("Linea: "+numero_linea);
 					return 1;
 					}
 				}
@@ -891,11 +892,12 @@ Metodos [] metodos;
 
 			//si hay return y no deberia
 			if(!regresa){
-				System.out.println("Linea: "+uu);
-				System.out.print("Metodo "+metodos[f].getNombre().substring(14));
-				System.out.println(" es TIPO_VOID.");
+
+				//System.out.println(" es TIPO_VOID.");
 				//System.out.println("Imposible regresar algo de un metodo que es void.");
-				Help.returnFromVoid();
+				Help.returnFromVoid( metodos[f].getNombre().substring(14), Integer.parseInt(uu) );
+				//System.out.println("Linea: "+uu);
+				//System.out.print("Metodo "+metodos[f].getNombre().substring(14));
 				return 1;
 			}
 
@@ -1062,9 +1064,15 @@ Metodos [] metodos;
 
 					if((!token[a+1].equals( token[a+2])) || ( token[a+1].equals( "<STRING>") || token[a+2].equals( "<STRING>")))
 					{
-					System.out.println("Linea: "+linea);
-					System.out.print("Operador "+operacion+" ");
-					System.out.println("no puede ser aplicado a: "+token[a+1]+" "+token[a+2]);
+
+
+					System.out.print("Operator "+operacion+" ");
+					//System.out.println("can not be applied to: "+token[a+1]+" and  "+token[a+2]);
+					Help.addingDifferentTypes( operacion, token[a+1], token[a+2], Integer.parseInt( linea ) );
+
+					//System.out.println("Linea: "+linea);
+
+
 					return 1;
 					}
 
@@ -2767,8 +2775,9 @@ Metodos [] metodos;
 
 					if(!found)
 					{
-					System.out.println("Linea: " + linea.substring(13));
-					System.out.println("Variable " + token[b].substring(14) + " es utilizada antes de ser declarada.");
+					Help.usingBeforDef( token[b].substring(14), Integer.parseInt(linea.substring(13)) );
+					/*System.out.println("Linea: " + linea.substring(13));
+					System.out.println("Variable " + token[b].substring(14) + " es utilizada antes de ser declarada.");*/
 					return 1;
 					}
 				}
@@ -2786,8 +2795,9 @@ Metodos [] metodos;
 
 					if(!found)
 					{
-					System.out.println("Linea: " + linea.substring(13));
-					System.out.println("Variable " + _id + " es utilizada antes de ser declarada.");
+					Help.usingBeforDef( _id, Integer.parseInt(linea.substring(13)) );						
+//					System.out.println("Linea: " + linea.substring(13));
+//					System.out.println("Variable " + _id + " es utilizada antes de ser declarada.");
 					return 1;
 					}
 
@@ -3756,23 +3766,95 @@ class compilador{
 
 
 class Help{
-	public static void notInAlphabet(char c){
-		System.out.println("The source file contains an unexpected ASCII character, which is identified by its hex number. To resolve the error, remove the character. Rember there are invisible characters out there that your editor might not be showing. The character ASCII number is: " + (int)c +" Another thing you have to take into account is text encodig, read <this> for more info."  );
+
+	private static void header(  ){
+		System.out.print("\n---------------------------------------\n");
+		System.out.print("    Your program contained errors. ");
+		System.out.print("\n---------------------------------------\n\n");
+
+
 			
 	}
 
-	public static void unfinishedString(){
-		System.out.println("A string constant cannot be continued on a second line unless you do the following: \nEnd the first line with a backslash. \nClose the string on the first line with a double quotation mark and open the string on the next line with another double quotation mark.\n\nEnding the first line with \\n is not sufficient");
+	public static void notInAlphabet(char c, int line){
+
+		header();
+		showLine(line);
+		System.out.println("The source file contains an unexpected ASCII character. To resolve the error, remove the character. Remeber there are invisible characters out there that your editor might not be showing. The character ASCII number is: " + (int)c +". Another thing you have to take into account is text encodig, read <this> for more info."  );
+			
+	}
+
+	public static void unfinishedString(int line){
+		header();
+		showLine(line);
+		System.out.println("You started a string but never closed it. A string constant cannot be continued on a second line unless you do the following: \n\tEnd the first line with a backslash. \n\tClose the string on the first line with a double quotation mark and open the string on the next line with another double quotation mark.\n\nEnding the first line with \\n is not sufficient");
 	
 	}
 
 
-	public static void returnFromVoid(){
-		System.out.println("If a function does not return a value, then a special \"TYPE\" is used to tell the computer this. The return type is \"void\" (all lower case). In thi case the function is declared as void but returns a value.")	
+	public static void returnFromVoid(String m, int line){
+		header();
+		showLine(line);
+		
+		System.out.println("In method "+m+", you are returning something from a void function. If a function does not return a value, then a special \"TYPE\" is used to tell the computer this. The return type is \"void\" (all lower case). In this case the function is declared as void but returns a value.");	
 	
 	}
 		
+	public static void addingDifferentTypes(String op, String t1, String t2, int linea){
+		header();	
+		showLine(linea);
 
+		System.out.println( "You are mixing " +t1 + " and " + t2 + ". They are diferent types. \n" );
+
+		System.out.println("\nMost generally, \"strong typing\" implies that the programming language places severe restrictions on the intermixing that is permitted to occur, preventing the compiling or running of source code which uses data in what is considered to be an invalid way. For instance, an addition operation may not allow an integer to be added to a string value; a procedure which operates upon linked lists may not be used upon numbers. However, the nature and strength of these restrictions is highly variable.");	
+	}
+
+
+	public static void usingBeforDef(String var, int linea){
+		header();
+		showLine(linea);
+		System.out.println("You are trying to use variable "+ var + " which you have not declared before. Remeber you have to declare variables before using them.");
+			
 	
+	}
+
+	public static void showLine(int line){
+
+		int cl = line;
+		
+		try{
+			BufferedReader br = new BufferedReader(new FileReader("pf.txt"));
+		
+
+			System.out.println("Here at line "+line+": ");	
+
+			while( cl-- > 2 ){
+				///System.out.printf(
+				 br.readLine( ) 
+				//)
+				; 
+			}
+			line -= 1;
+			for(int a = 3; a-- != 0 ; ){
+				if(a == 1){
+					System.out.println( ">>>" +  line + " : " + br.readLine() );
+				}else{
+					System.out.println( "   " +  line + " : " + br.readLine() );
+				}
+				
+				line++;
+			}
+
+			System.out.println("\n");	
+			
+			br.close();
+
+		}catch(Exception e){
+			System.out.printf("Touble showing the file.");
+			return;
+		
+		}
+		
+	}
 
 }
