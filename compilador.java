@@ -827,13 +827,17 @@ Metodos [] metodos;
 				token[b] = s1+"_"+metodos[a].getNombre().substring(14)+"_"+s2;
 				}
 
-				System.out.println("->"+token[b]+"<-");
-				if( token[b].indexOf( "args:NADA" ) == -1 ) { System.out.println("*");  if(token[b].startsWith("<METODO") )System.out.println("-"); }
+				/*System.out.println("->"+token[b]+"<-");
+				if( token[b].indexOf( "args:NADA" ) == -1 ) { 
+					System.out.println("*");  
+					if(token[b].startsWith("<METODO") )
+						System.out.println("-"); 
+				}*/
 
 
 				if( (token[b].indexOf( "args:NADA" ) == -1 )&&(token[b].startsWith("<METODO") ))
 				{
-					System.out.println(token[b]);
+				//System.out.println(token[b]);
 				String s1 = token[b].substring(0, token[b].indexOf(" args:")+6);
 				String s2 = token[b].substring( token[b].indexOf(" regresa:") );
 
