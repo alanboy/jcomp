@@ -1,6 +1,4 @@
 
-
-
 //define a global variable
 int myvar;  
 
@@ -14,9 +12,17 @@ void main(){
 	char *foo;
 	//foo = "this string is missing ending quote
 
-	
+
 	//return from a void
-	//return 3;
+	return 3;
+
+	//strong typed lang
+	String foobar;
+	int bar;
+	//bar = foobar + bar;
+
+	//using before declaring
+	// undeclared = 9;
 }
 
 
@@ -32,10 +38,6 @@ int adding( int a , int b ){
 int method(){
 	//not an expression
 	// return 3FF44;
-
-	//using before declaring
-	// undeclared = 9;
-
 
 	//complex call structures
 	return adding(1, 5); 

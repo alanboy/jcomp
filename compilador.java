@@ -3850,7 +3850,7 @@ class Help{
 			br.close();
 
 		}catch(Exception e){
-			System.out.printf("Touble showing the file.");
+			System.out.printf("Trouble showing the file.");
 			return;
 		
 		}

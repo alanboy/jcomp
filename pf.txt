@@ -19,10 +19,10 @@ def void #main(){
 	//strong typed lang
 	String foobar;
 	int bar;
-	//bar = foobar + bar;
+	bar = foobar + bar;
 
 	//using before declaring
-	undeclared = 9;
+	//undeclared = 9;
 }
 
 
