@@ -10,13 +10,11 @@ import java.util.*;
 -------------------------------------------------------------------------------------*/
 class analisis_lexico{
 
-String [][] TOKENS;
-char [] ALFABETO;
-String FILE_NAME;
-
-String PROGRAMA_FUENTE; //codigo final....
-
-Debugger debug;
+	String [][] TOKENS;
+	char [] ALFABETO;
+	String FILE_NAME;
+	String PROGRAMA_FUENTE; //codigo final....
+	Debugger debug;
 
 	analisis_lexico(){
 	}
@@ -60,7 +58,7 @@ Debugger debug;
 		if(tokenize() != 0)return 1;
 
 		debug.imprimirLinea( "------------------------------" );
-		debug.imprimirLinea( "ANALISIS LEXICO:" );
+		debug.imprimirLinea( "ANALISIS LEXICO 	" );
 		debug.imprimirLinea( "------------------------------" );
 
 		debug.imprimir( PROGRAMA_FUENTE );
@@ -189,7 +187,8 @@ Debugger debug;
 			if( !found  )
 			{
 			//encontro un caracter ke no esta en el alfabeto
-			System.out.println("He encontrado un caracter que no pertenece al alfabeto.");
+			//System.out.println("He encontrado un caracter que no pertenece al alfabeto.");
+			Help.notInAlphabet( c );
 			System.out.println("Linea: " + linea);
 			System.out.println("Caracter: [" + c +"]");
 			return 1;
@@ -273,8 +272,11 @@ Debugger debug;
 
 			//variables perras de cada linea, su numero y contenido
 			try{
-			numero_linea = separacion_linea.nextToken();
-			}catch(Exception nsee){ System.out.println("Archivo vacio"); return 1; }
+				numero_linea = separacion_linea.nextToken();
+			}catch(Exception nsee){ 
+				System.out.println("Archivo vacio");
+			       	return 1; 
+			}
 			linea = separacion_linea.nextToken();
 
 			//aki ya analizo linea por linea
@@ -307,11 +309,13 @@ Debugger debug;
 					//si no encuentra una comilla marka un error
 					s += st.nextToken();
 					try{
-					while (s.charAt(s.length()-1) != 34) s += st.nextToken();
+						while (s.charAt(s.length()-1) != 34) 
+							s += st.nextToken();
 					}catch(Exception e)
 					{
-					System.out.println("Error, no encontre el fin de la cadena.");
-					System.out.println("Linea: "+numero_linea);
+						Help.unfinishedString();
+						//System.out.println("Error, no encontre el fin de la cadena.");
+						System.out.println("Linea: "+numero_linea);
 					return 1;
 					}
 				}
@@ -890,7 +894,8 @@ Metodos [] metodos;
 				System.out.println("Linea: "+uu);
 				System.out.print("Metodo "+metodos[f].getNombre().substring(14));
 				System.out.println(" es TIPO_VOID.");
-				System.out.println("Imposible regresar algo de un metodo que es void.");
+				//System.out.println("Imposible regresar algo de un metodo que es void.");
+				Help.returnFromVoid();
 				return 1;
 			}
 
@@ -3748,3 +3753,26 @@ class compilador{
 	return 0;
 	}
 }//main
+
+
+class Help{
+	public static void notInAlphabet(char c){
+		System.out.println("The source file contains an unexpected ASCII character, which is identified by its hex number. To resolve the error, remove the character. Rember there are invisible characters out there that your editor might not be showing. The character ASCII number is: " + (int)c +" Another thing you have to take into account is text encodig, read <this> for more info."  );
+			
+	}
+
+	public static void unfinishedString(){
+		System.out.println("A string constant cannot be continued on a second line unless you do the following: \nEnd the first line with a backslash. \nClose the string on the first line with a double quotation mark and open the string on the next line with another double quotation mark.\n\nEnding the first line with \\n is not sufficient");
+	
+	}
+
+
+	public static void returnFromVoid(){
+		System.out.println("If a function does not return a value, then a special \"TYPE\" is used to tell the computer this. The return type is \"void\" (all lower case). In thi case the function is declared as void but returns a value.")	
+	
+	}
+		
+
+	
+
+}

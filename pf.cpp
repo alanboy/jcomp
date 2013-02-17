@@ -1,15 +1,17 @@
 
+
+
 //define a global variable
-def int myvar;  
+int myvar;  
 
 //defining a method
-def void #main(){
+void main(){
 	
 	//character not in alphabet
-	//@
+	//
 
 	//unfinished string
-	String foo;
+	char *foo;
 	//foo = "this string is missing ending quote
 
 	
@@ -20,20 +22,22 @@ def void #main(){
 
 
 //functions with parameters
-def int #adding( int a , int b ){
+int adding( int a , int b ){
 
 	//complex expressions	
 	return a+b+1000-5-995;
 }
 
 
-def int #method(){
+int method(){
 	//not an expression
 	// return 3FF44;
 
 	//using before declaring
 	// undeclared = 9;
 
+
 	//complex call structures
-	return #adding(1, 5); 
+	return adding(1, 5); 
 }
+
