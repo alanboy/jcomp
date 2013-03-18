@@ -7,13 +7,15 @@ import java.util.*;
 -------------------------------------------------------------------------------------*/
 class Debugger{
 
-PrintWriter pw;
+	PrintWriter pw;
 
 	Debugger (){
 		try{
-		pw = new PrintWriter(new BufferedWriter(new FileWriter("salida.txt")));
+			pw = new PrintWriter(new BufferedWriter(new FileWriter("salida.txt")));
+
 		}catch(IOException ioe){
-		System.out.println("error escribiendo archivo de debugger");
+			System.out.println("error escribiendo archivo de debugger");
+
 		}
 	}
 
@@ -29,6 +31,7 @@ PrintWriter pw;
 	void closeFile(){
 		pw.close();
 	}
+
 }//class Debugger
 
 

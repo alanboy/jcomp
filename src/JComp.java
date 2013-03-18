@@ -1,38 +1,54 @@
+/*------------------------------------------------------------------------------------
+ 				JComp
+-------------------------------------------------------------------------------------*/
 
 import java.io.*;
 import java.util.*;
 
-/*------------------------------------------------------------------------------------
- 				MAIN
--------------------------------------------------------------------------------------*/
 public class JComp{
 
 	public static void main(String [] args){
-			iniciar(args[0]);
+			if(args.length == 1){
+				iniciar(args[0]);
+			}else{
+				usage();
+			}
+	}
+
+	static void usage(){
+		System.out.println("USAGE: ");
+		System.out.println("JComp source");
 	}
 
 	static int iniciar(String file){
-
+		
 		String codigo;
-
 		Lexico a_lex = new Lexico();
 		Sintactico a_sin = new Sintactico();
 		Semantico a_sem = new Semantico();
 		Debugger debug = new Debugger();
+		
 
 		a_lex.setDebugger(debug);
 		a_lex.setCodigo(file);
-		if(a_lex.iniciar() != 0) {  debug.closeFile(); return 1; }
+		
+		if(a_lex.iniciar() != 0)
+		{  
+			debug.closeFile(); 
+			return 1; 
+		}
 
 		codigo = a_lex.getCodigo();
+
+		CodingGuidelinesManager codGuidelinesMod = new CodingGuidelinesManager();
+		codGuidelinesMod.setCodigo(codigo);
+		codGuidelinesMod.iniciar();
+	
 
 		a_sin.setDebugger(debug);
 		a_sin.setCodigo(codigo);
 		if(a_sin.iniciar() != 0)  { debug.closeFile(); return 1; }
 		codigo = a_sin.getCodigo();
-
-
-
 
 		a_sem.setDebugger(debug);
 		a_sem.setCodigo(codigo);
@@ -40,17 +56,10 @@ public class JComp{
 		codigo = a_sem.getCodigo();
 
 
-		//aki se termina el analisis del codigo....
-		//ahora a ensamblar
-
-		debug.imprimirLinea("");
-		debug.imprimirLinea("");
 		debug.imprimirLinea("----------------------");
 		debug.imprimirLinea("CODIGO OBJETO !!");
 		debug.imprimirLinea("----------------------");
-
 		debug.imprimirLinea(codigo);
-
 
 		Ensambler en = new Ensambler();
 		en.setCodigo(codigo);

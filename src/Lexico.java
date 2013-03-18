@@ -1,15 +1,25 @@
-
-import java.io.*;
-import java.util.*;
 /*------------------------------------------------------------------------------------
  				ANALISIS LEXICO
 -------------------------------------------------------------------------------------*/
-class Lexico{
+import java.io.*;
+import java.util.*;
+
+
+/**
+ * Lexico
+ *
+ * 
+ *
+ * @author Alan Gonzalez
+ * @todo Hacer esta clase singleton
+ *
+ * */
+public class Lexico{
 
 	String [][] TOKENS;
 	char [] ALFABETO;
 	String FILE_NAME;
-	String PROGRAMA_FUENTE; //codigo final....
+	String PROGRAMA_FUENTE;
 	Debugger debug;
 
 	Lexico(){
@@ -20,10 +30,8 @@ class Lexico{
 	}
 
 	void setCodigo(String FILE_NAME){
-		//archivo a analizar
 		this.FILE_NAME = FILE_NAME;
 	}
-
 
 	int iniciar(){
 		//todos los metodos ke manipulan el codigo fuente,
@@ -32,7 +40,6 @@ class Lexico{
 
 		//cargar archivos necesarios para analizar
 		if(cargarConfiguracion() != 0) return 1;
-
 
 		/*		funciones del lenguaje ke implicitas */
 		// tenemos ke agregarlas aki tal vez....
@@ -118,10 +125,6 @@ class Lexico{
 			//y ke ademas son de awuebo, tabulador y nueva linea
 			ALFABETO[_a.length()] = 10;
 			ALFABETO[_a.length()+1] = 9;
-
-
-			//listo aki, ya ALFABETO[] es un vector con todos los caracteres
-
 
 		//cargar el archivo fuente
 		//guardarlo tal  y como es en PROGRAMA_FUENTE
@@ -248,31 +251,23 @@ class Lexico{
 	return 0;
 	}
 
-
-
-
-
 	int tokenize(){
-		//ya tenemos ke analizar kuales seran tokens
 
 		String numero_linea;//el caracter 175 separa el numero de linea de la instruccion
 		String linea;
 		String pf="";	//aki se guarda el resultado intermedio de este pedo
 		StringTokenizer separacion_linea;
-
-
 		String lineas [] = PROGRAMA_FUENTE.split("\n");
 
 		for(int a=0; a<lineas.length; a++)
 		{
 			separacion_linea = new StringTokenizer( lineas[a], String.valueOf((char)175) );
 
-			//variables perras de cada linea, su numero y contenido
 			try{
 				numero_linea = separacion_linea.nextToken();
 			}catch(Exception nsee){ 
 				System.out.println("Archivo vacio");
-			       	return 1; 
+			   	return 1; 
 			}
 			linea = separacion_linea.nextToken();
 
@@ -285,13 +280,12 @@ class Lexico{
 			//agregar en el programa fuente nuevo el numero de linea
 			pf += "NUMERO_LINEA_"+numero_linea+"\n";
 
-
 			String token="";
 			boolean espacio = false;
 			boolean cadena = false;
 
-			while( st.hasMoreTokens() ){
-
+			while( st.hasMoreTokens() )
+			{
 				cadena = false;
 				String s = st.nextToken();
 
