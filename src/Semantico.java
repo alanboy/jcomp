@@ -1,19 +1,18 @@
-
+import jcomp.util.Log;
 /*------------------------------------------------------------------------------------
- 				ANALISIS SEMANTICO
+				ANALISIS SEMANTICO
 -------------------------------------------------------------------------------------*/
 public class Semantico{
 
-String codigo;
-Debugger debug;
-Variables [] vars;
-Metodos [] metodos;
-
+	String codigo;
+	Log debug;
+	Variables [] vars;
+	Metodos [] metodos;
 
 	Semantico(){
 	}
 
-	void setDebugger(Debugger debug){
+	void setDebugger(Log debug){
 		this.debug = debug;
 	}
 
@@ -45,12 +44,9 @@ Metodos [] metodos;
 		ES MAS FACIL HACERLO EN EL SEMANTICO PARA AL MISMO TIEMPO IR CHECANDO ERRORES
 		*/
 
-
 		//primro convertimos los tokens ke me pasa el sintactico en
 		//objetos, estos son Metodos y Variables
 		crearObjetos();
-
-
 
 		//primero revisaremos ke no se repitan los nombres de los metodos ni vars
 		if(revisarDefiniciones() != 0) return 1;
@@ -112,21 +108,16 @@ Metodos [] metodos;
 			if( analisisDimensional(metodos[f].getCuerpo(), f) != 0 ) return 1;
 		}
 
-
 		//buscar un main
 		if(buscarMain() != 0) return 1;
 
-
 		imprimirObjetos();
-
 
 		//una ultima cosa.... cambiar el nombre de las variables
 		//... agregarles el nombre del metodo, para ke si se
 		// ddeclaran variables con el mismo nombre en distintos metodos,
 		//estas sean consideradas diferentes
 		nombresDeVariables();
-
-
 
 		//	LISTO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		//      AHORA SOLO HAY KE
@@ -137,14 +128,11 @@ Metodos [] metodos;
 		//	en la variable codigo... la cual se puede obtener con un get de esta
 		//	clase
 
-	return 0;
+		return 0;
 	}//inicio
 
-
-
-
-
-	void nombresDeVariables(){
+	void nombresDeVariables()
+	{
 		for(int a=0; a<metodos.length; a++)
 		{
 			String [] token = metodos[a].getCuerpo().split("\n");
@@ -154,13 +142,11 @@ Metodos [] metodos;
 
 			for(int b=0; b<token.length; b++)
 			{
-
-
 				if( token[b].indexOf( " id:" ) != -1 )
 				{
-				String s1 = token[b].substring(0, token[b].indexOf(" id:")+4);
-				String s2 = token[b].substring( token[b].indexOf(" id:")+4 );
-				token[b] = s1+"_"+metodos[a].getNombre().substring(14)+"_"+s2;
+					String s1 = token[b].substring(0, token[b].indexOf(" id:")+4);
+					String s2 = token[b].substring( token[b].indexOf(" id:")+4 );
+					token[b] = s1+"_"+metodos[a].getNombre().substring(14)+"_"+s2;
 				}
 
 				/*System.out.println("->"+token[b]+"<-");
@@ -173,19 +159,20 @@ Metodos [] metodos;
 
 				if( (token[b].indexOf( "args:NADA" ) == -1 )&&(token[b].startsWith("<METODO") ))
 				{
-				//System.out.println(token[b]);
-				String s1 = token[b].substring(0, token[b].indexOf(" args:")+6);
-				String s2 = token[b].substring( token[b].indexOf(" regresa:") );
+					//System.out.println(token[b]);
+					String s1 = token[b].substring(0, token[b].indexOf(" args:")+6);
+					String s2 = token[b].substring( token[b].indexOf(" regresa:") );
 
-				String [] argus = token[b].substring(token[b].indexOf(" args:")+6, token[b].indexOf(" regresa:")).split(" ");
+					String [] argus = token[b].substring(token[b].indexOf(" args:")+6, token[b].indexOf(" regresa:")).split(" ");
 					for(int j = 1; j<argus.length; j = j+2)
 					{
-					argus[j] = "_"+metodos[a].getNombre().substring(14) + "_"+argus[j];
+						argus[j] = "_"+metodos[a].getNombre().substring(14) + "_"+argus[j];
 					}
 
 					String argust = s1;
-					for(int u=0; u<argus.length; u++){
-					argust += argus[u] + " ";
+					for(int u=0; u<argus.length; u++)
+					{
+						argust += argus[u] + " ";
 					}
 
 					argust += s2;
@@ -193,24 +180,21 @@ Metodos [] metodos;
 					System.out.println(token[b]);
 				}
 
-
-
 				cuerpo += token[b] + "\n";;
 			}
 
 			metodos[a].setCuerpo(cuerpo);
 		}//cada metodo
-
 	}//metodo nombres de variables
 
-
-
-
-
-	int revisarRetorno(String body, int f){
+	int revisarRetorno(String body, int f)
+	{
 
 		boolean regresa = true;
-		if(metodos[f].getTipoDeRetorno().equals("TIPO_VOID")) regresa=false;
+		if(metodos[f].getTipoDeRetorno().equals("TIPO_VOID"))
+		{
+			regresa=false;
+		}
 
 		if( body.indexOf("<retorno") != -1 )
 		{
@@ -219,19 +203,15 @@ Metodos [] metodos;
 			String uu = body.substring( body.indexOf("<retorno linea:")+15, body.indexOf("<retorno linea:")+19);
 			uu = uu.substring( 0, uu.indexOf(">"));
 
-
-
 			//si hay return y no deberia
-			if(!regresa){
-
+			if(!regresa)
+			{
 				//System.out.println(" es TIPO_VOID.");
-				//System.out.println("Imposible regresar algo de un metodo que es void.");
-				Help.returnFromVoid( metodos[f].getNombre().substring(14), Integer.parseInt(uu) );
-				//System.out.println("Linea: "+uu);
-				//System.out.print("Metodo "+metodos[f].getNombre().substring(14));
+				System.out.println("Imposible regresar algo de un metodo que es void.");
+				System.out.println("Linea: "+uu);
+				System.out.print("Metodo "+metodos[f].getNombre().substring(14));
 				return 1;
 			}
-
 		}
 		else
 		{
@@ -243,79 +223,80 @@ Metodos [] metodos;
 				return 1;
 			}
 		}
-
-	return 0;
+		return 0;
 	}
 
-
-
-
-	int analisisDimensional(String body, int metodo_){
-
-	String token[]= body.split("\n");
-
-	boolean CAMBIO = true;
-	while(CAMBIO)
+	int analisisDimensional(String body, int metodo_)
 	{
-	CAMBIO=false;
 
-		//primero simplificar lo basico
+		String token[]= body.split("\n");
 
-		body = "";for(int h=0; h<token.length; h++)if(!token[h].equals(""))body += token[h] + "\n";
-		token = body.split("\n");
-
-
-		for(int a=0; a<token.length; a++)
+		boolean CAMBIO = true;
+		while(CAMBIO)
 		{
-			if(token[a].startsWith("<declaracion tipo:VOID ") )
-			{
-			String linea = token[a].substring( token[a].indexOf("linea:")+6, token[a].length()-1);
-			System.out.println("Linea: "+linea);
-			System.out.println("Declaracion no valida.");
-			return 1;
-			}
-		}
+			CAMBIO=false;
 
+			//primero simplificar lo basico
 
+			body = "";
+			for(int h=0; h<token.length; h++)
+				if(!token[h].equals(""))
+					body += token[h] + "\n";
 
-		body = "";for(int h=0; h<token.length; h++)if(!token[h].equals(""))body += token[h] + "\n";
-		token = body.split("\n");
+			token = body.split("\n");
 
-		boolean cambio = true;
-
-		while(cambio)
-		{
-		cambio = false;
 			for(int a=0; a<token.length; a++)
 			{
-				if(token[a].startsWith("<llamada") && token[a+1].equals("</llamada>"))
+				if(token[a].startsWith("<declaracion tipo:VOID ") )
 				{
-				token[a] = "<"+token[a].substring( token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" id:"))+">";
-				token[a+1] = "";
-				cambio = true;
-				CAMBIO = true;
+					String linea = token[a].substring( token[a].indexOf("linea:")+6, token[a].length()-1);
+					System.out.println("Linea: "+linea);
+					System.out.println("Declaracion no valida.");
+					return 1;
 				}
 			}
-		}
 
+			body = "";for(int h=0; h<token.length; h++)if(!token[h].equals(""))body += token[h] + "\n";
+			token = body.split("\n");
 
-		body = "";for(int h=0; h<token.length; h++)if(!token[h].equals(""))body += token[h] + "\n";
-		token = body.split("\n");
+			boolean cambio = true;
 
-		cambio = true;
-
-		while(cambio)
-		{
-		cambio = false;
-			for(int a=0; a<token.length; a++)
+			while(cambio)
 			{
-				if(token[a].startsWith("<INT ") )
+				cambio = false;
+				for(int a=0; a<token.length; a++)
+				{
+					if(token[a].startsWith("<llamada") && token[a+1].equals("</llamada>"))
+					{
+						token[a] = "<"+token[a].substring( token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" id:"))+">";
+						token[a+1] = "";
+						cambio = true;
+						CAMBIO = true;
+					}
+				}
+			}
+
+			body = "";
+			for(int h=0; h<token.length; h++)
+				if(!token[h].equals(""))
+					body += token[h] + "\n";
+
+			token = body.split("\n");
+
+			cambio = true;
+
+			while(cambio)
+			{
+				cambio = false;
+				for(int a=0; a<token.length; a++)
+				{
+					if(token[a].startsWith("<INT ") )
 					{ token[a] = "<INT>"; cambio = true; CAMBIO = true;}
 
-				if(token[a].startsWith("<STRING ") )
+					if(token[a].startsWith("<STRING ") )
 					{ token[a] = "<STRING>"; cambio = true; CAMBIO = true;}
+				}
 			}
-		}
 
 
 		body = "";for(int h=0; h<token.length; h++)if(!token[h].equals(""))body += token[h] + "\n";
@@ -325,55 +306,56 @@ Metodos [] metodos;
 
 		while(cambio)
 		{
-		cambio = false;
+			cambio = false;
 			for(int a=0; a<token.length; a++)
 			{
 				if(token[a].startsWith("<llamada"))
 				{
-				int b=a+1;
-				boolean not_good = false;
+					int b=a+1;
+					boolean not_good = false;
 
-				while(!token[b].equals("</llamada>"))
-				{
-				if(token[b].startsWith("<op"))not_good = true;
-				if(token[b].startsWith("<llamada"))not_good = true;
-				b++;
-				}
+					while(!token[b].equals("</llamada>"))
+					{
+						if(token[b].startsWith("<op"))not_good = true;
+						if(token[b].startsWith("<llamada"))not_good = true;
+						b++;
+					}
 
-				if(!not_good)
-				{
-
-
-				String texto = "";
-				for(int i=a; i<=b; i++)
-					if(!token[i].equals(""))
-						texto += token[i]+"%";
+					if(!not_good)
+					{
 
 
-				//revisar esta llamada a metodo para ver si los tipos coniciden///////////////////////////////////////////////////////////////////////////// aki reviso algo importante, es mas facil llamar al metodo desde aki
-				if( revisarTipoArgumentos( texto ) != 0)return 1;
+						String texto = "";
+						for(int i=a; i<=b; i++)
+							if(!token[i].equals(""))
+								texto += token[i]+"%";
 
-				token[a] = "<"+token[a].substring( token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" id:"))+">";
-				for(int i=a+1; i<=b; i++) token[i] = "";
-				cambio=true;
-				CAMBIO = true;
-				}
 
+						//revisar esta llamada a metodo para ver si los tipos coniciden
+						/////////////////////////////////////////////////////////////////////////////
+						//// aki reviso algo importante, es mas facil llamar al metodo desde aki
+						if( revisarTipoArgumentos( texto ) != 0)return 1;
+
+						token[a] = "<"+token[a].substring( token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" id:"))+">";
+
+						for(int i=a+1; i<=b; i++)
+						{
+							token[i] = "";
+						}
+						cambio=true;
+						CAMBIO = true;
+					}
 				}
 			}
 		}
-
 
 		body = "";for(int h=0; h<token.length; h++)if(!token[h].equals(""))body += token[h] + "\n";
 		token = body.split("\n");
 
 		cambio = true;
-
-
-
 		while(cambio)
 		{
-		cambio = false;
+			cambio = false;
 			for(int a=0; a<token.length; a++)
 			{
 				if(token[a].startsWith("<op "))
@@ -390,28 +372,22 @@ Metodos [] metodos;
 
 				if(!not_good)
 				{
-				String linea = token[a].substring(token[a].indexOf("linea:")+6, token[a].length()-1);
-				String operacion = token[a].substring(token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" "));
+					String linea = token[a].substring(token[a].indexOf("linea:")+6, token[a].length()-1);
+					String operacion = token[a].substring(token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" "));
 
 					if((!token[a+1].equals( token[a+2])) || ( token[a+1].equals( "<STRING>") || token[a+2].equals( "<STRING>")))
 					{
-
-
-					System.out.print("Operator "+operacion+" ");
-					//System.out.println("can not be applied to: "+token[a+1]+" and  "+token[a+2]);
-					Help.addingDifferentTypes( operacion, token[a+1], token[a+2], Integer.parseInt( linea ) );
-
-					//System.out.println("Linea: "+linea);
-
-
-					return 1;
+						System.out.print("Operator "+operacion+" ");
+						System.out.println("can not be applied to: "+token[a+1]+" and  "+token[a+2]);
+						System.out.println("Linea: "+linea);
+						return 1;
 					}
 
-				token[a]=token[a+1];
-				for(int i=a+1; i<=b; i++) token[i] = "";
+					token[a]=token[a+1];
+					for(int i=a+1; i<=b; i++) token[i] = "";
 
-				cambio=true;
-				CAMBIO = true;
+					cambio = true;
+					CAMBIO = true;
 				}
 
 				}
@@ -422,104 +398,86 @@ Metodos [] metodos;
 		token = body.split("\n");
 
 		cambio = true;
-
 		while(cambio)
 		{
-		cambio = false;
+			cambio = false;
 			for(int a=0; a<token.length; a++)
 			{
 				if(token[a].startsWith("<asignacion ") )
 				{
-				int b=a+1;
-				boolean not_good = false;
+					int b=a+1;
+					boolean not_good = false;
 
-				while(!token[b].equals("</asignacion>"))
-				{
-				if(token[b].startsWith("<op"))not_good = true;
-				if(token[b].startsWith("<llamada"))not_good = true;
-				b++;
-				}
-
-				if(!not_good)
-				{
-				String linea = token[a].substring(token[a].indexOf("linea:")+6, token[a].length()-1);
-				String recibe = token[a].substring(token[a].indexOf("tipo:")+5, token[a].indexOf(" id:"));
-				String _id = token[a].substring(token[a].indexOf("id:")+3, token[a].lastIndexOf(" "));
-				recibe = "<" + recibe + ">";
-
-					if(!recibe.equals( token[a+1] ))
+					while(!token[b].equals("</asignacion>"))
 					{
-					System.out.println("Linea: "+linea);
-					System.out.println("Tipos incompatibles.");
-					System.out.println("Encontrado:"+token[a+1]);
-					System.out.println("Requerido:"+recibe);
-					return 1;
+						if(token[b].startsWith("<op"))not_good = true;
+						if(token[b].startsWith("<llamada"))not_good = true;
+						b++;
 					}
 
-				token[a]=recibe;
-				for(int i=a+1; i<=b; i++) token[i] = "";
+					if(!not_good)
+					{
+						String linea = token[a].substring(token[a].indexOf("linea:")+6, token[a].length()-1);
+						String recibe = token[a].substring(token[a].indexOf("tipo:")+5, token[a].indexOf(" id:"));
+						String _id = token[a].substring(token[a].indexOf("id:")+3, token[a].lastIndexOf(" "));
+						recibe = "<" + recibe + ">";
 
-				cambio=true;
-				CAMBIO = true;
-				}
+						if(!recibe.equals( token[a+1] ))
+						{
+							System.out.println("Linea: "+linea);
+							System.out.println("Tipos incompatibles.");
+							System.out.println("Encontrado:"+token[a+1]);
+							System.out.println("Requerido:"+recibe);
+							return 1;
+						}
+
+						token[a]=recibe;
+						for(int i=a+1; i<=b; i++) token[i] = "";
+
+						cambio=true;
+						CAMBIO = true;
+					}
 
 				}
 			}
 		}
-
-
-
-
 
 		body = "";for(int h=0; h<token.length; h++)if(!token[h].equals(""))body += token[h] + "\n";
 		token = body.split("\n");
 
 		cambio = true;
-
 		while(cambio)
 		{
-		cambio = false;
+			cambio = false;
 			for(int a=0; a<token.length; a++)
 			{
 				if(token[a].startsWith("<retorno linea:") && token[a+2].equals("</retorno>"))
 				{
-				 String tipejo = "TIPO_"+token[a+1].substring(1,token[a+1].length()-1);
-				 String ret = metodos[metodo_].getTipoDeRetorno();
+					String tipejo = "TIPO_"+token[a+1].substring(1,token[a+1].length()-1);
+					String ret = metodos[metodo_].getTipoDeRetorno();
 					if(!tipejo.equals(ret))
 					{
-					System.out.print("Linea : ");
-					System.out.println(token[a].substring(token[a].indexOf(" linea:")+7, token[a].length()-1));
-					System.out.print("Metodo "+metodos[metodo_].getNombre().substring(14));
-					System.out.print(" debe regresar " + ret);
-					System.out.println(" pero " +tipejo+" encontrado. ");
-					return 1;
+						System.out.print("Linea : ");
+						System.out.println(token[a].substring(token[a].indexOf(" linea:")+7, token[a].length()-1));
+						System.out.print("Metodo "+metodos[metodo_].getNombre().substring(14));
+						System.out.print(" debe regresar " + ret);
+						System.out.println(" pero " +tipejo+" encontrado. ");
+						return 1;
 					}
-
 				}
 			}
 		}
-
-
-
 	}//while super grandote
 
-
-		body = "";
-		for(int h=0; h<token.length; h++)
-			if(!token[h].equals(""))
-				body += token[h] + "\n";
-
-
+	body = "";
+	for(int h=0; h<token.length; h++)
+		if(!token[h].equals(""))
+			body += token[h] + "\n";
 	return 0;
 	}
 
-
-
-
-
-
-	int revisarTipoArgumentos(String s){
-
+	int revisarTipoArgumentos(String s)
+	{
 		String tokens[] = s.split("%");
 		//-</llamada tipo:INT id:numeros4 linea:12>
 		String id = tokens[0].substring( tokens[0].indexOf(" id:")+4, tokens[0].indexOf(" linea:"));
@@ -557,11 +515,6 @@ Metodos [] metodos;
 	return 0;
 	}
 
-
-
-
-
-
 	int buscarMain(){
 		boolean found = false;
 		for(int a=0; a<metodos.length; a++)
@@ -578,8 +531,8 @@ Metodos [] metodos;
 
 		if(!found)
 		{
-		System.out.println("Metodo void #main() no existe.");
-		return 1;
+			System.out.println("Metodo void #main() no existe.");
+			return 1;
 		}
 	return 0;
 	}
@@ -1641,17 +1594,14 @@ Metodos [] metodos;
 				token[r] = "</llamada>";
 			}
 
-
-
 			cuerpo = "";
 			for(int b=0; b<token.length; b++)
 				if(!token[b].equals("")) cuerpo += token[b]+" ";
 
 			metodos[a].setCuerpo( cuerpo );
-
 		}//for de kada metodo
 
-	return 0;
+		return 0;
 	}
 
 
@@ -1660,7 +1610,9 @@ Metodos [] metodos;
 		String [] token = codigo.split("\n");
 
 		int total_definiciones = 0;
-		for(int d = 0; d<token.length; d++) if(token[d].equals("CONTROL_DEF"))total_definiciones ++;
+		for(int d = 0; d<token.length; d++) 
+			if(token[d].equals("CONTROL_DEF"))
+				total_definiciones ++;
 
 		String [] definiciones = new String[total_definiciones];
 
@@ -1671,20 +1623,28 @@ Metodos [] metodos;
 		{
 			if(token[d].equals("CONTROL_DEF"))
 			{
-			definicion++;
-			definiciones[definicion] = linea+" ";
+				definicion++;
+				definiciones[definicion] = linea+" ";
 			}
 
 			try{
-			if((definicion > -1)&&(!token[d+1].equals("CONTROL_DEF"))) definiciones[definicion] += (token[d]+" ");
-			}catch(Exception e){}
+				if((definicion > -1)&&(!token[d+1].equals("CONTROL_DEF")))
+				{
+					definiciones[definicion] += (token[d]+" ");
+				}
+			}catch(Exception e)
+			{
+				System.out.println(e);
+				return 1;
+			}
 
-
-			if(token[d].startsWith("NUMERO_LINEA")) linea = token[d];
+			if(token[d].startsWith("NUMERO_LINEA"))
+			{
+				linea = token[d];
+			}
 		}
 
 		//listo aki el vector definiciones sale con todas las definiciones incluyendo el numero de linea
-
 
 		//en fin las definiciones de instrucciones basicas se kedan en
 		//un  vector de strings ke se llama definiciones[]
@@ -1693,9 +1653,15 @@ Metodos [] metodos;
 
 		for(int x=0; x< total_definiciones; x++)
 		{
-			if(definiciones[x].indexOf("PUNTUACION_GATO") != -1) num_de_metodos++; else num_de_variables++;
+			if(definiciones[x].indexOf("PUNTUACION_GATO") != -1)
+			{
+				num_de_metodos++;
+			}
+			else
+			{
+				num_de_variables++;
+			}
 		}
-
 
 		//pero antes para mayor comodidad, mejor hacer dos vectores,
 		//def_met[] y def_var[]
@@ -1714,20 +1680,21 @@ Metodos [] metodos;
 
 		//ahora si crear bien los objetos de la clase Metodos
 		metodos = new Metodos[num_de_metodos];
-		for( int a = 0; a<metodos.length; a++ ) metodos[a] = new Metodos();
+		for( int a = 0; a<metodos.length; a++ ) 
+			metodos[a] = new Metodos();
 
 		int met = 0;
 		for(int a=0; a<num_de_metodos; a++)
 		{
-
 			String [] _a = def_met[a].split(" ");
 
 			metodos[met].setLinea( _a[0] );
 
 			String [] _b = new String[_a.length];
 			int _d = 0;
+
 			for(int _c = 0; _c < _a.length; _c++)
-				if( ! _a[_c].startsWith("NUMERO_LINEA") ) _b[_d++] = _a[_c];
+				if( ! _a[_c].startsWith("NUMERO_LINEA")) _b[_d++] = _a[_c];
 
 			String _e = "";
 			for(int _c = 0; _c < _d; _c++) _e += _b[_c]+" ";
@@ -1741,14 +1708,10 @@ Metodos [] metodos;
 			metodos[met].setArgumentos( _e.substring( _e.indexOf("PARENTESIS_ABRE") + 15 , _e.indexOf("PARENTESIS_CIERRA") ) );
 			metodos[met].setCuerpo( _f.substring( _f.indexOf("LLAVE_ABRE")  ) );
 
-		met++;
+			met++;
 		}//for de cada metodo
 
-
-
 		//agregar el metodo de impresion
-
-
 
 		//ahora crear los objetos de la clase Variables
 		vars = new Variables[num_de_variables];
@@ -1768,39 +1731,31 @@ Metodos [] metodos;
 
 			vars[nvar].setTipo( _b[1] );
 			vars[nvar].setNombre( _b[2] );
-		nvar++;
+			nvar++;
 		}//for de cada variable
 
-
 		//listo vars[] y metodos[] ya estan llenos ... 1:14pm
-
-
-		//----------------RIP------------------
-		//aki yacian mas de cien lineas de codigo ke tuvieron ke ser borradas,
-		//ya ke no pense de manera orientada a objetos.... esas 120 lineas se convirtieron
-		//en 50 lineas mucho mas eficientes
-		//----------------RIP------------------
-
 		return 0;
-		}//fin metodo crearObjetos()
-
+	}//fin metodo crearObjetos()
 
 	int revisarDefiniciones(){
-
+		if (metodos == null) System.out.println("foo");
 		//Revisar metodos con el mismo nombre
-		for(int a = 0; a<metodos.length; a++)
+		for(int a = 0; a < metodos.length; a++)
 		{
-		String comp = metodos[a].getNombre();
+			String comp = metodos[a].getNombre();
 			for(int b=0; b<metodos.length; b++)
 			{
-				if(a==b) b++;
-				if(b==metodos.length) break;
-				if( comp.equals( metodos[b].getNombre() ) )
+				if (a==b) b++;
+
+				if (b==metodos.length) break;
+				
+				if (comp.equals( metodos[b].getNombre() ) )
 				{
-				System.out.println("Linea: "+metodos[b].getLinea().substring(13));
-				System.out.println("Metodo "+comp.substring(14)+" ya esta definido en este programa.");
-				debug.imprimirLinea("\nMetodo ya definido !!!");
-				return 1;
+					System.out.println("Linea: "+metodos[b].getLinea().substring(13));
+					System.out.println("Metodo "+comp.substring(14)+" ya esta definido en este programa.");
+					debug.imprimirLinea("\nMetodo ya definido !!!");
+					return 1;
 				}
 			}
 		}
@@ -1815,177 +1770,172 @@ Metodos [] metodos;
 				if(b==vars.length) break;
 				if( comp.equals( vars[b].getNombre() ) )
 				{
-				System.out.println("Linea: "+vars[b].getLinea().substring(13));
-				System.out.println("Variable "+comp.substring(14)+" ya esta definido en este programa.");
-				debug.imprimirLinea("\nVariable ya definida !!!");
-				return 1;
+					System.out.println("Linea: "+vars[b].getLinea().substring(13));
+					System.out.println("Variable "+comp.substring(14)+" ya esta definido en este programa.");
+					debug.imprimirLinea("\nVariable ya definida !!!");
+					return 1;
 				}
 			}
 		}
 
-	return 0;
+		return 0;
 	}//revisarDefiniciones()
-
-
-
-
-
 
 	//revisar ke dentro del cuerpo de los metodos no se declaren las variables dos veces
 	//acuerdate ke los argumentos ke recibe el metodo son tambien declaraciones
 	//y ke no pueden tener el mismo nombre ke declaraciones globales def
 	int revisarCuerpoVariables(){
 
-	String cuerpo="";
-	String linea="";
-	String declaraciones [][];
-	int declaracion;
+		String cuerpo="";
+		String linea="";
+		String declaraciones [][];
+		int declaracion;
 
-	for(int d=0; d<metodos.length; d++)
-	{
-		cuerpo = metodos[d].getCuerpo();
-		String [] tokens = cuerpo.split(" ");
-		declaracion=0;
-
-		//contar cuantas declaraciones en los argumentos ke recibe
-		String s = metodos[d].getArgumentos();
-		String ss [] = s.split(" ");
-		for(int h=0; h<ss.length; h++)
+		for(int d=0; d<metodos.length; d++)
 		{
-			if( ss[h].startsWith("TIPO_") && ss[h+1].startsWith("IDENTIFICADOR_"))
-			declaracion++;
-		}
+			cuerpo = metodos[d].getCuerpo();
+			String [] tokens = cuerpo.split(" ");
+			declaracion=0;
 
-		int argumentos = declaracion;
-
-		//contar cuantas declaraciones hay en el cuerpo--
-		for(int a=0; a<tokens.length; a++)
-			if( tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
-				declaracion++;
-
-
-		//crear un vector bidimensional.. declaracion-> linea, tipo, id
-		declaraciones = new String[declaracion][3];
-
-		int inicio=0;
-
-		for(int h=0; h<ss.length; h++)
-		{
-			if( ss[h].startsWith("TIPO_") && ss[h+1].startsWith("IDENTIFICADOR_"))
+			//contar cuantas declaraciones en los argumentos ke recibe
+			String s = metodos[d].getArgumentos();
+			String ss [] = s.split(" ");
+			for(int h=0; h<ss.length; h++)
 			{
-			declaraciones[inicio][0] = metodos[d].getLinea();
-			declaraciones[inicio][1] = ss[h];
-			declaraciones[inicio][2] = ss[h+1];
-			inicio++;
-			}
-		}
-
-		linea = metodos[d].getLinea();
-		for(int a=0; a<tokens.length; a++)
-		{
-		if( tokens[a].startsWith("NUMERO_LINEA"))linea = tokens[a];
-
-			if( tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
-			{
-			declaraciones[inicio][0] = linea;
-			declaraciones[inicio][1] = tokens[a];
-			declaraciones[inicio][2] = tokens[a+1];
-			inicio++;
-			}
-		}//kada token
-
-
-		//por fin !! ya tengo la declaraciones de este metodo... ahora ver ke no sean iwuales
-		//o ke no sean iwuales a alguna definicion global
-		//las declaraciones globales estan en el el arreglo vars[].getNombre()
-		for(int p=0; p<declaraciones.length; p++)
-		{
-		//System.out.println("- "+declaraciones[p][0]+" "+declaraciones[p][1]+" "+declaraciones[p][2]);
-		String id = declaraciones[p][2];
-			for(int q=0; q<declaraciones.length; q++)
-			{
-			if( p == q) q++;
-			if( q == declaraciones.length) break;
-				if( id.equals( declaraciones[q][2] ) )
+				if( ss[h].startsWith("TIPO_") && ss[h+1].startsWith("IDENTIFICADOR_"))
 				{
-				System.out.println("Linea: "+declaraciones[q][0].substring(13));
-				System.out.println("Variable "+ declaraciones[p][2].substring(14)+" ya esta definida localmente.");
-				return 1;
+					declaracion++;
 				}
 			}
 
-			for(int f=0; f<vars.length; f++)
+			int argumentos = declaracion;
+
+			//contar cuantas declaraciones hay en el cuerpo--
+			for(int a=0; a<tokens.length; a++)
+				if( tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
+					declaracion++;
+
+			//crear un vector bidimensional.. declaracion-> linea, tipo, id
+			declaraciones = new String[declaracion][3];
+
+			int inicio=0;
+
+			for(int h=0; h<ss.length; h++)
 			{
-				if( id.equals( vars[f].getNombre() ) )
+				if( ss[h].startsWith("TIPO_") && ss[h+1].startsWith("IDENTIFICADOR_"))
 				{
-				System.out.println("Linea: "+declaraciones[p][0].substring(13));
-				System.out.println("Variable "+ declaraciones[p][2].substring(14)+" ya esta definida globalmente, en la linea "+vars[f].getLinea().substring(13)+".");
-				return 1;
+					declaraciones[inicio][0] = metodos[d].getLinea();
+					declaraciones[inicio][1] = ss[h];
+					declaraciones[inicio][2] = ss[h+1];
+					inicio++;
 				}
 			}
-		}//for de comprobaciones... fiuuu
 
-
-		//ya seeeee... !!! en vez de tener 3 tokens, hacer unos solo
-		//ke contenga <declaracion-linea-tipo-id>
-		//declaraciones[p][0,1,2]
-
-		//pido perdon a los dioses por tanto if (ya vez omar, son necesarios jaja)
-		linea = metodos[d].getLinea();
-		for(int x=0; x<tokens.length; x++)
-		{
-		   if(tokens[x].startsWith("NUMERO_LINEA_")) linea = tokens[x].substring(13);
-
-		   if(tokens[x].startsWith("TIPO_"))
-		   {
-			if(tokens[x+1].startsWith("IDENTIFICADOR_") && tokens[x+2].equals("PUNTUACION_PUNTO_COMA") )
+			linea = metodos[d].getLinea();
+			for(int a=0; a<tokens.length; a++)
 			{
-			tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+1].substring(14)+">";
-			tokens[x+1] = "";
-			tokens[x+2] = "";
+				if( tokens[a].startsWith("NUMERO_LINEA"))
+				{
+					linea = tokens[a];
+				}
+
+				if( tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
+				{
+					declaraciones[inicio][0] = linea;
+					declaraciones[inicio][1] = tokens[a];
+					declaraciones[inicio][2] = tokens[a+1];
+					inicio++;
+				}
+			}//kada token
+
+			//por fin !! ya tengo la declaraciones de este metodo... ahora ver ke no sean iwuales
+			//o ke no sean iwuales a alguna definicion global
+			//las declaraciones globales estan en el el arreglo vars[].getNombre()
+			for(int p=0; p<declaraciones.length; p++)
+			{
+				//System.out.println("- "+declaraciones[p][0]+" "+declaraciones[p][1]+" "+declaraciones[p][2]);
+				String id = declaraciones[p][2];
+				for(int q=0; q<declaraciones.length; q++)
+				{
+					if( p == q) q++;
+					if( q == declaraciones.length) break;
+					if( id.equals( declaraciones[q][2] ) )
+					{
+						System.out.println("Linea: "+declaraciones[q][0].substring(13));
+						System.out.println("Variable "+ declaraciones[p][2].substring(14)+" ya esta definida localmente.");
+						return 1;
+					}
+				}
+
+				for(int f=0; f<vars.length; f++)
+				{
+					if( id.equals( vars[f].getNombre() ) )
+					{
+						System.out.println("Linea: "+declaraciones[p][0].substring(13));
+						System.out.println("Variable "+ declaraciones[p][2].substring(14)+" ya esta definida globalmente, en la linea "+vars[f].getLinea().substring(13)+".");
+						return 1;
+					}
+				}
+			}//for de comprobaciones... fiuuu
+
+
+			//ya seeeee... !!! en vez de tener 3 tokens, hacer unos solo
+			//ke contenga <declaracion-linea-tipo-id>
+			//declaraciones[p][0,1,2]
+
+			//pido perdon a los dioses por tanto if (ya vez omar, son necesarios jaja)
+			linea = metodos[d].getLinea();
+			for(int x=0; x<tokens.length; x++)
+			{
+				if(tokens[x].startsWith("NUMERO_LINEA_")) linea = tokens[x].substring(13);
+
+				if(tokens[x].startsWith("TIPO_"))
+				{
+					if(tokens[x+1].startsWith("IDENTIFICADOR_") && tokens[x+2].equals("PUNTUACION_PUNTO_COMA") )
+					{
+						tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+1].substring(14)+">";
+						tokens[x+1] = "";
+						tokens[x+2] = "";
+					}
+
+					if(tokens[x+1].startsWith("IDENTIFICADOR_") && tokens[x+2].startsWith("NUMERO_LINEA_") && tokens[x+3].equals("PUNTUACION_PUNTO_COMA") )
+					{
+						tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+1].substring(14)+">";
+						tokens[x+1] = tokens[x+2];
+						tokens[x+2] = "";
+						tokens[x+3] = "";
+					}
+
+					if(tokens[x+1].startsWith("NUMERO_LINEA_") && tokens[x+2].startsWith("IDENTIFICADOR_") && tokens[x+3].equals("PUNTUACION_PUNTO_COMA") )
+					{
+						tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+2].substring(14)+">";
+						tokens[x+1] = tokens[x+1];
+						tokens[x+2] = "";
+						tokens[x+3] = "";
+					}
+
+					if(tokens[x+1].startsWith("NUMERO_LINEA_") && tokens[x+2].startsWith("IDENTIFICADOR_") && tokens[x+3].startsWith("NUMERO_LINEA_") && tokens[x+4].equals("PUNTUACION_PUNTO_COMA") )
+					{
+						tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+2].substring(14)+">";
+						tokens[x+1] = tokens[x+3];
+						tokens[x+2] = "";
+						tokens[x+3] = "";
+						tokens[x+4] = "";
+					}
+
+
+				}
 			}
 
-			if(tokens[x+1].startsWith("IDENTIFICADOR_") && tokens[x+2].startsWith("NUMERO_LINEA_") && tokens[x+3].equals("PUNTUACION_PUNTO_COMA") )
-			{
-			tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+1].substring(14)+">";
-			tokens[x+1] = tokens[x+2];
-			tokens[x+2] = "";
-			tokens[x+3] = "";
-			}
+			String cuerpo2 = "";
+			for(int y=0; y<tokens.length; y++)if(!tokens[y].equals(""))cuerpo2 += tokens[y] + " ";
 
-			if(tokens[x+1].startsWith("NUMERO_LINEA_") && tokens[x+2].startsWith("IDENTIFICADOR_") && tokens[x+3].equals("PUNTUACION_PUNTO_COMA") )
-			{
-			tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+2].substring(14)+">";
-			tokens[x+1] = tokens[x+1];
-			tokens[x+2] = "";
-			tokens[x+3] = "";
-			}
+			metodos[d].setCuerpo(cuerpo2);
 
-			if(tokens[x+1].startsWith("NUMERO_LINEA_") && tokens[x+2].startsWith("IDENTIFICADOR_") && tokens[x+3].startsWith("NUMERO_LINEA_") && tokens[x+4].equals("PUNTUACION_PUNTO_COMA") )
-			{
-			tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+2].substring(14)+">";
-			tokens[x+1] = tokens[x+3];
-			tokens[x+2] = "";
-			tokens[x+3] = "";
-			tokens[x+4] = "";
-			}
+		}//for de cada cuerpo de cada metodo
 
-
-		   }
-		}
-
-		String cuerpo2 = "";
-		for(int y=0; y<tokens.length; y++)if(!tokens[y].equals(""))cuerpo2 += tokens[y] + " ";
-
-		metodos[d].setCuerpo(cuerpo2);
-
-	}//for de cada cuerpo de cada metodo
-
-	return 0;
+		return 0;
 	}//revisarCuerpoVariables()
-
-
-
 
 	int revisarExistenciaMetodos(){
 		//Antes de empezar kiero limpiar los argumentos
@@ -2022,13 +1972,12 @@ Metodos [] metodos;
 			String linea = metodos[b].getLinea();
 			for(int c=0; c<token.length; c++)
 			{
-
 				if(token[c].startsWith("NUMERO_LINEA_")) linea = token[c];
 
 				if(token[c].equals("PUNTUACION_GATO"))
 				{
-				String id = token[c+1];
-				boolean found = false;
+					String id = token[c+1];
+					boolean found = false;
 
 					for(int d=0; d<metodos.length; d++)
 						if( metodos[d].getNombre().equals(id))found=true;
@@ -2046,32 +1995,28 @@ Metodos [] metodos;
 	return 0;
 	}//revisarMetodos()
 
-
-
 	int revisarExistenciaVariables(){
 		for(int a = 0; a<metodos.length; a++)
 		{
+			//contar cuantas declaraciones hay en TOTAL
+			String [] token = metodos[a].getCuerpo().split("<declaracion-");
+			String [] args = metodos[a].getArgumentos().split(" ");
 
+			int total = token.length + args.length - 1 + vars.length;
+			if(metodos[a].getArgumentos().equals("NADA")) total--;
 
-		//contar cuantas declaraciones hay en TOTAL
-		String [] token = metodos[a].getCuerpo().split("<declaracion-");
-		String [] args = metodos[a].getArgumentos().split(" ");
+			//hacer un recorrido por todos lo tokens
+			//ir guardando las declaraciones en el vector variables
+			//luego si encuentro algun uso de variable, checar en el vector, si si existe
+			//si no, es porke, o aun no ha sido declarada, o nunca ha sido declarada
+			String [] variables = new String[total];
 
-		int total = token.length + args.length - 1 + vars.length;
-		if(metodos[a].getArgumentos().equals("NADA")) total--;
+			for(int u=0; u<variables.length; u++) variables[u] = "";
 
-		//hacer un recorrido por todos lo tokens
-		//ir guardando las declaraciones en el vector variables
-		//luego si encuentro algun uso de variable, checar en el vector, si si existe
-		//si no, es porke, o aun no ha sido declarada, o nunca ha sido declarada
-		String [] variables = new String[total];
+			int declaracion_actual = 0;
+			String linea = metodos[a].getLinea();
 
-		for(int u=0; u<variables.length; u++) variables[u] = "";
-
-		int declaracion_actual = 0;
-		String linea = metodos[a].getLinea();
-
-		token = metodos[a].getCuerpo().split(" ");
+			token = metodos[a].getCuerpo().split(" ");
 
 			for(int z=0; z<vars.length; z++)
 				variables[declaracion_actual++] = vars[z].getNombre().substring(14);
@@ -2082,8 +2027,8 @@ Metodos [] metodos;
 			{
 				for(int z=0; z<args.length; z++)
 				{
-				String [] _b = args[z].split("-");
-				variables[declaracion_actual++] = _b[1].substring(0, _b[1].length()-1);///// error cuando no hay argumentos
+					String [] _b = args[z].split("-");
+					variables[declaracion_actual++] = _b[1].substring(0, _b[1].length()-1);///// error cuando no hay argumentos
 				}
 			}
 
@@ -2106,14 +2051,11 @@ Metodos [] metodos;
 
 					if(!found)
 					{
-					Help.usingBeforDef( token[b].substring(14), Integer.parseInt(linea.substring(13)) );
-					/*System.out.println("Linea: " + linea.substring(13));
-					System.out.println("Variable " + token[b].substring(14) + " es utilizada antes de ser declarada.");*/
-					return 1;
+						System.out.println("Linea: " + linea.substring(13));
+						System.out.println("Variable " + token[b].substring(14) + " es utilizada antes de ser declarada.");
+						return 1;
 					}
 				}
-
-
 
 				if(token[b].startsWith("<asignacion-"))
 				{
@@ -2126,58 +2068,36 @@ Metodos [] metodos;
 
 					if(!found)
 					{
-					Help.usingBeforDef( _id, Integer.parseInt(linea.substring(13)) );						
-//					System.out.println("Linea: " + linea.substring(13));
-//					System.out.println("Variable " + _id + " es utilizada antes de ser declarada.");
-					return 1;
+						System.out.println("Linea: " + linea.substring(13));
+						System.out.println("Variable " + _id + " es utilizada antes de ser declarada.");
+						return 1;
 					}
 
 				}
 			}//for de kada token
 		}//for de metodos
-	return 0;
+		return 0;
 	}//revisarExistenciaVariables
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	void imprimirObjetos(){
-		//imprimir lo ke tienen los objetos nomas pa probar
 		for(int z=0; z<metodos.length; z++)
 		{
-		debug.imprimirLinea( "\nMetodo "+z );
-		debug.imprimirLinea( "linea: " + metodos[z].getLinea() );
-		debug.imprimirLinea( "nombre: " + metodos[z].getNombre() );
-		debug.imprimirLinea( "retorno: " + metodos[z].getTipoDeRetorno() );
-		debug.imprimirLinea( "recibe: " + metodos[z].getArgumentos() );
-		debug.imprimirLinea( "cuerpo: ");
+			debug.imprimirLinea( "\nMetodo "+z );
+			debug.imprimirLinea( "linea: " + metodos[z].getLinea() );
+			debug.imprimirLinea( "nombre: " + metodos[z].getNombre() );
+			debug.imprimirLinea( "retorno: " + metodos[z].getTipoDeRetorno() );
+			debug.imprimirLinea( "recibe: " + metodos[z].getArgumentos() );
+			debug.imprimirLinea( "cuerpo: ");
+
 			String _g [] = metodos[z].getCuerpo().split("\n");
 			int tabs = 0;
+
 			for(int _h = 0; _h < _g.length; _h++)
 			{
 				if( _g[_h].startsWith("</")) tabs--;
 
 				for(int b=0; b<tabs; b++) debug.imprimir("	");
+
 				debug.imprimirLinea( _g[_h]);
 
 				if( _g[_h].startsWith("<llamada")) tabs++;
@@ -2193,17 +2113,11 @@ Metodos [] metodos;
 
 		for(int z=0; z<vars.length; z++)
 		{
-		debug.imprimirLinea( "\nVariable "+z );
-		debug.imprimirLinea( "linea: " + vars[z].getLinea() );
-		debug.imprimirLinea( "nombre: " + vars[z].getNombre() );
-		debug.imprimirLinea( "tipo: " + vars[z].getTipo() );
+			debug.imprimirLinea( "\nVariable "+z );
+			debug.imprimirLinea( "linea: " + vars[z].getLinea() );
+			debug.imprimirLinea( "nombre: " + vars[z].getNombre() );
+			debug.imprimirLinea( "tipo: " + vars[z].getTipo() );
 		}
 	}//imprimir objetos
-
-
-
-
-
-
 }//clase analisis_semantico
 

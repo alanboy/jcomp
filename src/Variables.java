@@ -1,14 +1,15 @@
 /*------------------------------------------------------------------------------------
  				Variables
 -------------------------------------------------------------------------------------*/
-//las variables ke se encuentran en el programa, son un objeto de esta clase
-public class Variables{
+public class Variables
+{
 
 	private String Linea;
 	private String Nombre;
 	private String Tipo;
 
-	Variables(){
+	Variables()
+	{
 		this.Linea = "ns";
 		this.Nombre = "ns";
 		this.Tipo = "ns";

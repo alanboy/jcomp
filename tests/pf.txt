@@ -19,13 +19,11 @@ def void #main(){
 	//strong typed lang
 	String foobar;
 	int bar;
-	bar = foobar + bar;
+	//bar = foobar + bar;
 
 	//using before declaring
 	//undeclared = 9;
 }
-
-
 
 //functions with parameters
 def int #adding( int a , int b ){
@@ -33,7 +31,6 @@ def int #adding( int a , int b ){
 	//complex expressions	
 	return a+b+1000-5-995;
 }
-
 
 def int #method(){
 	//not an expression

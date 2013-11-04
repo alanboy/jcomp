@@ -1,16 +1,19 @@
+import jcomp.automata.*;
+import jcomp.util.Log;
 
 /*------------------------------------------------------------------------------------
  				ANALISIS SINTACTICO
 -------------------------------------------------------------------------------------*/
-public class Sintactico{
-
+public class Sintactico
+{
 	String codigo_fuente;
-	Debugger debug;
+	Log debug;
 
-	Sintactico(){
+	Sintactico()
+	{
 	}
 
-	void setDebugger(Debugger debug){
+	void setDebugger(Log debug){
 		this.debug = debug;
 	}
 
@@ -43,15 +46,12 @@ public class Sintactico{
 
 		for(int a=0; a<s.length; a++)
 		{
-		if(s[a].startsWith("IDENTIFICADOR_")) s[a]="<id>";
-		if(s[a].startsWith("VALOR_NUMERO_")) s[a]="NUM";
-		if(s[a].startsWith("TIPO_")) s[a]="TIPO";
-		if(s[a].startsWith("STRING_")) s[a]="STRING";
-		cf += s[a]+" ";
+			if(s[a].startsWith("IDENTIFICADOR_")) s[a]="<id>";
+			if(s[a].startsWith("VALOR_NUMERO_")) s[a]="NUM";
+			if(s[a].startsWith("TIPO_")) s[a]="TIPO";
+			if(s[a].startsWith("STRING_")) s[a]="STRING";
+			cf += s[a]+" ";
 		}
-
-
-
 
 		//crear las producciones para la gramatica
 		//y despues se las pasare al automata
@@ -65,7 +65,6 @@ public class Sintactico{
 
 		new Produccion("<def_global>", "CONTROL_DEF <variable_declarator>"),
 		//new Produccion("<def_global>", "CONTROL_DEF <variable_declaration>"),
-
 
 		new Produccion("<casi_metodo_def>", "CONTROL_DEF TIPO <casi_llamada>"),
 		new Produccion("<metodo_def>", "<casi_metodo_def> PARENTESIS_CIERRA <statement_block>"),
@@ -96,10 +95,7 @@ public class Sintactico{
 		new Produccion("<expression_booleana>", "PARENTESIS_ABRE <expression_booleana> PARENTESIS_CIERRA"),
 		new Produccion("<expression_booleana>", "<expression_booleana> <op_bool> <expression_booleana>"),
 
-
-
-
-//nuevasss----------------//nuevasss----------------//nuevasss----------------//nuevasss----------------
+		//nuevas
 		new Produccion("<expression_booleana>", "<llamada> <op_bool> <expression>"),
 		new Produccion("<expression_booleana>", "<llamada> <op_bool> <llamada>"),
 		new Produccion("<expression_booleana>", "<expression> <op_bool> <llamada>"),
@@ -110,10 +106,6 @@ public class Sintactico{
 		new Produccion("<expression_booleana>", "<expression_booleana> <op> <id>"),
 		new Produccion("<expression_booleana>", "<id> <op> <expression_booleana>"),
 		new Produccion("<id>", "PARENTESIS_ABRE <id> PARENTESIS_CIERRA"),
-//nuevasss----------------//nuevasss----------------//nuevasss----------------//nuevasss----------------
-
-
-
 
 		new Produccion("<op_bool>", "BOL_MENOR_QUE"),
 		new Produccion("<op_bool>", "BOL_MAYOR_QUE"),
@@ -125,14 +117,9 @@ public class Sintactico{
 		new Produccion("<asignacion>", "<id> ASIGNA <id> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> ASIGNA <llamada> PUNTUACION_PUNTO_COMA"), //--------
 
-//		new Produccion("<variable_declaration>", "TIPO <asignacion>"),
-
+		//new Produccion("<variable_declaration>", "TIPO <asignacion>"),
 		//new Produccion("<variable_declarator>", "TIPO CORCHETE_ABRE CORCHETE_CIERRA <id> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<variable_declarator>", "TIPO <id> PUNTUACION_PUNTO_COMA"),
-
-
-
-
 
 		new Produccion("<statement_block>", "LLAVE_ABRE <statement> LLAVE_CIERRA"),
 		new Produccion("<statement_block>", "LLAVE_ABRE LLAVE_CIERRA"),
@@ -161,7 +148,6 @@ public class Sintactico{
 		new Produccion("<expression>", "<literal_expression>"),
 		new Produccion("<expression>", "PARENTESIS_ABRE <expression> PARENTESIS_CIERRA"),
 
-
 		new Produccion("<ARGS>", "<expression> PUNTUACION_COMA <expression>"),
 		new Produccion("<ARGS>", "<expression> PUNTUACION_COMA <id>"),
 		new Produccion("<ARGS>", "<id> PUNTUACION_COMA <expression>"),
@@ -170,7 +156,6 @@ public class Sintactico{
 		new Produccion("<ARGS>", "<ARGS> PUNTUACION_COMA <id>"),
 		new Produccion("<ARGS>", "<ARGS> <op> <expression>"),
 		new Produccion("<ARGS>", "<ARGS> <op> <id>"),
-
 
 		new Produccion("<casi_llamada>", "PUNTUACION_GATO <id> PARENTESIS_ABRE"),
 		new Produccion("<llamada>", "<casi_llamada> <expression> PARENTESIS_CIERRA"),
@@ -188,7 +173,6 @@ public class Sintactico{
 		new Produccion("PARENTESIS_ABRE <expression>", "PARENTESIS_ABRE <llamada>"),
 		new Produccion("<expression> PARENTESIS_CIERRA", "<llamada> PARENTESIS_CIERRA"),
 
-
 		new Produccion("<op>", "OP_SUMA"),
 		new Produccion("<op>", "OP_RESTA"),
 		new Produccion("<op>", "OP_MULTIPLICACION"),
@@ -199,22 +183,19 @@ public class Sintactico{
 
 		};
 
-
-
 		Automata aut = new Automata(prod, cf);
-		aut.setDebugger(debug);
+		//aut.setDebugger(debug);
 		String resultado = aut.iniciar();
 
 		debug.imprimirLinea( resultado );
 
 		if( !resultado.endsWith("<PROGRAMA> "))
-			{
+		{
 			System.out.println( "Error de Syntaxis." );
 			return 1;
-			}
+		}
 
 		return 0;
-	}//iniciar()
-
+	}
 }//clase
 

@@ -3,7 +3,7 @@
 -------------------------------------------------------------------------------------*/
 import java.io.*;
 import java.util.*;
-
+import jcomp.util.Log;
 
 /**
  * Lexico
@@ -14,18 +14,20 @@ import java.util.*;
  * @todo Hacer esta clase singleton
  *
  * */
-public class Lexico{
-
+public class Lexico
+{
 	String [][] TOKENS;
 	char [] ALFABETO;
 	String FILE_NAME;
 	String PROGRAMA_FUENTE;
-	Debugger debug;
+	Log debug;
 
-	Lexico(){
+	Lexico()
+	{
 	}
 
-	void setDebugger(Debugger debug){
+	void setDebugger(Log debug)
+	{
 		this.debug = debug;
 	}
 
@@ -111,7 +113,6 @@ public class Lexico{
 				{"char","TIPO_CHAR"},
 				{"String","TIPO_STRING"}};
 
-
 			//escribir el alfabeto ke se puede aceptar
 			String _a = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklimnopqrstuvwxyz 0123456789{}()<>=;[]#.\",_+/-*";
 			int TAM_ALF = _a.length();
@@ -143,10 +144,6 @@ public class Lexico{
 	return 0;
 	}//fin metodo cargarConfiguracion()
 
-
-
-
-
 	int eliminarComentarios(){
 
 		String pf="";
@@ -154,19 +151,19 @@ public class Lexico{
 
 		for (int x=0; x<result.length; x++)
 		{
-         	String linea = result[x];
-		int d = linea.indexOf("//");
+			String linea = result[x];
+			int d = linea.indexOf("//");
 
-		if( d != -1) linea = linea.substring( 0, d );
-		pf += (linea + "\n");
+			if( d != -1) 
+			{
+				linea = linea.substring( 0, d );
+			}
+			pf += (linea + "\n");
 		}
 
-	PROGRAMA_FUENTE = pf;
-	return 0;
+		PROGRAMA_FUENTE = pf;
+		return 0;
 	}
-
-
-
 
 	int verificarAlfabeto(){
 		int linea = 1;
@@ -185,30 +182,24 @@ public class Lexico{
 
 			if( !found  )
 			{
-			//encontro un caracter ke no esta en el alfabeto
-			//System.out.println("He encontrado un caracter que no pertenece al alfabeto.");
-			Help.notInAlphabet( c, linea );
-			//Help.showLine((linea));
-			//system.out.println("Linea: " + linea);
-			//System.out.println("Caracter: [" + c +"]");
-			return 1;
+				//encontro un caracter ke no esta en el alfabeto
+				System.out.println("He encontrado un caracter que no pertenece al alfabeto.");
+				System.out.println("Linea: " + linea);
+				System.out.println("Caracter: [" + c +"]");
+				return 1;
 			}
 
-		if(c == '\n')linea ++;
+			if(c == '\n')
+			{
+				linea ++;
+			}
 
 		}
 	return 0;
 	}//metodo verificarAlfabeto
 
-
-
-
-
-
-
-
-
-	int limpiarCodigo(){
+	int limpiarCodigo()
+	{
 		//elimina espacios demas, tabulaciones, y lineas en blanco
 		//agrega el numerod de linea
 
@@ -224,14 +215,23 @@ public class Lexico{
 			linea = new StringBuffer(result[x]);
 
 			boolean cambio = true;
-			while(cambio == true)
+			while(cambio)
 			{
 				cambio = false;
 				int a = linea.indexOf("  ");
-				if( a != -1 ){ linea.replace(a,a+2, " "); cambio = true; }
+				if( a != -1 )
+				{ 
+					linea.replace(a,a+2, " "); 
+					cambio = true; 
+				}
 
 				int b = linea.indexOf(String.valueOf((char)9));
-				if( b != -1 ){ linea.setCharAt(b, ' '); cambio = true; }
+
+				if( b != -1 )
+				{
+					linea.setCharAt(b, ' '); 
+					cambio = true; 
+				}
 			}
 
 			//si dentro de una cadena long mayor a cero el primero es
@@ -247,12 +247,12 @@ public class Lexico{
 
 		}//for ke recorre cada linea
 
-	PROGRAMA_FUENTE = pf;
-	return 0;
+		PROGRAMA_FUENTE = pf;
+		return 0;
 	}
 
-	int tokenize(){
-
+	int tokenize()
+	{
 		String numero_linea;//el caracter 175 separa el numero de linea de la instruccion
 		String linea;
 		String pf="";	//aki se guarda el resultado intermedio de este pedo
@@ -304,9 +304,8 @@ public class Lexico{
 							s += st.nextToken();
 					}catch(Exception e)
 					{
-						Help.unfinishedString ( Integer.parseInt( numero_linea ) );
-						//System.out.println("Error, no encontre el fin de la cadena.");
-						//System.out.println("Linea: "+numero_linea);
+						System.out.println("Error, no encontre el fin de la cadena.");
+						System.out.println("Linea: "+numero_linea);
 					return 1;
 					}
 				}
@@ -327,7 +326,6 @@ public class Lexico{
 		//ahora hay ke compararlos con las palabras reservadas
 		PROGRAMA_FUENTE = pf;
 
-
 		//--------> RECUERDA !!
 		//TOKENS tiene en la columna 1
 		//el alto "nivel" y en la 2 ps ya el token ke le corresponde
@@ -340,8 +338,7 @@ public class Lexico{
 		for(int a=0; a<lineas.length; a++)
 		{
 
-
-		found = false;
+			found = false;
 
 			for(int b=0; b<TOKENS.length; b++)
 			{
@@ -352,7 +349,6 @@ public class Lexico{
 					break;
 				}
 			}//for palabras reservadas
-
 
 			//si no encontro palabra puede ser un
 			// identificador, un valor, o una estupidez
@@ -369,14 +365,12 @@ public class Lexico{
 					yaloencontre = true;
 				}catch(Exception e){}
 
-
 				//VEAMOS SI ES UN NUMERO DE LINEA
 				if(token.startsWith("NUMERO_LINEA"))
 				{
 					pf += lineas[a] + "\n";
 					yaloencontre = true;
 				}
-
 
 				//si eske aun no lo he encontrado
 				//ps haber si es un identificador
@@ -386,7 +380,6 @@ public class Lexico{
 					pf += "IDENTIFICADOR_" + lineas[a] + "\n";
 					yaloencontre = true;
 				}
-
 
 				//haber si es un string
 				if((token.charAt(0) == '\"') && !yaloencontre)
@@ -412,7 +405,7 @@ public class Lexico{
 					}
 
 					System.out.println("Linea: "+ err);
-					System.out.println("aki: "+ token);
+					System.out.println("Token: "+ token);
 					//TO DO: ke muestre la linea complera
 					return 1;
 				}
@@ -424,5 +417,4 @@ public class Lexico{
 
 	return 0;
 	}
-
-}//fin de clase alanlisis_lexico
+}//clase alanlisis_lexico

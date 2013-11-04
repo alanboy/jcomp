@@ -1,37 +1,99 @@
+package jcomp.util;
 
 import java.io.*;
 import java.util.*;
 
-/*------------------------------------------------------------------------------------
- 				DEBUGGER
--------------------------------------------------------------------------------------*/
-class Debugger{
-
+public class Log
+{
 	PrintWriter pw;
+	static Log instance;
+	String logFilename;
+	LOG_DESTINATION destination;
 
-	Debugger (){
-		try{
-			pw = new PrintWriter(new BufferedWriter(new FileWriter("salida.txt")));
+	public static Log getInstance()
+	{
+		if (instance == null)
+		{
+			instance = new Log();
+		}
+		return instance;
+	}
 
-		}catch(IOException ioe){
-			System.out.println("error escribiendo archivo de debugger");
+	public boolean setFilename(String sf)
+	{
+		boolean status = false;
+		if (pw == null)
+		{
+			status = true;
+			this.logFilename = sf;
+		}
+		return status;
+	}
 
+	public void warning(String s)
+	{
+		pw.print("WARNING:" + s);
+	}
+
+	public void log(String s)
+	{
+		switch(destination)
+		{
+			case LOG_TO_STDOUT:
+				System.out.print(s);
+			break;
+			case LOG_TO_FILE:
+				pw.println(s);
+			break;
 		}
 	}
 
-	void imprimir(String s){
-		pw.print(s);
+	public void imprimirLinea(String s)
+	{
+		log(s + "\n");
 	}
 
-
-	void imprimirLinea(String s){
-		pw.println(s);
+	public void imprimir(String s)
+	{
+		log(s);
 	}
 
-	void closeFile(){
+	private enum LOG_DESTINATION
+	{
+		LOG_TO_FILE,
+		LOG_TO_STDOUT,
+		LOG_TO_STDERR
+	};
+
+	private Log ()
+	{
+		logFilename = "output.log";
+		destination = LOG_DESTINATION.LOG_TO_STDOUT;
+	}
+
+	private void OpenLogFile()
+	{
+		try
+		{
+			pw = new PrintWriter(
+					new BufferedWriter(
+						new FileWriter(logFilename)));
+		}
+		catch(IOException ioe)
+		{
+			System.out.println(ioe);
+		}
+	}
+
+	private void closeFile()
+	{
 		pw.close();
 	}
 
-}//class Debugger
+}//class Log
 
 
+class Debugger{
+
+
+}

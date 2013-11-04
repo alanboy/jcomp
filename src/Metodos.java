@@ -1,7 +1,7 @@
 /*------------------------------------------------------------------------------------
  				Metodo
 -------------------------------------------------------------------------------------*/
-//los metodos ke se encuentran en el programa, son un objeto de esta clase
+//los metodos que se encuentran en el programa, son un objeto de esta clase
 public class Metodos{
 
 	private String Linea;
@@ -9,10 +9,10 @@ public class Metodos{
 	private String TipoDeRetorno;
 	private String Argumentos;
 	private String Cuerpo;
-
 	private Variables [] variables;
 
-	Metodos(){
+	Metodos()
+	{
 		this.Linea = "ns";
 		this.Nombre = "ns";
 		this.TipoDeRetorno = "ns";
@@ -20,12 +20,14 @@ public class Metodos{
 		this.Cuerpo = "ns";
 	}
 
-
-	void setNumVariables(int i){
+	void setNumVariables(int i)
+	{
 		variables = new Variables[i];
-		for(int g=0; g<variables.length; g++)variables[g] = new Variables();
+		for(int g=0; g<variables.length; g++)
+		{
+			variables[g] = new Variables();
+		}
 	}
-
 
 	void setLinea(String s){ Linea = s; }
 	void setNombre(String s){ Nombre = s; }
@@ -40,6 +42,4 @@ public class Metodos{
 	String getCuerpo(){ return Cuerpo; }
 
 }
-
-
 
