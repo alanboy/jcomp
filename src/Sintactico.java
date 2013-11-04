@@ -13,15 +13,18 @@ public class Sintactico
 	{
 	}
 
-	void setDebugger(Log debug){
+	void setDebugger(Log debug)
+	{
 		this.debug = debug;
 	}
 
-	void setCodigo(String cf){
+	void setCodigo(String cf)
+	{
 		codigo_fuente = cf;
 	}
 
-	String getCodigo(){
+	String getCodigo()
+	{
 		return codigo_fuente;
 	}
 
@@ -33,17 +36,14 @@ public class Sintactico
 		debug.imprimirLinea( "ANALISIS SINTACTICO:" );
 		debug.imprimirLinea( "------------------------------" );
 
-
-		//primero chekar ke este bien, ya despues ornaizar el codigo para el semantico
-
+		// primero chekar ke este bien, ya despues ornaizar el codigo para el semantico
 		String s [] = codigo_fuente.split("\n");
 		String cf = "";
 
-		//pegar el codigo en una sola linea
-		//y ya ke para el analizis sintactico
-		//solo necesitamos saber ke es un id, o un numero
-		//y no el numero en si, ps cambiarle este pedo
-
+		// pegar el codigo en una sola linea
+		// y ya quee para el analizis sintactico
+		// solo necesitamos saber que es un id, o un numero
+		// y no el numero en si
 		for(int a=0; a<s.length; a++)
 		{
 			if(s[a].startsWith("IDENTIFICADOR_")) s[a]="<id>";

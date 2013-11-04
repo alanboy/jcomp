@@ -40,32 +40,23 @@ public class JComp
 
 		if(a_lex.iniciar() != 0)
 		{
-			//debug.closeFile(); 
 			return 1; 
 		}
 
 		codigo = a_lex.getCodigo();
-
-		//CodingGuidelinesManager codGuidelinesMod = new CodingGuidelinesManager();
-		//codGuidelinesMod.setCodigo(codigo);
-		//codGuidelinesMod.iniciar();
-
 		a_sin.setDebugger(debug);
 		a_sin.setCodigo(codigo);
 		if(a_sin.iniciar() != 0)
 		{
-			//debug.closeFile();
 			return 1;
 		}
 
 		codigo = a_sin.getCodigo();
-
 		a_sem.setDebugger(debug);
 		a_sem.setCodigo(codigo);
 
 		if(a_sem.iniciar() != 0) 
 		{
-			//debug.closeFile();
 			return 1;
 		}
 		codigo = a_sem.getCodigo();

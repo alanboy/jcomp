@@ -9,18 +9,22 @@ public class Semantico{
 	Variables [] vars;
 	Metodos [] metodos;
 
-	Semantico(){
+	Semantico()
+	{
 	}
 
-	void setDebugger(Log debug){
+	void setDebugger(Log debug)
+	{
 		this.debug = debug;
 	}
 
-	void setCodigo(String c){
+	void setCodigo(String c)
+	{
 		codigo = c;
 	}
 
-	String getCodigo(){
+	String getCodigo()
+	{
 		return codigo;
 	}
 
@@ -1610,32 +1614,34 @@ public class Semantico{
 		String [] token = codigo.split("\n");
 
 		int total_definiciones = 0;
-		for(int d = 0; d<token.length; d++) 
-			if(token[d].equals("CONTROL_DEF"))
-				total_definiciones ++;
-
-		String [] definiciones = new String[total_definiciones];
-
-		int definicion=-1;
-		String linea="";
-
 		for(int d = 0; d<token.length; d++)
 		{
 			if(token[d].equals("CONTROL_DEF"))
 			{
+				total_definiciones ++;
+			}
+		}
+
+		debug.log("Total definiciones " + total_definiciones + "\n" );
+		String [] definiciones = new String[total_definiciones];
+
+		int definicion = -1;
+		String linea = "";
+
+		for (int d = 0; d < token.length; d++)
+		{
+			if (token[d].equals("CONTROL_DEF"))
+			{
 				definicion++;
-				definiciones[definicion] = linea+" ";
+				definiciones[definicion] = linea + " ";
 			}
 
-			try{
-				if((definicion > -1)&&(!token[d+1].equals("CONTROL_DEF")))
+			if (d < token.length-1)
+			{
+				if ((definicion > -1) && (!token[d+1].equals("CONTROL_DEF")))
 				{
 					definiciones[definicion] += (token[d]+" ");
 				}
-			}catch(Exception e)
-			{
-				System.out.println(e);
-				return 1;
 			}
 
 			if(token[d].startsWith("NUMERO_LINEA"))
@@ -1645,7 +1651,6 @@ public class Semantico{
 		}
 
 		//listo aki el vector definiciones sale con todas las definiciones incluyendo el numero de linea
-
 		//en fin las definiciones de instrucciones basicas se kedan en
 		//un  vector de strings ke se llama definiciones[]
 		//ahora contar si son metodos o variables
@@ -1663,6 +1668,7 @@ public class Semantico{
 			}
 		}
 
+		debug.log("Total metodos " + num_de_metodos + "\n" );
 		//pero antes para mayor comodidad, mejor hacer dos vectores,
 		//def_met[] y def_var[]
 		String [] def_met = new String[num_de_metodos];

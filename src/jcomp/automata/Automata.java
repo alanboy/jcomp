@@ -2,6 +2,7 @@
 
 import java.io.*;
 import java.util.*;
+import jcomp.util.Log;
 
 /*------------------------------------------------------------------------------------
  				AUTOMATA DE PILA
@@ -17,11 +18,13 @@ public class Automata
 	private String cadena;
 	private String [] tokens;
 	Stack <String> pila = new Stack<String>();
+	Log l;
 
 	public Automata(Produccion [] prod, String cad)
 	{
 		prods = prod;
 		cadena = cad;
+		l = Log.getInstance();
 	}
 
 	public String iniciar()
@@ -126,20 +129,22 @@ public class Automata
 	void verPila()
 	{
 		Stack <String> pila2 = new Stack<String>();
-		while(!pila.empty()) pila2.push( pila.pop() );
+		while(!pila.empty())
+		{
+			pila2.push( pila.pop() );
+		}
 
 		while(!pila2.empty())
 		{
 			String s = pila2.pop();
-
+			l.imprimir( s + " " );
 			pila.push( s );
 		}
 
-		/*if(debug != null)
+		if(l != null)
 		{
-			debug.imprimirLinea( " " ); 
+			l.imprimirLinea( " " ); 
 		}
-		*/
 	}//ver Pila()
 }//Automata
 
