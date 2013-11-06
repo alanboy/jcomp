@@ -3,6 +3,8 @@ EXECUTABLE_NAME = JComp.class
 BIN_DIR = bin
 TEST_DIR = tests
 
+
+
 $(BIN_DIR):
 	mkdir $(BIN_DIR)
 
@@ -12,19 +14,30 @@ $(EXECUTABLE_NAME): clean-build $(BIN_DIR)
 
 clean-build:
 	del /Q $(BIN_DIR)\*
-	del filelist
+!if exist("filelist")
+		del filelist
+!endif
+
+
 
 clean-tests:
-	del /Q $(TEST_DIR)\*.exe
-	del /Q $(TEST_DIR)\*.obj
+	@del /Q *.exe
+	@del /Q *.obj
+	@del /Q *.asm
 
 test1: $(TEST_DIR)\1\1.jc $(TEST_DIR)\1\1.c
-	java -cp bin JComp $(TEST_DIR)\1\1.jc
-	cl /Fa1.asm $(TEST_DIR)\1\1.c
-	diff $(TEST_DIR)\1\1.asm $(TEST_DIR)\1\p.asm
+	java -cp bin JComp $(TEST_DIR)\1\1.jc > NUL
+	cl /nologo /Fa1.asm $(TEST_DIR)\1\1.c
+!if ([diff 1.asm p.asm > NUL] == 1) 
+	@echo  ===================== TEST FAILED =========================
+	diff 1.asm p.asm -y 
+!endif
+
 
 tests: clean-tests test1
 	
+
+
 
 all: $(EXECUTABLE_NAME) tests
 
