@@ -31,7 +31,8 @@ public class Lexico
 		this.debug = debug;
 	}
 
-	void setCodigo(String FILE_NAME){
+	void setCodigo(String FILE_NAME)
+	{
 		this.FILE_NAME = FILE_NAME;
 	}
 

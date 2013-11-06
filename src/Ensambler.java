@@ -1,3 +1,4 @@
+
 import jcomp.util.Log;
 
 public class Ensambler
@@ -29,19 +30,24 @@ public class Ensambler
 
 	int iniciar()
 	{
-		nuevo_codigo = ".686\n\n";
+		nuevo_codigo = "; Generated\n";
+		nuevo_codigo += ".686\n\n";
 
 		sseg = "SSEG SEGMENT STACK\n";
 		sseg += "	DB 256 DUP(\"pila\")\n";
 		sseg += "SSEG ENDS\n\n";
 
 		dseg = "DSEG SEGMENT\n";
-			agregarDeclaracionesGlobales();
+
+		agregarDeclaracionesGlobales();
+
 		dseg += "DSEG ENDS\n\n";
 
 		cseg = 	"CSEG SEGMENT \'CODE\'\n";
-		cseg += "	ASSUME	CS:CSEG,	SS:SSEG, 	DS:DSEG\n\n";
-			agregarProcedimientos();
+		cseg += "	ASSUME	CS:CSEG,	SS:SSEG,	DS:DSEG\n\n";
+
+		agregarProcedimientos();
+
 		cseg += "CSEG ENDS\n\n";
 
 		nuevo_codigo += sseg + dseg + cseg;
@@ -49,7 +55,8 @@ public class Ensambler
 
 		codigo = nuevo_codigo;
 
-		//aki el codigo ya esta con mnemonicos mios... imprimirlos pa ke se vea bonito
+		// aki el codigo ya esta con mnemonicos mios... 
+		// imprimirlos pa ke se vea bonito
 		debug.imprimirLinea("\n\n----------------------");
 		debug.imprimirLinea(" CODIGO CON MNEMONICOS MIOS");
 		debug.imprimirLinea("----------------------");
