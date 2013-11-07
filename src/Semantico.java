@@ -99,13 +99,10 @@ public class Semantico{
 		{
 			//convertir las operaciones en la nueva nomenclatura
 			metodos[f].setCuerpo( convertirOP( metodos[f].getCuerpo() ) );
-			//no mames, mucho mas perro de lo ke imagine, pero salio
 
 			//ahora eliminar los parentesis ke ya de nada sirven
-			//ya todo esta chingon en el arbol 12:50am
 			metodos[f].setCuerpo( eliminarParentesis( metodos[f].getCuerpo() ) );
 
-			//ke los metodos tengan return
 			if( revisarRetorno(metodos[f].getCuerpo(), f) != 0 ) return 1;
 
 			//okay, ahora de este arbol hacer un analisis dimensional
@@ -121,17 +118,17 @@ public class Semantico{
 		//... agregarles el nombre del metodo, para ke si se
 		// ddeclaran variables con el mismo nombre en distintos metodos,
 		//estas sean consideradas diferentes
-		nombresDeVariables();
+		//nombresDeVariables();
 
 		//	LISTO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		//      AHORA SOLO HAY KE
-		//	GENERAR EL CODIGO INTERMEDIO, KE HAY KE PASAR A ENSAMBLADOR todavia :(
+		//	GENERAR EL CODIGO INTERMEDIO
 		generarCodigo();
+
 		//	DESPUES DE ESTO... SE TERMINA EL ANALISIS DE CODIGO
 		//	este metodo, pasa los objetos en una cadena de texto, y la guarda
 		//	en la variable codigo... la cual se puede obtener con un get de esta
 		//	clase
-
 		return 0;
 	}//inicio
 
@@ -535,8 +532,7 @@ public class Semantico{
 
 		if(!found)
 		{
-			System.out.println("Metodo void #main() no existe.");
-			return 1;
+			System.out.println("WARNING: Metodo void #main() no existe.");
 		}
 	return 0;
 	}
@@ -890,7 +886,6 @@ public class Semantico{
 			String cuerpo = "";
 			for(int g=0; g<tokens.length; g++) cuerpo += tokens[g]+"\n";
 
-
 			cuerpo = reorganizarDeclaraciones(cuerpo, variables);
 
 			cuerpo = reorganizarLLamadas(cuerpo);
@@ -925,7 +920,6 @@ public class Semantico{
 			cuerpo = quitarPuntoComaYLinea(cuerpo);
 
 			//awebooooo ahora si se ve bonito el arbol
-
 			metodos[a].setCuerpo(cuerpo);
 		}//for metodos
 
@@ -1174,15 +1168,10 @@ public class Semantico{
 	return body;
 	}//metodo
 
-
-
-
-
-
-	String reorganizarAsignacion(String body, String [][] variables){
-		//new <asignacion tipo:string id:cadena linea:12> </asignacion>
-		//old <asignacion-12-cadena>
-
+	//old <asignacion-12-cadena>
+	//new <asignacion tipo:string id:cadena linea:12> </asignacion>
+	String reorganizarAsignacion(String body, String [][] variables)
+	{
 		String [] token = body.split("\n");
 		body = "";
 		String nuevo;
@@ -1191,23 +1180,24 @@ public class Semantico{
 			nuevo = "";
 			if(token[a].startsWith("<asignacion-"))
 			{
-			token[a] = token[a].substring( 1, token[a].length()-1);
-			String g [] = token[a].split("-");
-			nuevo += "<asignacion tipo:";
+				token[a] = token[a].substring( 1, token[a].length()-1);
+				String g [] = token[a].split("-");
+				nuevo += "<asignacion tipo:";
 
 				for(int b=0; b<variables.length; b++)
-					if(variables[b][0].equals(g[2])) nuevo += variables[b][1];
+				{
+					if(variables[b][0].equals(g[2]))
+					{
+						nuevo += variables[b][1];
+					}
+				}
 
-			nuevo += " id:" + g[2] + " linea:" + g[1]+">";
-			token[a] = nuevo;
+				nuevo += " id:" + g[2] + " linea:" + g[1]+">";
+				token[a] = nuevo;
 			}
-
-		body += token[a]+ "\n";
+			body += token[a]+ "\n";
 		}
-
-
-
-	return body;
+		return body;
 	}
 
 
@@ -1499,39 +1489,43 @@ public class Semantico{
 	return 0;
 	}//revisarArgumentosDeLLamadas()
 
-
-
-
-
-
-
-
-	int convertirAsignaciones(){
+	int convertirAsignaciones()
+	{
 		for(int a=0; a<metodos.length; a++)
 		{
 			String [] token = metodos[a].getCuerpo().split(" ");
 			String linea = metodos[a].getLinea();
 			for(int b=0; b<token.length; b++)
 			{
-				if(token[b].startsWith("NUMERO_LINEA")) linea = token[b];
+				if(token[b].startsWith("NUMERO_LINEA"))
+				{
+					linea = token[b];
+				}
 
 				if(token[b].startsWith("IDENTIFICADOR_") && token[b+1].equals("ASIGNA") && !token[b+2].equals("ASIGNA"))
 				{
-				token[b] = "<asignacion-"+linea.substring(13)+"-"+token[b].substring(14)+">";
-				token[++b] = "";
-					while(!token[b].equals("PUNTUACION_PUNTO_COMA")) b++;
-				token[b] = "</asignacion>";
+					token[b] = "<asignacion-"+linea.substring(13)+"-"+token[b].substring(14)+">";
+					token[++b] = "";
+
+					while(!token[b].equals("PUNTUACION_PUNTO_COMA"))
+					{
+						b++;
+					}
+					token[b] = "</asignacion>";
 				}
 			}
 
 			String nuevo_cuerpo = "";
 			for(int b=0; b<token.length; b++)
-				if(!token[b].equals("")) nuevo_cuerpo += token[b] + " ";
-
+			{
+				if(!token[b].equals(""))
+				{
+					nuevo_cuerpo += token[b] + " ";
+				}
+			}
 			metodos[a].setCuerpo(nuevo_cuerpo);
 		}
-
-	return 0;
+		return 0;
 	}
 
 

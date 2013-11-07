@@ -1,22 +1,19 @@
 /*------------------------------------------------------------------------------------
  				JComp
 -------------------------------------------------------------------------------------*/
-
 import java.io.*;
 import java.util.*;
-
 import jcomp.util.Log;
 
 public class JComp
 {
-
 	public static void main(String [] args)
 	{
-			if(args.length == 1){
-				iniciar(args[0]);
-			}else{
-				usage();
-			}
+		if(args.length == 1){
+			iniciar(args[0]);
+		}else{
+			usage();
+		}
 	}
 
 	static void usage()
@@ -71,7 +68,6 @@ public class JComp
 		en.setDebugger(debug);
 		if(en.iniciar() != 0)
 		{
-			//debug.closeFile(); 
 			return 1;
 		}
 		codigo = en.getCodigo();
@@ -102,8 +98,9 @@ public class JComp
 			System.out.println("error creando archivo asm");
 
 		}
-
 		debug.imprimirLinea("OK");
+
+		/*
 		debug.imprimirLinea("");
 		debug.imprimirLinea("ENSAMBLANDO ...");
 
@@ -168,6 +165,8 @@ public class JComp
 
 		//debug.closeFile();
 		//
+		//
+		//*/
 		System.out.println("Compilacion completa.");
 		return 0;
 	}
@@ -175,7 +174,7 @@ public class JComp
 	/* 
 	 * Destructor ()
 	 * {
-	 * //debug.closeFile();
+	 * debug.closeFile();
 	 *
 	 * }
 	 * */
