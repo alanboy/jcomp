@@ -2,8 +2,8 @@ import jcomp.util.Log;
 /*------------------------------------------------------------------------------------
 				ANALISIS SEMANTICO
 -------------------------------------------------------------------------------------*/
-public class Semantico{
-
+public class Semantico
+{
 	String codigo;
 	Log debug;
 	Variables [] vars;
@@ -28,12 +28,11 @@ public class Semantico{
 		return codigo;
 	}
 
-	int iniciar(){
-		debug.imprimirLinea( "" );
+	int iniciar()
+	{
 		debug.imprimirLinea( "------------------------------" );
 		debug.imprimirLinea( "      ANALISIS SEMANTICO" );
 		debug.imprimirLinea( "------------------------------" );
-
 
 		/*
 		AWEBOOO SE ME PRENDIO EL FOCO A LA 1:32 AM
@@ -41,9 +40,7 @@ public class Semantico{
 		#met1( 43, #met2( a ) , t)
 		se convierte en:
 		<llamada met1> 43 , <llamada met2> a </llamada> , t</llamada>
-
 		y asi se forma el arbol.... awebo
-
 		YA SE KE EL ARBOL SE DEBERIA DE HACER EN EL SINTACTICO PERO
 		ES MAS FACIL HACERLO EN EL SEMANTICO PARA AL MISMO TIEMPO IR CHECANDO ERRORES
 		*/
@@ -61,8 +58,6 @@ public class Semantico{
 		//bueno, TODAS las declaraciones, han sido comprobadas, y se
 		//han creado nuevos tokens
 
-		//ahora...
-
 		//convertir las asignaciones en la nueva nomenclatura xml
 		if(convertirAsignaciones() != 0) return 1;
 
@@ -76,7 +71,6 @@ public class Semantico{
 		//verificar ke existan las variables ke se estan usando
 		//y ke se declaren antes de ser usadas
 		if(revisarExistenciaVariables() != 0) return 1;
-
 
 		//convertir el token IDENTIFICADOR_variable1
 		//en <var-variable1>
@@ -300,7 +294,11 @@ public class Semantico{
 			}
 
 
-		body = "";for(int h=0; h<token.length; h++)if(!token[h].equals(""))body += token[h] + "\n";
+		body = "";
+		for(int h=0; h<token.length; h++)
+			if(!token[h].equals(""))
+				body += token[h] + "\n";
+
 		token = body.split("\n");
 
 		cambio = true;
@@ -609,15 +607,8 @@ public class Semantico{
 		for(int a=0; a<token.length; a++)
 			if(!token[a].equals("")) body += token[a] + "\n";
 
-	return body;
+		return body;
 	}
-
-
-
-
-
-
-
 
 	String convertirOP( String body ){
 			//<INT valor:5 linea:19>
@@ -844,14 +835,11 @@ public class Semantico{
 			//for(int _a=0; _a<variables.length; _a++)
 			//	System.out.println("-"+variables[_a][1]+" "+variables[_a][0]);
 
-
 			//------------------------
 			//list las variables estan en variables[numero_de_var][id, tipo]
 			//------------------------
 
-
 			/////////////////////////////////////
-			//ES TIEMPO DE NUEVOS COMIENZOS ESTO SE ESTA LLENDO A LA MIERDA
 			// HAY QUE REORGANIZAR LOS TOKENS 		1:40am
 			/////////////////////////////////////
 			/*
@@ -879,7 +867,6 @@ public class Semantico{
 			<coma>
 			<retorno> </retorno>
 			*/
-
 
 			String tokens[] = metodos[a].getCuerpo().split(" ");
 
@@ -930,7 +917,8 @@ public class Semantico{
 
 
 
-	String quitarPuntoComaYLinea(String cuerpo){
+	String quitarPuntoComaYLinea(String cuerpo)
+	{
 		String [] token = cuerpo.split("\n");
 		cuerpo = "";
 		for(int a = 0; a<token.length; a++)
@@ -942,7 +930,8 @@ public class Semantico{
 
 
 
-	String reorganizarReturn(String body){
+	String reorganizarReturn(String body)
+	{
 		String [] token = body.split("\n");
 		body = "";
 		for(int a = 0; a<token.length; a++)
@@ -1341,35 +1330,34 @@ public class Semantico{
 	}//metodo reorganizarDeclaraciones
 
 
-
-
-
-
-
-
-	int convertirVariables(){
+	//convertir el token IDENTIFICADOR_variable1
+	//en <var-13-_variable1>
+	int convertirVariables()
+	{
 		for(int a=0; a<metodos.length; a++)
 		{
 			String [] token = metodos[a].getCuerpo().split(" ");
 			String linea = metodos[a].getLinea();
 			String cuerpo = "";
+
 			for(int b=0; b<token.length; b++)
 			{
-				if(token[b].startsWith("NUMERO_LINEA")) linea = token[b];
+				if(token[b].startsWith("NUMERO_LINEA"))
+				{
+					linea = token[b];
+				}
 
 				if(token[b].startsWith("IDENTIFICADOR_"))
 				{
-
 					token[b] = "<var-"+linea.substring(13)+"-"+token[b].substring(14)+">";
 				}
-
 				cuerpo += token[b] + " ";
 			}
 
 			metodos[a].setCuerpo(cuerpo);
 		}//cada metodo
 
-	return 0;
+		return 0;
 	}//convertirVariables
 
 

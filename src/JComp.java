@@ -80,15 +80,6 @@ public class JComp
 
 		debug.imprimirLinea(codigo);
 
-		debug.imprimirLinea("");
-		debug.imprimirLinea("");
-		debug.imprimirLinea("----------------------");
-		debug.imprimirLinea("	ENSAMBLADO");
-		debug.imprimirLinea("----------------------");
-		//listo ahora a ensamblar
-
-		debug.imprimir("CREANDO .ASM ...");
-
 		try{
 			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter("p.asm")));
 			pw.print(codigo);
@@ -98,76 +89,7 @@ public class JComp
 			System.out.println("error creando archivo asm");
 
 		}
-		debug.imprimirLinea("OK");
 
-		/*
-		debug.imprimirLinea("");
-		debug.imprimirLinea("ENSAMBLANDO ...");
-
-
-		try{
-
-			String cmd = "cmd.exe /C tasm /z /ml p.asm";
-			Process proc = Runtime.getRuntime().exec(cmd);
-
-			try
-			{
-				InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-				BufferedReader br = new BufferedReader(isr);
-				String line=null;
-				while ( (line = br.readLine()) != null)
-				{
-					debug.imprimirLinea(line);
-
-					if(line.indexOf("Error messages:") != -1)
-					{
-						System.out.println(line);
-					}
-
-				}
-			} catch (IOException ioe)     { ioe.printStackTrace(); }
-
-			int exitVal = proc.waitFor();
-
-		} catch (Throwable t){ t.printStackTrace(); }
-
-
-		debug.imprimirLinea("");
-		debug.imprimirLinea("LINKEANDO ...");
-
-		try{
-
-			String cmd = "cmd.exe /C tlink p.obj";
-
-			Process proc = Runtime.getRuntime().exec(cmd);
-
-			try
-			{
-				InputStreamReader isr = new InputStreamReader(proc.getInputStream());
-				BufferedReader br = new BufferedReader(isr);
-				String line=null;
-				while ( (line = br.readLine()) != null)
-				{
-					debug.imprimirLinea(line);
-				}
-			} catch (IOException ioe)
-			{
-				ioe.printStackTrace();
-			}
-
-			int exitVal = proc.waitFor();
-
-		} catch (Throwable t){ t.printStackTrace(); }
-
-
-		debug.imprimirLinea("");
-		debug.imprimirLinea("---------------------------COMPILACION COMPLETA !!-------------");
-
-		//debug.closeFile();
-		//
-		//
-		//*/
-		System.out.println("Compilacion completa.");
 		return 0;
 	}
 

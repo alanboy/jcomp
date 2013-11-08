@@ -36,25 +36,19 @@ public class Ensambler
 		nuevo_codigo += "	include listing.inc\n";
 		nuevo_codigo += "	.model\tflat\n\n";
 
-
 		nuevo_codigo += "INCLUDELIB LIBCMT\n";
 		nuevo_codigo += "INCLUDELIB OLDNAMES\n";
-		
-		dseg = "";
-		agregarDeclaracionesGlobales();
 
+		dseg = agregarDeclaracionesGlobales();
 		nuevo_codigo += "\n";
+
 
 		cseg = "";
 		cseg += "PUBLIC\t_main\n";
+		cseg += "_TEXT\tSEGMENT\n";
+		cseg += agregarProcedimientos();
 
-		cseg += "_TEXT	SEGMENT\n";
-
-		sseg = "";
-
-		agregarProcedimientos();
-
-		nuevo_codigo = nuevo_codigo + sseg + dseg + cseg;
+		nuevo_codigo = nuevo_codigo + dseg + cseg;
 		nuevo_codigo += "_TEXT	ENDS\n";
 		nuevo_codigo += "END\n";
 
@@ -86,30 +80,30 @@ public class Ensambler
 		codigo = "";
 		for(int a = 0; a< lineas.length; a++)
 		{
-			if( lineas[a].indexOf("empujar") != -1 )
+			if (lineas[a].indexOf("empujar") != -1 )
 			{
 				lineas[a] = lineas[a].substring( 9 );
-				lineas[a] = "\n\tpush "+lineas[a];
+				lineas[a] = "\tpush "+lineas[a];
 			}
 
-			if( lineas[a].indexOf("asigna") != -1 )
+			if (lineas[a].indexOf("asigna") != -1 )
 			{
 				String f  = lineas[a].substring( 8 );
-				lineas[a] = "\n\t; asigna\n";
+				lineas[a] = "\t; asignacion\n";
 				lineas[a] += "\tpop\teax\n";
 				lineas[a] += "\tmov\t"+f+", eax\n";
 			}
 
-			if( lineas[a].indexOf("SUMA") != -1 )
+			if (lineas[a].indexOf("SUMA") != -1 )
 			{
-				lineas[a] = "\n\t; suma\n";
+				lineas[a] = "\t; suma\n";
 				lineas[a] += "\tpop\teax\n";
 				lineas[a] += "\tpop\tebx\n";
 				lineas[a] += "\tadd\teax, ebx\n";
 				lineas[a] += "\tpush\teax\n";
 			}
 
-			if( lineas[a].indexOf("RESTA") != -1 )
+			if (lineas[a].indexOf("RESTA") != -1 )
 			{
 				lineas[a] = "\n		pop ax\n";
 				lineas[a] += "		pop bx\n";
@@ -117,7 +111,7 @@ public class Ensambler
 				lineas[a] += "		push bx\n";
 			}
 
-			if( lineas[a].indexOf("MUL") != -1 )
+			if (lineas[a].indexOf("MUL") != -1 )
 			{
 				lineas[a] = "\n		pop ax\n";
 				lineas[a] += "		pop bx\n";
@@ -125,15 +119,16 @@ public class Ensambler
 				lineas[a] += "		push ax\n";
 			}
 
-			if( lineas[a].indexOf("retornar") != -1 )
+			if (lineas[a].indexOf("retornar") != -1 )
 			{
-				lineas[a] = "\n\t; implicit return \n";
+				lineas[a] = "\t; implicit return \n";
 				lineas[a] += "	pop\teax\n";
+				//	mov	esp, ebp				
 				lineas[a] += "	pop\tebp\n";
 				lineas[a] += "	ret\n";
 			}
 
-			if( lineas[a].indexOf("MAYOR") != -1 )
+			if (lineas[a].indexOf("MAYOR") != -1 )
 			{
 				lineas[a] = "\n	pop ax\n";
 				lineas[a] += "	pop bx\n";
@@ -142,7 +137,7 @@ public class Ensambler
 				lineas[a] += "	jl while_fin\n";
 			}
 
-			if( lineas[a].indexOf("MENOR") != -1 )
+			if (lineas[a].indexOf("MENOR") != -1 )
 			{
 				lineas[a] = "\n		pop ax\n";
 				lineas[a] += "		pop bx\n";
@@ -151,7 +146,7 @@ public class Ensambler
 				lineas[a] += "		jg while_fin\n";
 			}
 
-			if( lineas[a].indexOf("while_fin:") != -1 )
+			if (lineas[a].indexOf("while_fin:") != -1 )
 			{
 				lineas[a] = "\n		jmp while_cond\n";
 				lineas[a] += "		while_fin:\n";
@@ -162,11 +157,11 @@ public class Ensambler
 		}//For de kada linea
 	}//metodo
 
-	void agregarDeclaracionesGlobales()
+	String agregarDeclaracionesGlobales()
 	{
 		String tokens[] = codigo.split("\n");
 		String dataSegmentTmp = "";
-		
+
 		for (int a = 0; a<tokens.length; a++)
 		{
 			if(tokens[a].startsWith("<declaracion global"))
@@ -175,14 +170,17 @@ public class Ensambler
 				dataSegmentTmp += "COMM\t"+s[3].substring(3, s[3].length()-1)+":DWORD\n";
 			}
 
+			/*
 			if(tokens[a].startsWith("<declaracion tipo:"))
 			{
 				String s [] = tokens[a].split(" ");
 				dseg += "	"+s[2].substring(3, s[2].length()-1)+"	dw	?\n";
 			}
+			*/
 
 			//<METODO id:hey args:INT a, INT b regresa:INT>
 			//Guardar tambien las variables de los argumentos de cada metodo
+			/*
 			if(tokens[a].startsWith("<METODO id:"))
 			{
 				String args = tokens[a].substring(tokens[a].indexOf(" args:")+6, tokens[a].indexOf(" regresa"));
@@ -196,94 +194,111 @@ public class Ensambler
 					}
 				}//if de si hay argumentos
 			}//if de si es metodo
+			*/
 		}
 
+		String temp = "";
 		if (dataSegmentTmp.length() > 0)
 		{
-			dseg = "_DATA\tSEGMENT\n";
-			dseg += dataSegmentTmp;
-			dseg += "_DATA\tENDS\n";
+			temp = "_DATA\tSEGMENT\n";
+			temp += dataSegmentTmp;
+			temp += "_DATA\tENDS\n";
 		}
+
+		return temp;
 	}//declaraciones
 
-	void agregarProcedimientos()
+	String agregarProcedimientos()
 	{
+		String cseg = "";
+
+		// Declarar variables locales
+		String localVarDeclaraciones = "";
+
 		String tokens[] = codigo.split("\n");
 
-		for(int a = 0; a<tokens.length; a++)
+		for (int a = 0; a<tokens.length; a++)
 		{
-			if(tokens[a].startsWith("<METODO"))
+			if (tokens[a].startsWith("<METODO"))
 			{
 				int inicio = a+1;
 
 				String s [] = tokens[a].split(" ");
 				String nombre = s[1].substring(3);
 
-				if(nombre.equals("main"))
+				// Cambiar el nombre del metodo main
+				if (nombre.equals("main"))
 				{
 					nombre = "_main";
 				}
 
-				cseg += nombre +"	PROC\n";
+				// Prologo
+				cseg += nombre +"\tPROC\n";
+				cseg += "\tpush\tebp\n";
+				cseg += "\tmov\tebp, esp\n";
 
-				cseg += "	push\tebp\n";
-				cseg += "	mov\tebp, esp\n";
-
-				//si es el de imprimir tons agregar las cosas ke lleva
-				if(nombre.equals("imprimir"))
+				// leer variables que le pasan al metodo
+				// desde la pila pop ax y eso
+				int currentLocalSize = 0;
+				String cseg_temp = "";
+				while (!tokens[++a].equals("</METODO>"))
 				{
-					agregarMetodoImprimir();
+					if (tokens[a].startsWith("<declaracion tipo:"))
+					{
+						currentLocalSize += 4;
+						// Obtener el nombre de la variable
+						String declaracionLocalSp [] = tokens[a].split(" ");
+						String variableName = declaracionLocalSp[2].substring(3, declaracionLocalSp[2].length()-1);
+
+						// Guardar la declaracion de las variables locales
+						localVarDeclaraciones += (variableName + "$ = -" +currentLocalSize+ "\t\t\t\t\t\t; size = 4\n");
+
+						// Escribir la inicializacion : mov	DWORD PTR _local_var$[ebp], 5
+						cseg_temp += "\tmov\tDWORD PTR " + variableName + "$[ebp], 0\n";
+					}
 				}
 
-				//leer variables ke le pasan al metodo desde la pila pop ax y eso
-				while( !tokens[++a].equals("</METODO>"))
+				// Hacer espacio para variables locales
+				cseg += "\tsub\tesp, " + currentLocalSize + "\t\t\t\t\t;\n";
+
+				// Invertir el orden de cseg_temp
+				/*
+				String localInitParts [] = cseg_temp.split("\n");
+				for (int localDefI = localInitParts.length - 1;  localDefI >= 0 ; localDefI--)
 				{
+					cseg += localInitParts[ localDefI ] + "\n";
 				}
+				*/
+				cseg += cseg_temp; 
 
 				int fin = a-1;
 
-				if(!nombre.equals("imprimir"))
-				{
-					convertirNomenclatura(inicio, fin);
-				}
+				// Insertar el cuerpo
+				cseg += convertirNomenclatura(inicio, fin);
 
+				// Fin
 				cseg += "	xor\teax, eax\n";
 				cseg += "	pop\tebp\n";
 				cseg += "	ret\t0\n";
 				cseg += ""+nombre + "\tENDP\n";
 			}
 		}
+
+		// Invertir el orden de localVarDeclaraciones
+		String localInitParts [] = localVarDeclaraciones.split("\n");
+		String localVarDeclaracionesBuff = "";
+		for (int localDefI = localInitParts.length - 1;  localDefI >= 0 ; localDefI--)
+		{
+			localVarDeclaracionesBuff += localInitParts[ localDefI ] + "\n";
+		}
+
+		return localVarDeclaracionesBuff + cseg;
 	}//procedimientos
 
-	void convertirNomenclatura( int inicio, int fin )
+	String convertirNomenclatura( int inicio, int fin )
 	{
 		String [] tokens = codigo.split("\n");
-
-		//ke sake de la pila la instuccion de regreso y guardarla por ahi
-		//a menos ke sea el main
-		/*
-		if( !tokens[inicio-1].equals("<METODO id:main args:NADA regresa:VOID>"))
-		{
-			cseg += "\n		pop cx\n";
-
-			//sacar de la pila los argumentos ke recibe
-			//<METODO id:hey args:INT a, INT b regresa:INT>
-			//Guardar tambien las variables de los argumentos de kada metodo
-			String args = tokens[inicio-1].substring(tokens[inicio-1].indexOf(" args:")+6, tokens[inicio-1].indexOf(" regresa"));
-
-			if(!args.equals("NADA"))
-			{
-				String [] nargs = args.split(",");
-				for(int z = nargs.length-1; z>=0; z--)
-				{
-					String nom = nargs[z].substring(nargs[z].indexOf("INT ")+4);
-					cseg += "		pop "+nom+"\n";
-				}
-			}//if de si hay argumentos
-
-			cseg += "		pusha\n";
-		}
-		*/
+		String cseg = "";
 
 		for (int a = inicio; a<fin; a++)
 		{
@@ -293,20 +308,20 @@ public class Ensambler
 			}
 
 			//empujar enteros
-			if( tokens[a].startsWith("<INT ") )
+			if (tokens[a].startsWith("<INT "))
 			{
 				String partes [] = tokens[a].split(" ");
 				cseg += "		" + "empujar " + partes[1].substring( partes[1].indexOf(":")+1, partes[1].length()-1) + "\n";
 				tokens[a] = "*";
 			}
 
-			if( tokens[a].startsWith("<while") )
+			if (tokens[a].startsWith("<while") )
 			{
 				cseg += "		while_cond:\n";
 				tokens[a] = "*";
 			}
 
-			if( tokens[a].startsWith("</while") )
+			if (tokens[a].startsWith("</while") )
 			{
 				cseg += "		while_body:\n";
 				tokens[a] = "*";
@@ -314,7 +329,7 @@ public class Ensambler
 
 			boolean vacio = false;
 
-			if( tokens[a].startsWith("</") )
+			if (tokens[a].startsWith("</") )
 			{
 				tokens[a] = "*";
 				while( !tokens[--a].startsWith("<") )
@@ -322,34 +337,42 @@ public class Ensambler
 					if ( a == inicio ) vacio = true; 
 				}
 
-				if(!vacio)
+				if (!vacio)
 				{
-					if( tokens[a].indexOf("llamada tipo:") != -1 )
+					if (tokens[a].indexOf("llamada tipo:") != -1 )
 						tokens[a] = "		call "+ tokens[a].substring( tokens[a].indexOf("id:") + 3, tokens[a].length()-1 );
 
-					if( tokens[a].indexOf("op tipo:") != -1 )
+					if (tokens[a].indexOf("op tipo:") != -1 )
 						tokens[a] = "		"+tokens[a].substring( tokens[a].indexOf("tipo:") + 5, tokens[a].length()-1 );
 
-					if( tokens[a].indexOf("<retorno>") != -1 )
+					if (tokens[a].indexOf("<retorno>") != -1 )
 						tokens[a] = "		retornar";
 
-					// En la version anterior, no existen la variables locales.
-					// Todo se trata como variable global, y se usa el nombre del
-					// metodo como prefijo.
-					if( tokens[a].indexOf("asignacion tipo:INT id:") != -1 )
+					// Resolver los id's de la asignacion.
+					// Si es una variable global:
+					// 			mov     DWORD PTR _global_var, 45
+					//
+					// Si es una variable logal:
+					//			mov     eax, DWORD PTR _local_var$[ebp]
+					//
+					if (tokens[a].indexOf("asignacion tipo:INT id:") != -1)
 					{
-						// Version anterior:
-						// tokens[a] = "		asigna "+tokens[a].substring( tokens[a].indexOf(" id:") + 4, tokens[a].length()-1 )+"\n";
+						String varId = tokens[a].substring(
+													tokens[a].indexOf(" id:") + 4,
+													tokens[a].length()-1 );
 
-						// Version nueva:
-						// No agragar el prefijo del metodo.
-						tokens[a] = "		asigna "+tokens[a].substring( 
-															tokens[a].indexOf(" id:") + 4, 
-															tokens[a].length()-1 
-														)+"\n";
+						if (/* global */ false)
+						{
+							tokens[a] = "		asigna "+ varId +"\n";
+						}
+						else
+						{
+							// Para las variables locales, puedo usar el nombre
+							tokens[a] = "\tasigna DWORD PTR "+ varId +"$[ebp]\n";
+						}
 					}
 
-					if( tokens[a].indexOf("<llave") != -1 )
+					if (tokens[a].indexOf("<llave") != -1 )
 					{
 						tokens[a] = "\twhile_fin: \n";
 					}
@@ -359,50 +382,8 @@ public class Ensambler
 					tokens[a] = "*";
 				}//if de metodo vacio
 			}
-
-		}//for de kada metodo
-
-		//al akabar, regresar el valor de return a la pila, a menos ke sea el main
-		/*
-		if( !tokens[inicio-1].equals("<METODO id:main args:NADA regresa:VOID>"))
-		{
-			cseg += "\n		popa\n";
-			cseg += "\n		push cx\n";
-		}
-		*/
-	}
-
-	void agregarMetodoImprimir()
-	{
-		cseg += " 		pop dx\n";
-		cseg += " 		pop ax\n";
-		cseg += " 		pusha\n";
-
-		cseg += " 		mov bl,10 	;dividir entre 10\n";
-		cseg += " 		mov ah,0 	;\n";
-		cseg += " 		div bl		;divide. AL is quotient, AH is Remainder\n";
-
-		cseg += " 		add al,48d 	;adds 48 to generate ASCII character\n";
-		cseg += " 		add ah,48d\n";
-
-		cseg += " 		mov cl, ah\n";
-
-		cseg += " 		mov ah,0eh 	;print to screen\n";
-		cseg += " 		mov bx,7h\n";
-		cseg += " 		int 10h\n";
-
-		cseg += " 		mov ah,0eh 	;print to screen\n";
-		cseg += " 		mov al,cl\n";
-		cseg += " 		mov bx,7h\n";
-		cseg += " 		int 10h\n";
-
-		cseg += " 		mov ah,0eh 	;print to screen\n";
-		cseg += " 		mov al,0ah\n";
-		cseg += " 		mov bx,7h\n";
-		cseg += " 		int 10h\n";
-
-		cseg += " 		popa\n";
-		cseg += " 		push dx\n";
+		}//for de cada metodo
+		return cseg;
 	}
 }//class ensambler
 
