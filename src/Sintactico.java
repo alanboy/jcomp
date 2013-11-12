@@ -11,11 +11,7 @@ public class Sintactico
 
 	Sintactico()
 	{
-	}
-
-	void setDebugger(Log debug)
-	{
-		this.debug = debug;
+		this.debug = Log.getInstance();
 	}
 
 	void setCodigo(String cf)
@@ -28,15 +24,14 @@ public class Sintactico
 		return codigo_fuente;
 	}
 
-
-	int iniciar(){
-
+	int iniciar()
+	{
 		debug.imprimirLinea( " " );
 		debug.imprimirLinea( "------------------------------" );
 		debug.imprimirLinea( "ANALISIS SINTACTICO:" );
 		debug.imprimirLinea( "------------------------------" );
 
-		// primero chekar ke este bien, ya despues ornaizar el codigo para el semantico
+		// primero checar que este bien, ya despues ornaizar el codigo para el semantico
 		String s [] = codigo_fuente.split("\n");
 		String cf = "";
 
@@ -55,9 +50,9 @@ public class Sintactico
 
 		//crear las producciones para la gramatica
 		//y despues se las pasare al automata
-		Produccion [] prod =	{
-
-		new Produccion("<PROGRAMA>","$ <instruccion_basica> FINAL"), //awebo...!!! 4:19 am pero salio
+		Produccion [] prod =
+		{
+		new Produccion("<PROGRAMA>","$ <instruccion_basica> FINAL"),
 
 		new Produccion("<instruccion_basica>","<metodo_def>"),
 		new Produccion("<instruccion_basica>","<def_global>"),
@@ -184,9 +179,7 @@ public class Sintactico
 		};
 
 		Automata aut = new Automata(prod, cf);
-		//aut.setDebugger(debug);
 		String resultado = aut.iniciar();
-
 		debug.imprimirLinea( resultado );
 
 		if( !resultado.endsWith("<PROGRAMA> "))
@@ -197,5 +190,5 @@ public class Sintactico
 
 		return 0;
 	}
-}//clase
+}
 

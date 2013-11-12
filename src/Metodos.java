@@ -1,9 +1,5 @@
-/*------------------------------------------------------------------------------------
- 				Metodo
--------------------------------------------------------------------------------------*/
-//los metodos que se encuentran en el programa, son un objeto de esta clase
-public class Metodos{
-
+public class Metodos
+{
 	private String Linea;
 	private String Nombre;
 	private String TipoDeRetorno;
@@ -40,6 +36,5 @@ public class Metodos{
 	String getTipoDeRetorno(){ return TipoDeRetorno; }
 	String getArgumentos(){return Argumentos; }
 	String getCuerpo(){ return Cuerpo; }
-
 }
 

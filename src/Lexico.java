@@ -18,22 +18,17 @@ public class Lexico
 {
 	String [][] TOKENS;
 	char [] ALFABETO;
-	String FILE_NAME;
 	String PROGRAMA_FUENTE;
 	Log debug;
 
 	Lexico()
 	{
+		this.debug = Log.getInstance();
 	}
 
-	void setDebugger(Log debug)
+	void setCodigo(String source)
 	{
-		this.debug = debug;
-	}
-
-	void setCodigo(String FILE_NAME)
-	{
-		this.FILE_NAME = FILE_NAME;
+		PROGRAMA_FUENTE = source;
 	}
 
 	int iniciar(){
@@ -128,21 +123,8 @@ public class Lexico
 			ALFABETO[_a.length()] = 10;
 			ALFABETO[_a.length()+1] = 9;
 
-		//cargar el archivo fuente
-		//guardarlo tal  y como es en PROGRAMA_FUENTE
-		try{
-			BufferedReader br = new BufferedReader(new FileReader(FILE_NAME));
-			PROGRAMA_FUENTE = "";
-			String k = "";
-			while( (k = br.readLine()) != null ) PROGRAMA_FUENTE += (k+"\n");
 
-		}catch(Exception e){
-			//mandar el error de archivo en forma de texto
-			System.out.println( "No he podido leer el archivo de entrada.");
-			return 1;
-		}
-
-	return 0;
+		return 0;
 	}//fin metodo cargarConfiguracion()
 
 	int eliminarComentarios(){
