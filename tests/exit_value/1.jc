@@ -1,0 +1,14 @@
+
+def int a;
+
+def int #main()
+{
+	a = 3;
+	a = a+3;
+	return a;
+}
+
+def int #main2()
+{
+	return 19;
+}

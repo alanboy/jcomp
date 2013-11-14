@@ -160,32 +160,6 @@ public class Ensambler
 				String s [] = tokens[a].split(" ");
 				dataSegmentTmp += "COMM\t"+s[3].substring(3, s[3].length()-1)+":DWORD\n";
 			}
-
-			/*
-			if(tokens[a].startsWith("<declaracion tipo:"))
-			{
-				String s [] = tokens[a].split(" ");
-				dseg += "	"+s[2].substring(3, s[2].length()-1)+"	dw	?\n";
-			}
-			*/
-
-			//<METODO id:hey args:INT a, INT b regresa:INT>
-			//Guardar tambien las variables de los argumentos de cada metodo
-			/*
-			if(tokens[a].startsWith("<METODO id:"))
-			{
-				String args = tokens[a].substring(tokens[a].indexOf(" args:")+6, tokens[a].indexOf(" regresa"));
-				if(!args.equals("NADA"))
-				{
-					String [] nargs = args.split(",");
-					for(int z = 0; z<nargs.length; z++)
-					{
-						String nom = nargs[z].substring(nargs[z].indexOf("INT ")+4);
-						dseg += "	"+nom+"	dw	?\n";
-					}
-				}//if de si hay argumentos
-			}//if de si es metodo
-			*/
 		}
 
 		String temp = "";
@@ -250,8 +224,11 @@ public class Ensambler
 				}
 
 				// Hacer espacio para variables locales
-				cseg += "\tsub\tesp, " + currentLocalSize + "\t\t\t\t\t;\n";
-				cseg += cseg_temp; 
+				if (currentLocalSize > 0)
+				{
+					cseg += "\tsub\tesp, " + currentLocalSize + "\n";
+				}
+				cseg += cseg_temp;
 
 				int fin = a-1;
 
@@ -319,7 +296,6 @@ public class Ensambler
 
 				tokens[a] = "*";
 			}
-
 
 			if (tokens[a].startsWith("<while") )
 			{

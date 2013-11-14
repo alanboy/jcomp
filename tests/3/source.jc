@@ -1,0 +1,11 @@
+def int a;
+
+def int #main()
+{
+	return 19;
+}
+
+def int #main2()
+{
+	return 19;
+}

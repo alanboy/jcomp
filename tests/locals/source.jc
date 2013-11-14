@@ -1,0 +1,30 @@
+def int _global_var;
+
+def int #metodo()
+{
+	_global_var = 123;
+	return 3;
+}
+
+def int #main()
+{
+	
+	int _local_var;
+	int _b;
+	int _c;
+
+	_global_var = 45;
+
+	_b = 6;
+	_b = #metodo();
+
+	_local_var = 5;
+	_c = 7;
+
+	return 
+		_local_var		// 5
+		+ _global_var	// 45, later 123
+		+ _b			// 6, later 3
+		+ _c ;			// 7
+}
+

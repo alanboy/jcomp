@@ -907,10 +907,6 @@ public class Semantico
 	return 0;
 	}//metodod
 
-
-
-
-
 	String quitarPuntoComaYLinea(String cuerpo)
 	{
 		String [] token = cuerpo.split("\n");
@@ -921,8 +917,6 @@ public class Semantico
 
 	return cuerpo;
 	}
-
-
 
 	String reorganizarReturn(String body)
 	{
@@ -939,8 +933,6 @@ public class Semantico
 
 	return body;
 	}
-
-
 
 	String reorganizarComa(String body)
 	{
@@ -1006,7 +998,6 @@ public class Semantico
 			}
 		}
 
-
 		boolean cambio=true;
 		while(cambio)
 		{
@@ -1057,7 +1048,6 @@ public class Semantico
 			}
 		}
 
-
 		boolean cambio=true;
 		while(cambio)
 		{
@@ -1090,7 +1080,6 @@ public class Semantico
 
 	return body;
 	}//metodo
-
 
 	String reorganizarLineas(String body)
 	{

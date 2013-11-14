@@ -49,7 +49,7 @@ public class PseudoTag
 
 		String parts [] = _raw.substring(1,len).split(" ");
 
-		//First part is the type
+		// First part is the type
 		_type = parts[0];
 
 		for(int i=1; i < parts.length; i++)
@@ -61,8 +61,6 @@ public class PseudoTag
 
 	public String get(String key)
 	{
-		// _hashtable.containsKey("Google")
-		// _hashtable.containsValue("Japan")
 		return _hashtable.get(key);
 	}
 }

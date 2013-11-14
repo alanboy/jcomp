@@ -23,18 +23,26 @@ public class Opciones
 		int buffIndex = 0;
 
 		do{
-			char flag = _rawArgs[buffIndex].toCharArray()[1];
-			switch (flag)
+			if (_rawArgs[buffIndex].toCharArray()[0] != '-')
 			{
-				case PATH_A_CODIGO_FUENTE:
-					if (_PathACodigoFuente != null)
-					{
-						isValid = false;
-						break;
-					}
-					buffIndex++;
-					_PathACodigoFuente = _rawArgs[buffIndex];
-				break;
+				// Este debe ser el codigo fuente.
+				_PathACodigoFuente = _rawArgs[buffIndex];
+			}
+			else
+			{
+				char flag = _rawArgs[buffIndex].toCharArray()[1];
+				switch (flag)
+				{
+					case PATH_A_CODIGO_FUENTE:
+						if (_PathACodigoFuente != null)
+						{
+							isValid = false;
+							break;
+						}
+						buffIndex++;
+						_PathACodigoFuente = _rawArgs[buffIndex];
+					break;
+				}
 			}
 			buffIndex++;
 		}while(buffIndex < _rawArgs.length);

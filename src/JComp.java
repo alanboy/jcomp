@@ -42,11 +42,10 @@ public class JComp
 			return 1;
 		}
 
-
 		Lexico a_lex = new Lexico();
 		Sintactico a_sin = new Sintactico();
 		Semantico a_sem = new Semantico();
-		Log debug = Log.getInstance();
+		Log s_pLog = Log.getInstance();
 
 		a_lex.setCodigo(codigo);
 
@@ -71,10 +70,10 @@ public class JComp
 		}
 		codigo = a_sem.getCodigo();
 
-		debug.imprimirLinea("----------------------");
-		debug.imprimirLinea("CODIGO OBJETO !!");
-		debug.imprimirLinea("----------------------");
-		debug.imprimirLinea(codigo);
+		s_pLog.imprimirLinea("----------------------");
+		s_pLog.imprimirLinea("CODIGO OBJETO !!");
+		s_pLog.imprimirLinea("----------------------");
+		s_pLog.imprimirLinea(codigo);
 
 		Ensambler en = new Ensambler();
 		en.setCodigo(codigo);
@@ -84,13 +83,13 @@ public class JComp
 		}
 		codigo = en.getCodigo();
 
-		debug.imprimirLinea("");
-		debug.imprimirLinea("");
-		debug.imprimirLinea("----------------------");
-		debug.imprimirLinea("CODIGO PARA ENSAMBLAR");
-		debug.imprimirLinea("----------------------");
+		s_pLog.imprimirLinea("");
+		s_pLog.imprimirLinea("");
+		s_pLog.imprimirLinea("----------------------");
+		s_pLog.imprimirLinea("CODIGO PARA ENSAMBLAR");
+		s_pLog.imprimirLinea("----------------------");
 
-		debug.imprimirLinea(codigo);
+		s_pLog.imprimirLinea(codigo);
 
 		try{
 			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter("p.asm")));
@@ -108,7 +107,7 @@ public class JComp
 	/* 
 	 * Destructor ()
 	 * {
-	 * debug.closeFile();
+	 * s_pLog.closeFile();
 	 *
 	 * }
 	 * */
