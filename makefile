@@ -14,7 +14,9 @@ $(EXECUTABLE_NAME): clean-build $(BIN_DIR)
 
 
 clean-build:
-	rd /s /q jcomp
+!if exist("$(BIN_DIR)\jcomp")
+	@rd /s /q $(BIN_DIR)
+!endif
 !if exist("filelist")
 		del filelist
 !endif
