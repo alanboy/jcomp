@@ -1,7 +1,7 @@
 jcomp
 =====
 
-
+```
 //define a global variable
 def int myvar;  
 
@@ -42,3 +42,4 @@ def int #method(){
 	//complex call structures
 	return #adding(1, 5); 
 }
+```
