@@ -1,3 +1,5 @@
+package jcomp;
+
 public class Variables
 {
 

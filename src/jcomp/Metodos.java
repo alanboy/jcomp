@@ -1,3 +1,5 @@
+package jcomp;
+
 public class Metodos
 {
 	private String Linea;

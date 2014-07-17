@@ -1,3 +1,5 @@
+package jcomp;
+
 import jcomp.automata.*;
 import jcomp.util.Log;
 

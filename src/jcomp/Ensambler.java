@@ -1,3 +1,5 @@
+package jcomp;
+
 import jcomp.util.Log;
 import jcomp.util.PseudoTag;
 
