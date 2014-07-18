@@ -1,4 +1,4 @@
-package jcomp;
+package jcomp.frontend;
 
 import jcomp.util.Log;
 
@@ -22,22 +22,22 @@ public class Semantico
 	Variables [] g_pVariables;
 	Metodos [] metodos;
 
-	Semantico()
+	public Semantico()
 	{
 		this.debug = Log.getInstance();
 	}
 
-	void setCodigo(String c)
+	public void setCodigo(String c)
 	{
 		codigo = c;
 	}
 
-	String getCodigo()
+	public String getCodigo()
 	{
 		return codigo;
 	}
 
-	int iniciar()
+	public int iniciar()
 	{
 		debug.imprimirLinea( "------------------------------" );
 		debug.imprimirLinea( "      ANALISIS SEMANTICO" );

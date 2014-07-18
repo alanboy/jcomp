@@ -1,4 +1,4 @@
-package jcomp;
+package jcomp.frontend;
 
 public class Metodos
 {

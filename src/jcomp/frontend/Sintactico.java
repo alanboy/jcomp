@@ -1,4 +1,4 @@
-package jcomp;
+package jcomp.frontend;
 
 import jcomp.automata.*;
 import jcomp.util.Log;
@@ -11,22 +11,22 @@ public class Sintactico
 	String codigo_fuente;
 	Log debug;
 
-	Sintactico()
+	public Sintactico()
 	{
 		this.debug = Log.getInstance();
 	}
 
-	void setCodigo(String cf)
+	public void setCodigo(String cf)
 	{
 		codigo_fuente = cf;
 	}
 
-	String getCodigo()
+	public String getCodigo()
 	{
 		return codigo_fuente;
 	}
 
-	int iniciar()
+	public int iniciar()
 	{
 		debug.imprimirLinea( " " );
 		debug.imprimirLinea( "------------------------------" );

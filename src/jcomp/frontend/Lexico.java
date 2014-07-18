@@ -1,4 +1,4 @@
-package jcomp;
+package jcomp.frontend;
 
 /*------------------------------------------------------------------------------------
  				ANALISIS LEXICO
@@ -23,17 +23,17 @@ public class Lexico
 	String PROGRAMA_FUENTE;
 	Log debug;
 
-	Lexico()
+	public Lexico()
 	{
 		this.debug = Log.getInstance();
 	}
 
-	void setCodigo(String source)
+	public void setCodigo(String source)
 	{
 		PROGRAMA_FUENTE = source;
 	}
 
-	int iniciar(){
+	public int iniciar(){
 		//todos los metodos ke manipulan el codigo fuente,
 		// lo leen de CODIGO_FUENTE y lo guardan manipulado
 		// en CODIGO_FUENTE tambien
@@ -70,7 +70,7 @@ public class Lexico
 	}
 
 
-	String getCodigo(){
+	public String getCodigo(){
 		return PROGRAMA_FUENTE;
 	}
 

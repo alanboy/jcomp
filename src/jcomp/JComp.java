@@ -1,5 +1,9 @@
 package jcomp;
 
+import jcomp.frontend.Semantico;
+import jcomp.frontend.Lexico;
+import jcomp.frontend.Sintactico;
+import jcomp.backend.Ensambler;
 import java.io.*;
 import java.util.*;
 import jcomp.Opciones;
@@ -7,8 +11,14 @@ import jcomp.util.Log;
 
 public class JComp
 {
+    
+    private static final int VersionMajor      = 0;
+    private static final int VersionMinor      = 0;
+    private static final int VersionRevision   = 1;
 	public static void main(String [] args)
 	{
+        title();
+
 		Opciones o = new Opciones(args);
 		if (!o.isValid())
 		{
@@ -20,12 +30,26 @@ public class JComp
 		}
 	}
 
+    static void title()
+	{
+		System.out.println("jcomp Compiler Version "
+                + VersionMajor
+                + "."
+                + VersionMinor 
+                + "."
+                + VersionRevision 
+                + " for X86");
+		System.out.println("Alan Gonzalez 2010 - 2014");
+        System.out.println("");
+	}
+        
 	static void uso()
 	{
-		System.out.println("jcomp compiler for x86");
-		System.out.println("Alan Gonzalez 2013");
-		System.out.println("");
 		System.out.println("uso: jcomp [ option... ] filename... [ /link linkoption... ]");
+        
+        System.out.println("options:");
+        System.out.println("-v\t\t\t\tVerbose output");
+        System.out.println("-h\t\t\t\tShow help");
 	}
 
 	static int iniciar(Opciones lineaDeComandos)
@@ -39,7 +63,7 @@ public class JComp
 			String k = "";
 			while( (k = br.readLine()) != null ) codigo += (k+"\n");
 
-		}catch(Exception e){
+		}catch(IOException e){
 			System.out.println( "No he podido leer el archivo de entrada:" + lineaDeComandos.getCodigoFuentePath());
 			return 1;
 		}
