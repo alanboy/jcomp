@@ -6,6 +6,8 @@ public class Opciones
 	private String _PathACodigoFuente;
 	private boolean isValid;
 	private final char PATH_A_CODIGO_FUENTE = 'f';
+	private final char ENSAMBLADOR = 'a';
+	private String _ConfiguracionAsm = "nasm";
 
 	public Opciones(String [] args)
 	{
@@ -16,6 +18,11 @@ public class Opciones
 	public String getCodigoFuentePath()
 	{
 		return _PathACodigoFuente;
+	}
+
+	public String getNasmOrMasm()
+	{
+		return _ConfiguracionAsm;
 	}
 
 	private void parse()
@@ -42,6 +49,17 @@ public class Opciones
 						buffIndex++;
 						_PathACodigoFuente = _rawArgs[buffIndex];
 					break;
+
+					case ENSAMBLADOR:
+						if (_ConfiguracionAsm != null)
+						{
+							isValid = false;
+							break;
+						}
+						buffIndex++;
+						_ConfiguracionAsm = _rawArgs[buffIndex];
+					break;
+
 				}
 			}
 			buffIndex++;

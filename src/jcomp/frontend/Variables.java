@@ -2,7 +2,6 @@ package jcomp.frontend;
 
 public class Variables
 {
-
 	private String Linea;
 	private String Nombre;
 	private String Tipo;

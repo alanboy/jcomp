@@ -11,12 +11,11 @@ import java.util.Set;
 // getType() regresaria "INT"
 // get("id") regresaria "_local_var"
 // get("scope") regresaria "local"
-//
 public class PseudoTag
 {
-	String _raw;
-	Hashtable <String,String>_hashtable;
-	String _type;
+	private String _raw;
+	private Hashtable <String,String> _hashtable;
+	private String _type;
 
 	public PseudoTag(String raw)
 	{
@@ -32,7 +31,7 @@ public class PseudoTag
 		}catch(Exception e){
 			if (!failSilently)
 			{
-				System.out.println("Error al parser pseudo-tag:" + _raw);
+				System.out.println("Error al parsear pseudo-tag:" + _raw);
 				System.out.println(e);
 			}
 		}
@@ -63,4 +62,10 @@ public class PseudoTag
 	{
 		return _hashtable.get(key);
 	}
+
+	public String set(String key, int val)
+	{
+		return _hashtable.put(key, String.valueOf(val));
+	}
 }
+

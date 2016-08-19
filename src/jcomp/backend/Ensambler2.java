@@ -2,21 +2,18 @@ package jcomp.backend;
 
 import jcomp.util.Log;
 import jcomp.util.PseudoTag;
+import java.util.Hashtable;
 
-public class Ensambler
+public class Ensambler2
 {
-	private String codigo;
-	private String nuevo_codigo;
 	Log debug;
-	String sseg, dseg, cseg;
+	private String codigo;
+	private Hashtable<String, PseudoTag> mapaVariablesLocales;
 
-	public Ensambler()
+	public Ensambler2(String codigo)
 	{
+		this.mapaVariablesLocales = new Hashtable<String, PseudoTag>();
 		this.debug = Log.getInstance();
-	}
-
-	public void setCodigo(String codigo)
-	{
 		this.codigo = codigo;
 	}
 
@@ -27,41 +24,25 @@ public class Ensambler
 
 	public int iniciar()
 	{
-		nuevo_codigo = ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
-		nuevo_codigo += "; Generado con jComp\n\n";
-		nuevo_codigo += "	TITLE \n";
-		nuevo_codigo += "	.686P\n";
-		nuevo_codigo += "	.XMM\n";
-		nuevo_codigo += "	include listing.inc\n";
-		nuevo_codigo += "	.model\tflat\n\n";
-
-		nuevo_codigo += "INCLUDELIB LIBCMT\n";
-		nuevo_codigo += "INCLUDELIB OLDNAMES\n";
-
+		String dseg, cseg;
 		dseg = agregarDeclaracionesGlobales();
 
-		cseg = "PUBLIC\t_main\n";
-		cseg += "_TEXT\tSEGMENT\n";
+		cseg = "section .text\n";
+		cseg += "\tglobal _start\n";
 		cseg += agregarProcedimientos();
 
-		nuevo_codigo = nuevo_codigo + dseg + cseg;
-		nuevo_codigo += "_TEXT ENDS\n";
-		nuevo_codigo += "END\n";
+		codigo = dseg + cseg;
 
-		codigo = nuevo_codigo;
-
-		debug.imprimirLinea("\n\n----------------------");
-		debug.imprimirLinea(" CODIGO CON MNEMONICOS MIOS");
+		debug.imprimirLinea("----------------------");
+		debug.imprimirLinea(" GENERACION DE CODIGO INTERMEDIA");
 		debug.imprimirLinea("----------------------");
 
 		String lineas [] = codigo.split("\n");
 
-		for (int a = 0; a< lineas.length; a++)
+		for (int a = 0; a < lineas.length; a++)
 		{
 			debug.imprimirLinea(lineas[a]);
 		}
-
-		debug.imprimirLinea("");
 
 		convertirMnemonicosFinales();
 
@@ -72,21 +53,37 @@ public class Ensambler
 	{
 		String lineas [] = codigo.split("\n");
 
-		codigo = "";
-		for (int a = 0; a< lineas.length; a++)
+		codigo = ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
+		codigo += "; Generado con jComp\n\n";
+
+		for (int a = 0; a < lineas.length; a++)
 		{
-			if (lineas[a].indexOf("empujar") != -1 )
+			if (lineas[a].trim().startsWith(";"))
+			{
+				codigo += lineas[a]+"\n";
+				continue;
+			}
+
+			if (lineas[a].indexOf("empujar ") != -1 )
 			{
 				lineas[a] = lineas[a].substring( 9 );
 				lineas[a] = "\tpush "+lineas[a];
 			}
 
-			if (lineas[a].indexOf("asigna") != -1 )
+			if (lineas[a].indexOf("empujarapuntador") != -1 )
 			{
-				String f  = lineas[a].substring( 8 );
-				lineas[a] = "\n\t; asignacion "+lineas[a]+"\n";
+				lineas[a] = lineas[a].substring( 18 );
+				lineas[a] = "\tpush dword ["+lineas[a] +"]";
+			}
+
+			if (lineas[a].indexOf("asignaAGlobal") != -1 )
+			{
+				String id = lineas[a].substring( 14 );
+				lineas[a] = "\t; asignacion a global\n";
 				lineas[a] += "\tpop eax\n";
-				lineas[a] += "\tmov"+f+", eax\n";
+				lineas[a] += "\tmov ";
+				lineas[a] += id;
+				lineas[a] += ", eax\n";
 			}
 
 			if (lineas[a].indexOf("SUMA") != -1 )
@@ -116,13 +113,19 @@ public class Ensambler
 
 			if (lineas[a].indexOf("retornar") != -1 )
 			{
-				lineas[a] = "\t; implicit return \n";
-				lineas[a] += "	pop\teax\n";
-				//this is only needed when locals were 
-                //in the stack i think
-				lineas[a] += "	mov	esp, ebp\n";
-				lineas[a] += "	pop\tebp\n";
-				lineas[a] += "	ret\t0\n";
+				// Retornar de otra function es RET
+				lineas[a] = "\n\t; return explicito de funcion \n";
+				lineas[a] += "	pop eax\n";    // El valor a regresar (exit value)
+				lineas[a] += "	ret\n";
+			}
+
+			if (lineas[a].indexOf("salir") != -1 )
+			{
+				// Retornar de main sinfica hacer syscall
+				lineas[a] = "\n\t; return explicito \n";
+				lineas[a] += "	mov eax, 1\n"; // Syscall para salir del proces (sys_exit)
+				lineas[a] += "	pop ebx\n";    // El valor a regresar (exit value)
+				lineas[a] += "	int 80h\n";
 			}
 
 			if (lineas[a].indexOf("MAYOR") != -1 )
@@ -150,8 +153,8 @@ public class Ensambler
 			}
 
 			codigo += lineas[a]+"\n";
-		}//For de cada linea
-	}//metodo
+		} // for de cada linea
+	} // metodo
 
 	private String agregarDeclaracionesGlobales()
 	{
@@ -163,16 +166,15 @@ public class Ensambler
 			if (tokens[a].startsWith("<declaracion global"))
 			{
 				String s [] = tokens[a].split(" ");
-				dataSegmentTmp += "COMM\t"+s[3].substring(3, s[3].length()-1)+":DWORD\n";
+				dataSegmentTmp += "\t"+s[3].substring(3, s[3].length()-1)+": dd 0\n";
 			}
 		}
 
 		String temp = "";
 		if (dataSegmentTmp.length() > 0)
 		{
-			temp = "_DATA\tSEGMENT\n";
+			temp = "section .data\n";
 			temp += dataSegmentTmp;
-			temp += "_DATA\tENDS\n";
 		}
 
 		return temp + "\n";
@@ -181,6 +183,7 @@ public class Ensambler
 	private String agregarProcedimientos()
 	{
 		String cseg = "";
+		boolean returnExplicto = false;
 
 		// Declarar variables locales
 		String localVarDeclaraciones = "";
@@ -199,39 +202,48 @@ public class Ensambler
 				// Cambiar el nombre del metodo main
 				if (nombre.equals("main"))
 				{
-					nombre = "_main";
+					nombre = "_start";
 				}
 
 				// Prologo
-				cseg += nombre +"\tPROC\n";
-				cseg += "\tpush\tebp\n";
-				cseg += "\tmov\tebp, esp\n";
+				cseg += nombre +":\n";
+				cseg += "\t; create the stack frame\n";
+				cseg += "\tpush ebp \n";
+				cseg += "\tmov ebp, esp\n";
 
 				// leer variables que le pasan al metodo
 				// desde la pila pop ax y eso
-				int currentLocalSize = 0;
-				String cseg_temp = "";
+				int espacioParaVariablesLocales = 0;
+				String cseg_temp = "\n\t; inicializar las variables locales\n";
+
 				while (!tokens[++a].equals("</METODO>"))
 				{
 					if (tokens[a].startsWith("<declaracion tipo:"))
 					{
-						currentLocalSize += 4;
+						// por ahora todas las variables locales son de 4 bytes
+						espacioParaVariablesLocales += 4;
+
 						// Obtener el nombre de la variable
 						String declaracionLocalSp [] = tokens[a].split(" ");
 						String variableName = declaracionLocalSp[2].substring(3, declaracionLocalSp[2].length()-1);
 
 						// Guardar la declaracion de las variables locales
-						localVarDeclaraciones += (variableName + "$ = -" +currentLocalSize+ "\t\t\t\t\t\t; size = 4\n");
+						// localVarDeclaraciones += (variableName + "$ = -" +espacioParaVariablesLocales+ "\t\t\t\t\t\t; size = 4\n");
 
 						// Escribir la inicializacion : mov	DWORD PTR _local_var$[ebp], 5
-						cseg_temp += "\tmov\tDWORD PTR " + variableName + "$[ebp], 0\n";
+						cseg_temp += "\tmov DWORD [ebp-" + espacioParaVariablesLocales + "], 0 ; "+ variableName + "\n";
+
+						PseudoTag variableLocal = new PseudoTag(tokens[a]);
+						variableLocal.set("stackpos", espacioParaVariablesLocales);
+						mapaVariablesLocales.put(variableName, variableLocal);
+
 					}
 				}
 
 				// Hacer espacio para variables locales
-				if (currentLocalSize > 0)
+				if (espacioParaVariablesLocales > 0)
 				{
-					cseg += "\tsub esp, " + currentLocalSize + "\n";
+					cseg += "\tsub esp, " + espacioParaVariablesLocales + "\n";
 				}
 
 				cseg += cseg_temp;
@@ -239,13 +251,23 @@ public class Ensambler
 				int fin = a-1;
 
 				// Insertar el cuerpo
-				cseg += convertirNomenclatura(inicio, fin);
+				cseg += convertirNomenclatura(inicio, fin, nombre.equals("_start"));
 
 				// Fin
-				cseg += "	xor\teax, eax\n";
-				cseg += "	pop\tebp\n";
-				cseg += "	ret\t0\n";
-				cseg += ""+nombre + "\tENDP\n";
+				if (nombre.equals("_start"))
+				{
+					cseg += "	mov eax, 1\n"; // Syscall para salir del proces (sys_exit)
+					cseg += "	mov ebx, 0\n"; // El valor a regresar (exit value)
+					cseg += "	int 80h\n";
+				}
+				else
+				{
+					cseg += "	xor eax, eax\n";
+					cseg += "	pop ebp\n";
+					cseg += "	ret 0\n";
+				}
+
+				cseg += "\t; fin de "+nombre + "\n\n";
 			}
 		}
 
@@ -260,12 +282,12 @@ public class Ensambler
 		return localVarDeclaracionesBuff + cseg;
 	}//procedimientos
 
-	String convertirNomenclatura( int inicio, int fin )
+	String convertirNomenclatura(int inicio, int fin, boolean metodoMain)
 	{
 		String [] tokens = codigo.split("\n");
 		String cseg = "";
 
-		for (int a = inicio; a<fin; a++)
+		for (int a = inicio; a < fin; a++)
 		{
 			while (tokens[a].equals("<coma>") || tokens[a].startsWith("<declaracion"))
 			{
@@ -280,15 +302,14 @@ public class Ensambler
 			{
 				if (variableTag.get("scope").equals("global")) // Empujar variable global
 				{
-					cseg += "\t\tempujar "
-						+ variableTag.get("id")
-						+ "\n";
+					cseg += "\tempujarapuntador "
+						+ variableTag.get("id") + "\n";
 				}
 				else if (variableTag.get("scope").equals("local")) // Empujar variable local
 				{
-					cseg += "\t\tempujar "
-						+ variableTag.get("id")
-						+ "$[ebp]\n";
+					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+					cseg += "\t; empujar variable local \n"
+						+ "\tpush DWORD [ebp-"+tokenTag.get("stackpos")+"]\n";
 				}
 				tokens[a] = "*";
 			}
@@ -317,26 +338,31 @@ public class Ensambler
 
 			boolean vacio = false;
 
-			if (tokens[a].startsWith("</") )
+			if (tokens[a].startsWith("</"))
 			{
 				tokens[a] = "*";
-				while( !tokens[--a].startsWith("<") )
+				while(!tokens[--a].startsWith("<"))
 				{
-					if ( a == inicio ) vacio = true; 
+					if (a == inicio) vacio = true;
 				}
 
 				if (!vacio)
 				{
 					if (tokens[a].indexOf("llamada tipo:") != -1 )
 					{
-						tokens[a] = "		call "+ tokens[a].substring( tokens[a].indexOf("id:") + 3, tokens[a].length()-1 );
+						tokens[a] = "\tcall "+ tokens[a].substring( tokens[a].indexOf("id:") + 3, tokens[a].length()-1 )
+							+ "\n\tpush eax\n";
 					}
 
 					if (tokens[a].indexOf("op tipo:") != -1 )
-						tokens[a] = "		"+tokens[a].substring( tokens[a].indexOf("tipo:") + 5, tokens[a].length()-1 );
+					{
+						tokens[a] = "\t"+tokens[a].substring(tokens[a].indexOf("tipo:") + 5, tokens[a].length()-1);
+					}
 
 					if (tokens[a].indexOf("<retorno>") != -1 )
-						tokens[a] = "		retornar";
+					{
+						tokens[a] = metodoMain ? "\tsalir" : "\tretornar";
+					}
 
 					// Resolver los id's de la asignacion.
 					// Si es una variable global:
@@ -348,16 +374,20 @@ public class Ensambler
 					PseudoTag tokenTag = new PseudoTag(tokens[a]);
 					if (tokens[a].indexOf("asignacion tipo:INT") != -1)
 					{
-						String varId = tokenTag.get("id");
-
-						if (tokenTag.get("scope").equals("global"))
+						tokenTag = mapaVariablesLocales.get(tokenTag.get("id"));
+                		if (tokenTag == null)
 						{
-							tokens[a] = "\tasigna "+ varId +"\n";
+							tokenTag = new PseudoTag(tokens[a]);
+							// si no esta en el mapa de variables locales, entonces
+							// esta es una variable global
+							tokens[a] = "\tasignaAGlobal "+ tokenTag.get("id") + "\n";
 						}
 						else
 						{
-							// Para las variables locales, puedo usar el nombre
-							tokens[a] = "\tasigna DWORD PTR "+ varId +"$[ebp]\n";
+							// Para las variables locales NO puedo usar el nombre
+							tokens[a] = "\n\t; asignacion local a " + tokenTag.get("id") + "\n";
+							tokens[a] += "\tpop eax\n";
+							tokens[a] += "\tmov DWORD [ebp-"+tokenTag.get("stackpos")+"], eax\n";
 						}
 					}
 

@@ -7,11 +7,9 @@ import jcomp.util.Log;
 /*------------------------------------------------------------------------------------
  				AUTOMATA DE PILA
 -------------------------------------------------------------------------------------*/
-	//su constructor recibe...Automata( Produccion [] prod, String cadena a probar )
-	//asi ke tambien necesita la clase produccion ke esta abajito
-	//para usarlo primero hay ke krear el vector Producciones
-	// asi: Produccion [] prod =	{ new Produccion("<oracion>", "<sujeto> <predicado>") }
-	//el conssstructor de produccion es Produccion (String ladoIzquierdo, String ladoDerecho)
+// su constructor recibe...Automata( Produccion [] prod, String cadena a probar )
+// asi: Produccion [] prod = { new Produccion("<oracion>", "<sujeto> <predicado>") }
+// el conssstructor de produccion es Produccion (String ladoIzquierdo, String ladoDerecho)
 public class Automata
 {
 	private Produccion [] prods;
@@ -44,18 +42,18 @@ public class Automata
 		{
 			verPila();
 
-			//si lo ke encuentra en la pila es el numero de linea
-			//guardarlo en la variable numero_linea... jajaja ke idiota
-			//pero bueno ya despues de algo servira
 			pila.push( tokens[index] );
 
+			// si lo ke encuentra en la pila es el numero de linea
+			// guardarlo en la variable numero_linea...
+			// pero bueno ya despues de algo servira
 			if (pila.peek().startsWith("NUMERO_LINEA_"))
 			{
 				numero_linea = Integer.parseInt( pila.pop().substring(13) );
 				pila.push( tokens[++index] );
 			}
 
-			cambio=true;
+			cambio =true;
 
 			while (cambio)
 			{
@@ -67,7 +65,7 @@ public class Automata
 				}
 
 				verPila();
-				cambio=false;
+				cambio = false;
 
 				for(int b=0; b<prods.length; b++)
 				{

@@ -1,71 +1,72 @@
 package jcomp;
 
-import jcomp.frontend.Semantico;
-import jcomp.frontend.Lexico;
-import jcomp.frontend.Sintactico;
-import jcomp.backend.Ensambler;
 import java.io.*;
 import java.util.*;
 import jcomp.Opciones;
+import jcomp.backend.*;
+import jcomp.frontend.Lexico;
+import jcomp.frontend.Semantico;
+import jcomp.frontend.Sintactico;
 import jcomp.util.Log;
 
 public class JComp
 {
-    
-    private static final int VersionMajor      = 0;
-    private static final int VersionMinor      = 0;
-    private static final int VersionRevision   = 1;
+	private static final int VersionMajor = 0;
+	private static final int VersionMinor = 0;
+	private static final int VersionRevision = 2;
+
 	public static void main(String [] args)
 	{
-        title();
+		title();
 
-		Opciones o = new Opciones(args);
-		if (!o.isValid())
+		Opciones opciones = new Opciones(args);
+		if (!opciones.isValid())
 		{
 			uso();
 		}
 		else
 		{
-			iniciar(o);
+			iniciar(opciones);
 		}
 	}
 
-    static void title()
+	static void title()
 	{
 		System.out.println("jcomp Compiler Version "
-                + VersionMajor
-                + "."
-                + VersionMinor 
-                + "."
-                + VersionRevision 
-                + " for X86");
-		System.out.println("Alan Gonzalez 2010 - 2014");
-        System.out.println("");
+				+ VersionMajor
+				+ "."
+				+ VersionMinor
+				+ "."
+				+ VersionRevision
+				+ " for x86");
+		System.out.println("Alan Gonzalez 2010 - 2016");
+		System.out.println("");
 	}
-        
+
 	static void uso()
 	{
 		System.out.println("uso: jcomp [ option... ] filename... [ /link linkoption... ]");
-        
-        System.out.println("options:");
-        System.out.println("-v\t\t\t\tVerbose output");
-        System.out.println("-h\t\t\t\tShow help");
+
+		System.out.println("options:");
+		System.out.println("-v mostrar salida detallada (verbose)");
+		System.out.println("-a nasm|masm generar ensamblador compatible con masm o nasm, el default es nasm");
+		System.out.println("-h mostrar ayuda");
 	}
 
 	static int iniciar(Opciones lineaDeComandos)
 	{
-		String codigo;
+		String codigo = "";
 
 		// Cargar el archivo fuente
 		try{
 			BufferedReader br = new BufferedReader(new FileReader(lineaDeComandos.getCodigoFuentePath()));
 			codigo = "";
 			String k = "";
-			while( (k = br.readLine()) != null ) codigo += (k+"\n");
+			while((k = br.readLine()) != null ) codigo += (k+"\n");
 
 		}catch(IOException e){
-			System.out.println( "No he podido leer el archivo de entrada:" + lineaDeComandos.getCodigoFuentePath());
-			return 1;
+			System.out.println("No he podido leer el archivo de entrada:" + lineaDeComandos.getCodigoFuentePath());
+			System.exit(1);
 		}
 
 		Lexico a_lex = new Lexico();
@@ -77,22 +78,22 @@ public class JComp
 
 		if(a_lex.iniciar() != 0)
 		{
-			return 1; 
+			System.exit(1);
 		}
 
 		codigo = a_lex.getCodigo();
 		a_sin.setCodigo(codigo);
 		if(a_sin.iniciar() != 0)
 		{
-			return 1;
+			System.exit(1);
 		}
 
 		codigo = a_sin.getCodigo();
 		a_sem.setCodigo(codigo);
 
-		if(a_sem.iniciar() != 0) 
+		if(a_sem.iniciar() != 0)
 		{
-			return 1;
+			System.exit(1);
 		}
 		codigo = a_sem.getCodigo();
 
@@ -101,13 +102,25 @@ public class JComp
 		s_pLog.imprimirLinea("----------------------");
 		s_pLog.imprimirLinea(codigo);
 
-		Ensambler en = new Ensambler();
-		en.setCodigo(codigo);
-		if(en.iniciar() != 0)
+		if (lineaDeComandos.getNasmOrMasm().equals("nasm"))
 		{
-			return 1;
+			Ensambler2 en = new Ensambler2(codigo);
+
+			if(en.iniciar() != 0) System.exit(1);
+
+			codigo = en.getCodigo();
 		}
-		codigo = en.getCodigo();
+		else
+		{
+			Ensambler en = new Ensambler();
+
+			en.setCodigo(codigo);
+
+			if(en.iniciar() != 0) System.exit(1);
+
+			codigo = en.getCodigo();
+		}
+
 
 		s_pLog.imprimirLinea("");
 		s_pLog.imprimirLinea("");
@@ -130,12 +143,5 @@ public class JComp
 		return 0;
 	}
 
-	/* 
-	 * Destructor ()
-	 * {
-	 * s_pLog.closeFile();
-	 *
-	 * }
-	 * */
-}//main
+}
 
