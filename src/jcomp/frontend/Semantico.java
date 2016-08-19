@@ -213,7 +213,6 @@ public class Semantico
 
 	int analisisDimensional(String body, int metodo_)
 	{
-
 		String token[]= body.split("\n");
 
 		boolean CAMBIO = true;
@@ -221,7 +220,7 @@ public class Semantico
 		{
 			CAMBIO=false;
 
-			//primero simplificar lo basico
+			// primero simplificar lo basico
 
 			body = "";
 			for (int h=0; h<token.length; h++)
@@ -376,10 +375,10 @@ public class Semantico
 					String linea = token[a].substring(token[a].indexOf("linea:")+6, token[a].length()-1);
 					String operacion = token[a].substring(token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" "));
 
-					if ((!token[a+1].equals( token[a+2])) || ( token[a+1].equals( "<STRING>") || token[a+2].equals( "<STRING>")))
+					if ((token[a+1].equals( "<STRING>") || token[a+2].equals( "<STRING>")))
 					{
-						System.out.print("Operator "+operacion+" ");
-						System.out.println("can not be applied to: "+token[a+1]+" and  "+token[a+2]);
+						System.out.print("Operador "+operacion+" ");
+						System.out.println("no puede ser aplicado a : "+token[a+1]+" y "+token[a+2]);
 						System.out.println("Linea: "+linea);
 						return 1;
 					}

@@ -81,26 +81,27 @@ public class Ensambler2
 				String id = lineas[a].substring( 14 );
 				lineas[a] = "\t; asignacion a global\n";
 				lineas[a] += "\tpop eax\n";
-				lineas[a] += "\tmov ";
+				lineas[a] += "\tmov [";
 				lineas[a] += id;
-				lineas[a] += ", eax\n";
+				lineas[a] += "], eax\n";
 			}
 
 			if (lineas[a].indexOf("SUMA") != -1 )
 			{
 				lineas[a] = "\t; suma\n";
-				lineas[a] += "\tpop\teax\n";
-				lineas[a] += "\tpop\tebx\n";
-				lineas[a] += "\tadd\teax, ebx\n";
-				lineas[a] += "\tpush\teax\n";
+				lineas[a] += "\tpop eax\n";
+				lineas[a] += "\tpop ebx\n";
+				lineas[a] += "\tadd eax, ebx\n";
+				lineas[a] += "\tpush eax\n";
 			}
 
 			if (lineas[a].indexOf("RESTA") != -1 )
 			{
-				lineas[a] = "\n		pop ax\n";
-				lineas[a] += "		pop bx\n";
-				lineas[a] += "		sub bx, ax\n";
-				lineas[a] += "		push bx\n";
+				lineas[a] = "\t; resta\n";
+				lineas[a] += "	pop eax\n";
+				lineas[a] += "	pop ebx\n";
+				lineas[a] += "	sub ebx, eax\n";
+				lineas[a] += "	push ebx\n";
 			}
 
 			if (lineas[a].indexOf("MUL") != -1 )
@@ -116,6 +117,8 @@ public class Ensambler2
 				// Retornar de otra function es RET
 				lineas[a] = "\n\t; return explicito de funcion \n";
 				lineas[a] += "	pop eax\n";    // El valor a regresar (exit value)
+				lineas[a] += "	mov esp, ebp\n";
+				lineas[a] += "	pop ebp\n";
 				lineas[a] += "	ret\n";
 			}
 
@@ -262,9 +265,10 @@ public class Ensambler2
 				}
 				else
 				{
-					cseg += "	xor eax, eax\n";
+					// solo hay que hacer esto para metodos void
+					cseg += "	mov esp, ebp\n";
 					cseg += "	pop ebp\n";
-					cseg += "	ret 0\n";
+					cseg += "	ret\n";
 				}
 
 				cseg += "\t; fin de "+nombre + "\n\n";
