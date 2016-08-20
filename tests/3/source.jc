@@ -2,7 +2,7 @@ def int a;
 
 def int #main()
 {
-	return 19;
+	return 0;
 }
 
 def int #main2()
