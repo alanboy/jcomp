@@ -1,0 +1,17 @@
+
+def void #putc(int c)
+{
+	// El contenido de este 
+	// metodo lo inyecta el 
+	// compilador.
+}
+
+def int #main()
+{
+	#putc(76); // L
+	#putc(65); // A
+	#putc(85); // U
+	
+	return 0;	
+}
+

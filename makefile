@@ -24,7 +24,7 @@ endif
 
 all: clean $(EXECUTABLE_NAME) tests
 
-tests: clean-tests test1 test2 test3 test4 test5
+tests: clean-tests test1 test2 test3 test4 test5 test6
 	@echo "$(RED)============== TESTS SUCCEDED ==============$(NC)"
 
 clean: clean-tests clean-build
@@ -88,6 +88,12 @@ test4:
 
 test5: $(EXECUTABLE_NAME)
 	java -cp bin jcomp.JComp $(TEST_DIR)/args/args.jc > out
+	$(CMD_ASSEMBLE) p.asm
+	$(CMD_LINK) p.o
+	$(CMD_RUN)
+
+test6: $(EXECUTABLE_NAME)
+	java -cp bin jcomp.JComp $(TEST_DIR)/print/print.jc > out
 	$(CMD_ASSEMBLE) p.asm
 	$(CMD_LINK) p.o
 	$(CMD_RUN)

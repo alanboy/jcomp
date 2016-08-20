@@ -10,6 +10,16 @@ public class Ensambler2
 	private String codigo;
 	private Hashtable<String, PseudoTag> mapaVariablesLocales;
 
+	private static String join(String [] a, char c)
+	{
+		StringBuilder s = new StringBuilder();
+		for (String si : a)
+		{
+			s.append(si + c);
+		}
+		return s.toString();
+	}
+
 	public Ensambler2(String codigo)
 	{
 		this.mapaVariablesLocales = new Hashtable<String, PseudoTag>();
@@ -29,7 +39,10 @@ public class Ensambler2
 
 		cseg = "section .text\n";
 		cseg += "\tglobal _start\n";
+
 		cseg += procesarMetodos();
+
+		cseg += agregarCodigoNativo();
 
 		codigo = dseg + cseg;
 
@@ -159,6 +172,34 @@ public class Ensambler2
 		} // for de cada linea
 	} // metodo
 
+	private String agregarCodigoNativo()
+	{
+		String [] asm = new String[]
+		{
+			"putc:",
+			"	push ebp",
+			"	mov ebp, esp",
+
+			"	mov eax, ebp",
+			"	mov ebx, 8",
+			"	add eax, ebx",
+			"	push eax            ; calcular la direccion del primer argumento",
+			"	pop ecx             ; ebp+8 y ponerla en ecx ",
+
+			"	mov eax,4           ; la system call para escribir en la pantalla (sys_write)",
+			"	mov ebx,1           ; file descriptor 1 - standard output",
+			"	mov edx,1           ; la longitud de bytes que queremos imprimir",
+			"	int 80h             ; llamar al kernel",
+
+			"	mov esp, ebp",
+			"	pop ebp",
+			"	ret",
+			"	; fin de putc"
+		};
+
+		return join(asm, '\n');
+	}
+
 	private String agregarDeclaracionesGlobales()
 	{
 		String tokens[] = codigo.split("\n");
@@ -204,6 +245,11 @@ public class Ensambler2
 
 			String s [] = tokens[a].split(" ");
 			String nombre = s[1].substring(3);
+
+			if (nombre.equals("putc"))
+			{
+				continue;
+			}
 
 			// Cambiar el nombre del metodo main
 			if (nombre.equals("main"))
