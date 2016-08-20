@@ -96,5 +96,7 @@ test6: $(EXECUTABLE_NAME)
 	java -cp bin jcomp.JComp $(TEST_DIR)/print/print.jc > out
 	$(CMD_ASSEMBLE) p.asm
 	$(CMD_LINK) p.o
-	$(CMD_RUN)
+	$(CMD_RUN) > TestOut.txt
+	diff --ignore-all-space tests/print/Ref.txt TestOut.txt 
+
 
