@@ -29,7 +29,7 @@ public class Ensambler2
 
 		cseg = "section .text\n";
 		cseg += "\tglobal _start\n";
-		cseg += agregarProcedimientos();
+		cseg += procesarMetodos();
 
 		codigo = dseg + cseg;
 
@@ -183,7 +183,7 @@ public class Ensambler2
 		return temp + "\n";
 	}//declaraciones
 
-	private String agregarProcedimientos()
+	private String procesarMetodos()
 	{
 		String cseg = "";
 		boolean returnExplicto = false;
@@ -195,84 +195,119 @@ public class Ensambler2
 
 		for (int a = 0; a<tokens.length; a++)
 		{
-			if (tokens[a].startsWith("<METODO"))
+			if (!tokens[a].startsWith("<METODO"))
 			{
-				int inicio = a+1;
-
-				String s [] = tokens[a].split(" ");
-				String nombre = s[1].substring(3);
-
-				// Cambiar el nombre del metodo main
-				if (nombre.equals("main"))
-				{
-					nombre = "_start";
-				}
-
-				// Prologo
-				cseg += nombre +":\n";
-				cseg += "\t; create the stack frame\n";
-				cseg += "\tpush ebp \n";
-				cseg += "\tmov ebp, esp\n";
-
-				// leer variables que le pasan al metodo
-				// desde la pila pop ax y eso
-				int espacioParaVariablesLocales = 0;
-				String cseg_temp = "\n\t; inicializar las variables locales\n";
-
-				while (!tokens[++a].equals("</METODO>"))
-				{
-					if (tokens[a].startsWith("<declaracion tipo:"))
-					{
-						// por ahora todas las variables locales son de 4 bytes
-						espacioParaVariablesLocales += 4;
-
-						// Obtener el nombre de la variable
-						String declaracionLocalSp [] = tokens[a].split(" ");
-						String variableName = declaracionLocalSp[2].substring(3, declaracionLocalSp[2].length()-1);
-
-						// Guardar la declaracion de las variables locales
-						// localVarDeclaraciones += (variableName + "$ = -" +espacioParaVariablesLocales+ "\t\t\t\t\t\t; size = 4\n");
-
-						// Escribir la inicializacion : mov	DWORD PTR _local_var$[ebp], 5
-						cseg_temp += "\tmov DWORD [ebp-" + espacioParaVariablesLocales + "], 0 ; "+ variableName + "\n";
-
-						PseudoTag variableLocal = new PseudoTag(tokens[a]);
-						variableLocal.set("stackpos", espacioParaVariablesLocales);
-						mapaVariablesLocales.put(variableName, variableLocal);
-
-					}
-				}
-
-				// Hacer espacio para variables locales
-				if (espacioParaVariablesLocales > 0)
-				{
-					cseg += "\tsub esp, " + espacioParaVariablesLocales + "\n";
-				}
-
-				cseg += cseg_temp;
-
-				int fin = a-1;
-
-				// Insertar el cuerpo
-				cseg += convertirNomenclatura(inicio, fin, nombre.equals("_start"));
-
-				// Fin
-				if (nombre.equals("_start"))
-				{
-					cseg += "	mov eax, 1\n"; // Syscall para salir del proces (sys_exit)
-					cseg += "	mov ebx, 0\n"; // El valor a regresar (exit value)
-					cseg += "	int 80h\n";
-				}
-				else
-				{
-					// solo hay que hacer esto para metodos void
-					cseg += "	mov esp, ebp\n";
-					cseg += "	pop ebp\n";
-					cseg += "	ret\n";
-				}
-
-				cseg += "\t; fin de "+nombre + "\n\n";
+				continue;
 			}
+
+			int inicio = a+1;
+
+			String s [] = tokens[a].split(" ");
+			String nombre = s[1].substring(3);
+
+			// Cambiar el nombre del metodo main
+			if (nombre.equals("main"))
+			{
+				nombre = "_start";
+			}
+
+			// Prologo
+			cseg += nombre +":\n";
+			cseg += "\t; create the stack frame\n";
+			cseg += "\tpush ebp \n";
+			cseg += "\tmov ebp, esp\n";
+
+			int espacioParaVariablesLocales = 0;
+			String cseg_temp = "\n\t; inicializar las variables locales\n";
+
+			// Un metodo que recibe argumentos se ve asi:
+			//
+			//    <METODO id:print args:INT a, INT b regresa:INT>
+			//
+			// hay que hacer espacio para esos argumentos en
+			// variables locales. Un metodo que no recibe nada:
+			//
+			//    <METODO id:main args:NADA regresa:INT>
+			//
+			boolean argumentosAlMetodo = tokens[a].indexOf("args:NADA") == -1;
+
+			if (argumentosAlMetodo)
+			{
+				int inicioDeArgumentos = tokens[a].indexOf("args:") + 5;
+				int finDeArgumentos = tokens[a].lastIndexOf("regresa:");
+				String [] argumentos = tokens[a].substring(inicioDeArgumentos, finDeArgumentos).trim().split(",");
+
+				int argumentoActual = 8;
+
+				for (String argumento : argumentos)
+				{
+					String variableName = argumento.trim().split(" ")[1];
+
+					PseudoTag variableLocal = new PseudoTag("", true /*failSilently*/);
+					variableLocal.set("id", variableName);
+					variableLocal.set("stackpos", "+"  + argumentoActual);
+					variableLocal.set("scope", "arg");
+
+					argumentoActual += 4;
+
+					mapaVariablesLocales.put(variableName, variableLocal);
+
+				}
+			}
+
+			while (!tokens[++a].equals("</METODO>"))
+			{
+				if (tokens[a].startsWith("<declaracion tipo:"))
+				{
+					// por ahora todas las variables locales son de 4 bytes
+					espacioParaVariablesLocales += 4;
+
+					// Obtener el nombre de la variable
+					String declaracionLocalSp [] = tokens[a].split(" ");
+					String variableName = declaracionLocalSp[2].substring(3, declaracionLocalSp[2].length()-1);
+
+					// Guardar la declaracion de las variables locales
+					// localVarDeclaraciones += (variableName + "$ = -" +espacioParaVariablesLocales+ "\t\t\t\t\t\t; size = 4\n");
+
+					// Escribir la inicializacion : mov	DWORD PTR _local_var$[ebp], 5
+					cseg_temp += "\tmov DWORD [ebp-" + espacioParaVariablesLocales + "], 0 ; "+ variableName + "\n";
+
+					PseudoTag variableLocal = new PseudoTag(tokens[a]);
+					variableLocal.set("stackpos", "-" + espacioParaVariablesLocales);
+					mapaVariablesLocales.put(variableName, variableLocal);
+
+				}
+			}
+
+			// Hacer espacio para variables locales
+			if (espacioParaVariablesLocales > 0)
+			{
+				cseg += "\tsub esp, " + espacioParaVariablesLocales + "\n";
+			}
+
+			cseg += cseg_temp;
+
+			int fin = a-1;
+
+			// Insertar el cuerpo
+			cseg += convertirNomenclatura(inicio, fin, nombre.equals("_start"));
+
+			// Fin
+			if (nombre.equals("_start"))
+			{
+				cseg += "	mov eax, 1\n"; // Syscall para salir del proces (sys_exit)
+				cseg += "	mov ebx, 0\n"; // El valor a regresar (exit value)
+				cseg += "	int 80h\n";
+			}
+			else
+			{
+				// solo hay que hacer esto para metodos void
+				cseg += "	mov esp, ebp\n";
+				cseg += "	pop ebp\n";
+				cseg += "	ret\n";
+			}
+
+			cseg += "\t; fin de "+nombre + "\n\n";
 		}
 
 		// Invertir el orden de localVarDeclaraciones
@@ -313,7 +348,13 @@ public class Ensambler2
 				{
 					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
 					cseg += "\t; empujar variable local \n"
-						+ "\tpush DWORD [ebp-"+tokenTag.get("stackpos")+"]\n";
+						+ "\tpush DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+				}
+				else if (variableTag.get("scope").equals("arg")) // Empujar variable local
+				{
+					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+					cseg += "\t; empujar arg \n"
+						+ "\tpush DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
 				}
 				tokens[a] = "*";
 			}
@@ -391,7 +432,7 @@ public class Ensambler2
 							// Para las variables locales NO puedo usar el nombre
 							tokens[a] = "\n\t; asignacion local a " + tokenTag.get("id") + "\n";
 							tokens[a] += "\tpop eax\n";
-							tokens[a] += "\tmov DWORD [ebp-"+tokenTag.get("stackpos")+"], eax\n";
+							tokens[a] += "\tmov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
 						}
 					}
 

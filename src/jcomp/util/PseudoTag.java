@@ -36,6 +36,7 @@ public class PseudoTag
 			}
 		}
 	}
+
 	private void parse() throws Exception
 	{
 		// Test for < >
@@ -66,6 +67,11 @@ public class PseudoTag
 	public String set(String key, int val)
 	{
 		return _hashtable.put(key, String.valueOf(val));
+	}
+
+	public String set(String key, String val)
+	{
+		return _hashtable.put(key, val);
 	}
 }
 

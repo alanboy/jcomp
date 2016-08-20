@@ -24,7 +24,7 @@ endif
 
 all: clean $(EXECUTABLE_NAME) tests
 
-tests: clean-tests test1 test2 test3 test4
+tests: clean-tests test1 test2 test3 test4 test5
 	@echo "$(RED)============== TESTS SUCCEDED ==============$(NC)"
 
 clean: clean-tests clean-build
@@ -49,7 +49,7 @@ clean-tests:
 	$(CMD_DEL_RECURSIVO) *.lnk
 	$(CMD_DEL_RECURSIVO) *.pdb
 
-test1: $(EXECUTABLE_NAME) $(TEST_DIR)/1/1.jc $(TEST_DIR)/1/1.c
+test1: $(EXECUTABLE_NAME) $(TEST_DIR)/1/1.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc > out
 	$(CMD_ASSEMBLE) p.asm
 	$(CMD_LINK) p.o
@@ -65,7 +65,7 @@ test2: $(TEST_DIR)/2/2.jc $(TEST_DIR)/2/2.c
 	@#findstr /v "; TITLE" p.asm > ps.asm
 	@#diff --ignore-blank-lines 2s.asm ps.asm
 
-test3: $(TEST_DIR)/3/source.jc $(TEST_DIR)/3/source.c
+test3: $(TEST_DIR)/3/source.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/3/source.jc > NUL
 	$(CMD_ASSEMBLE) p.asm
 	$(CMD_LINK) p.o
@@ -76,7 +76,7 @@ test3: $(TEST_DIR)/3/source.jc $(TEST_DIR)/3/source.c
 	@#diff --ignore-blank-lines msclc.asm ps.asm
 
 test4:
-	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc > log
+	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc > out
 	$(CMD_ASSEMBLE) p.asm
 	$(CMD_LINK) p.o
 	$(CMD_RUN)
@@ -85,4 +85,10 @@ test4:
 	@#findstr /V "^;" 1.asm > 1s.asm
 	@#ml /nologo ps.asm >NUL
 	@#ml /nologo 1s.asm >NUL
+
+test5: $(EXECUTABLE_NAME)
+	java -cp bin jcomp.JComp $(TEST_DIR)/args/args.jc > out
+	$(CMD_ASSEMBLE) p.asm
+	$(CMD_LINK) p.o
+	$(CMD_RUN)
 

@@ -1,0 +1,14 @@
+def int #print(int a, int b)
+{
+	int c ;
+	c = 0;
+	return a + b;
+}
+
+def int #main()
+{
+	int resultado;
+	resultado = #print(10,11); 
+	return resultado - 21;	
+}
+
