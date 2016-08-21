@@ -24,7 +24,7 @@ endif
 
 all: clean $(EXECUTABLE_NAME) tests
 
-tests: clean-tests test1 test2 test3 test4 test5 test6
+tests: clean-tests test1 test2 test3 test4 test5 test6 test7
 	@echo "$(RED)============== TESTS SUCCEDED ==============$(NC)"
 
 clean: clean-tests clean-build
@@ -99,4 +99,11 @@ test6: $(EXECUTABLE_NAME)
 	$(CMD_RUN) > TestOut.txt
 	diff --ignore-all-space tests/print/Ref.txt TestOut.txt 
 
+
+test7: $(EXECUTABLE_NAME)
+	java -cp bin jcomp.JComp $(TEST_DIR)/while/while.jc > out
+	$(CMD_ASSEMBLE) p.asm
+	$(CMD_LINK) p.o
+	$(CMD_RUN) > TestOut.txt
+	diff --ignore-all-space tests/while/Ref.txt TestOut.txt 
 

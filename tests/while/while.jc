@@ -1,0 +1,31 @@
+
+def void #putc(int c)
+{
+	// El contenido de este 
+	// metodo lo inyecta el 
+	// compilador.
+}
+
+def int #main()
+{
+	int a;
+	a = 65;
+
+	while(a < 91)
+	{
+		#putc(a);
+		a = a + 1;
+	}
+
+	a = a - 1;
+	#putc(10);
+
+	while(a > 64)
+	{
+		#putc(a);
+		a = a - 1;
+	}
+
+	#putc(10);	
+    return 0;
+}

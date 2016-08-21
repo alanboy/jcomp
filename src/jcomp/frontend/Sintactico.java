@@ -186,7 +186,8 @@ public class Sintactico
 
 		if( !resultado.endsWith("<PROGRAMA> "))
 		{
-			System.out.println( "Error de Syntaxis." );
+			System.out.println("Error de Syntaxis.");
+			System.err.println("Error de Syntaxis.");
 			return 1;
 		}
 

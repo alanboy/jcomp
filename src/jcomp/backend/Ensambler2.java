@@ -144,28 +144,34 @@ public class Ensambler2
 				lineas[a] += "	int 80h\n";
 			}
 
-			if (lineas[a].indexOf("MAYOR") != -1 )
+			if (lineas[a].indexOf("MAYOR_") != -1 )
 			{
-				lineas[a] = "\n	pop ax\n";
-				lineas[a] += "	pop bx\n";
-		 		lineas[a] += "	cmp bx, ax\n";
-				lineas[a] += "	je while_fin\n";
-				lineas[a] += "	jl while_fin\n";
+				String id = lineas[a].trim().split("_")[1];
+				id = id.substring(0, id.length() - 2);
+
+				lineas[a] = "\n	pop eax\n";
+				lineas[a] += "	pop ebx\n";
+		 		lineas[a] += "	cmp ebx, eax\n";
+				lineas[a] += "	je while_" + id + "_fin\n";
+				lineas[a] += "	jl while_" + id + "_fin\n";
 			}
 
-			if (lineas[a].indexOf("MENOR") != -1 )
+			if (lineas[a].indexOf("MENOR_") != -1 )
 			{
-				lineas[a] = "\n	pop ax\n";
-				lineas[a] += "	pop bx\n";
-				lineas[a] += "	cmp bx, ax\n";
-				lineas[a] += "	je while_fin\n";
-				lineas[a] += "	jg while_fin\n";
+				String id = lineas[a].trim().split("_")[1];
+				id = id.substring(0, id.length() - 2);
+
+				lineas[a] = "\n	pop eax\n";
+				lineas[a] += "	pop ebx\n";
+				lineas[a] += "	cmp ebx, eax\n";
+				lineas[a] += "	je while_" + id + "_fin\n";
+				lineas[a] += "	jg while_" + id + "_fin\n";
 			}
 
 			if (lineas[a].indexOf("while_fin:") != -1 )
 			{
 				lineas[a] = "\n	jmp while_cond\n";
-				lineas[a] += "	while_fin:\n";
+				lineas[a] += "while_fin:\n";
 			}
 
 			codigo += lineas[a]+"\n";
@@ -371,6 +377,7 @@ public class Ensambler2
 	{
 		String [] tokens = codigo.split("\n");
 		String cseg = "";
+		String whileActual = "";
 
 		for (int a = inicio; a < fin; a++)
 		{
@@ -408,23 +415,37 @@ public class Ensambler2
 			// <INT valor:7> Una literal
 			if (tokens[a].startsWith("<INT valor:"))
 			{
-				cseg += "\tempujar "
-						+ variableTag.get("valor")
-						+ "\n";
-
+				cseg += "\tempujar " + variableTag.get("valor") + "\n";
 				tokens[a] = "*";
 			}
 
+			// <while linea:22>
 			if (tokens[a].startsWith("<while") )
 			{
-				cseg += "		while_cond:\n";
+				int lineaInicio = tokens[a].indexOf("linea:") + 6;
+				int lineaFin = tokens[a].indexOf(">");
+				String linea = tokens[a].substring(lineaInicio, lineaFin);
+
+				whileActual = linea;
+
+				cseg += "while_"+ linea +"_cond:\n";
 				tokens[a] = "*";
 			}
 
 			if (tokens[a].startsWith("</while") )
 			{
-				cseg += "		while_body:\n";
+				cseg += "while_"+ whileActual+"_body:\n";
 				tokens[a] = "*";
+			}
+
+			if (tokens[a].indexOf("MAYOR") != -1 )
+			{
+				tokens[a] = "<op tipo:MAYOR_"+ whileActual + "\\> n";
+			}
+
+			if (tokens[a].indexOf("MENOR") != -1 )
+			{
+				tokens[a] = "<op tipo:MENOR_"+ whileActual + "\\> n";
 			}
 
 			boolean vacio = false;
@@ -432,7 +453,7 @@ public class Ensambler2
 			if (tokens[a].startsWith("</"))
 			{
 				tokens[a] = "*";
-				while(!tokens[--a].startsWith("<"))
+				while (!tokens[--a].startsWith("<"))
 				{
 					if (a == inicio) vacio = true;
 				}
@@ -484,7 +505,8 @@ public class Ensambler2
 
 					if (tokens[a].indexOf("<llave") != -1 )
 					{
-						tokens[a] = "\twhile_fin: \n";
+						tokens[a] = "\n	jmp while_"+whileActual+"_cond\n";
+						tokens[a] += "while_"+whileActual+"_fin:\n";
 					}
 
 					cseg += tokens[a] + "\n";

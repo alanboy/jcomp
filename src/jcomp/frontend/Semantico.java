@@ -577,11 +577,17 @@ public class Semantico
 			// Iterar por el cuerpo del metodo
 			String tokens [] = metodos[a].getCuerpo().split("\n");
 			String newBody = "";
-			for (int t=0; t<tokens.length; t++)
+			for (int t = 0; t < tokens.length; t++)
 			{
 				// Remover todo antes de "linea:xx"
 				if (tokens[t].indexOf(" linea:") != -1)
 				{
+					// excepto en los while:
+					if (tokens[t].indexOf("<while") != -1)
+					{
+						codigo += tokens[t]+"\n";
+						continue;
+					}
 					tokens[t] = tokens[t].substring(0, tokens[t].indexOf(" linea:"))+">";
 				}
 
@@ -998,7 +1004,7 @@ public class Semantico
 			}
 		}
 
-		boolean cambio=true;
+		boolean cambio = true;
 		while(cambio)
 		{
 			int r = token.length-1;
