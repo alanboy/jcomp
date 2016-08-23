@@ -61,9 +61,12 @@ public class Sintactico
 		new Produccion("<instruccion_basica>","<instruccion_basica> <instruccion_basica>"),
 
 		new Produccion("<def_global>", "CONTROL_DEF <variable_declarator>"),
-		//new Produccion("<def_global>", "CONTROL_DEF <variable_declaration>"),
 
 		new Produccion("<casi_metodo_def>", "CONTROL_DEF TIPO <casi_llamada>"),
+		new Produccion("<casi_metodo_def>", "<casi_metodo_def> TIPO CORCHETE_ABRE CORCHETE_CIERRA <id>"),
+		new Produccion("<casi_metodo_def>", "<casi_metodo_def> TIPO <id> PUNTUACION_COMA"),
+		new Produccion("<casi_metodo_def>", "<casi_metodo_def> PUNTUACION_COMA TIPO <id>"),
+
 		new Produccion("<metodo_def>", "<casi_metodo_def> PARENTESIS_CIERRA <statement_block>"),
 		new Produccion("<metodo_def>", "<casi_metodo_def> TIPO <id> PARENTESIS_CIERRA <statement_block>"),
 		new Produccion("<metodo_def>", "<casi_metodo_def> <decl_p_met> PARENTESIS_CIERRA <statement_block>"),
@@ -115,7 +118,7 @@ public class Sintactico
 		new Produccion("<asignacion>", "<id> ASIGNA <llamada> PUNTUACION_PUNTO_COMA"), //--------
 
 		//new Produccion("<variable_declaration>", "TIPO <asignacion>"),
-		//new Produccion("<variable_declarator>", "TIPO CORCHETE_ABRE CORCHETE_CIERRA <id> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<variable_declarator>", "TIPO CORCHETE_ABRE CORCHETE_CIERRA <id> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<variable_declarator>", "TIPO <id> PUNTUACION_PUNTO_COMA"),
 
 		new Produccion("<statement_block>", "LLAVE_ABRE <statement> LLAVE_CIERRA"),

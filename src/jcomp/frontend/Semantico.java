@@ -260,10 +260,7 @@ public class Semantico
 			}
 
 			body = "";
-			for (int h=0; h<token.length; h++)
-				if (!token[h].equals(""))
-					body += token[h] + "\n";
-
+			body = join(token, '\n');
 			token = body.split("\n");
 
 			cambio = true;
@@ -273,6 +270,13 @@ public class Semantico
 				cambio = false;
 				for (int a=0; a<token.length; a++)
 				{
+					if (token[a].startsWith("<INT[] ")) // Nota el espacio al final de "<INT[] "
+					{
+						token[a] = "<INT[]>";
+						cambio = true;
+						CAMBIO = true;
+					}
+
 					if (token[a].startsWith("<INT "))
 					{
 						token[a] = "<INT>";
@@ -289,11 +293,8 @@ public class Semantico
 				}
 			}
 
-
-		body = "";
-		for (int h=0; h<token.length; h++)
-			if (!token[h].equals(""))
-				body += token[h] + "\n";
+		// Unir los tokes de nuevo en un string
+		body = join(token, '\n');
 
 		token = body.split("\n");
 
@@ -309,7 +310,7 @@ public class Semantico
 					int b=a+1;
 					boolean not_good = false;
 
-					while(!token[b].equals("</llamada>"))
+					while (!token[b].equals("</llamada>"))
 					{
 						if (token[b].startsWith("<op"))not_good = true;
 						if (token[b].startsWith("<llamada"))not_good = true;
@@ -318,8 +319,6 @@ public class Semantico
 
 					if (!not_good)
 					{
-
-
 						String texto = "";
 						for (int i=a; i<=b; i++)
 							if (!token[i].equals(""))
@@ -328,16 +327,16 @@ public class Semantico
 						/////////////////////////////////////////////////////////////////////////////
 						// revisar esta llamada a metodo para ver si los tipos coniciden
 						// aqui reviso algo importante, es mas facil llamar al metodo desde aqui
-						if ( revisarTipoArgumentos( texto) != 0)
+						if (revisarTipoArgumentos(texto) != 0)
 							return 1;
 
-						token[a] = "<"+token[a].substring( token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" id:"))+">";
+						token[a] = "<"+token[a].substring(token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" id:"))+">";
 
 						for (int i=a+1; i<=b; i++)
 						{
 							token[i] = "";
 						}
-						cambio=true;
+						cambio = true;
 						CAMBIO = true;
 					}
 				}
@@ -525,7 +524,7 @@ public class Semantico
 		{
 			if ( metodos[a].getNombre().substring(14).equals("main")
 				&& metodos[a].getArgumentos().equals("NADA")
-				&& metodos[a].getTipoDeRetorno().equals("TIPO_VOID"))
+				&& metodos[a].getTipoDeRetorno().equals("TIPO_INT"))
 			{
 				found = true;
 			}
@@ -1807,6 +1806,15 @@ public class Semantico
 				if ( tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
 					declaracion++;
 
+			//contar cuantas declaraciones tipo arreglo
+			for (int a=0; a<tokens.length; a++)
+				if (tokens[a].startsWith("TIPO_") 
+						&& tokens[a+1].startsWith("CORCHETE_ABRE")
+						&& tokens[a+2].startsWith("CORCHETE_CIERRA")
+						&& tokens[a+3].startsWith("IDENTIFICADOR_")
+						&& tokens[a+4].equals("PUNTUACION_PUNTO_COMA"))
+					declaracion++;
+
 			//crear un vector bidimensional.. declaracion-> linea, tipo, id
 			declaraciones = new String[declaracion][3];
 
@@ -1831,11 +1839,23 @@ public class Semantico
 					linea = tokens[a];
 				}
 
-				if ( tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
+				if (tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
 				{
 					declaraciones[inicio][0] = linea;
 					declaraciones[inicio][1] = tokens[a];
 					declaraciones[inicio][2] = tokens[a+1];
+					inicio++;
+				}
+
+				if (tokens[a].startsWith("TIPO_")
+						&& tokens[a+1].startsWith("CORCHETE_ABRE")
+						&& tokens[a+2].startsWith("CORCHETE_CIERRA")
+						&& tokens[a+3].startsWith("IDENTIFICADOR_")
+						&& tokens[a+4].equals("PUNTUACION_PUNTO_COMA"))
+				{
+					declaraciones[inicio][0] = linea;
+					declaraciones[inicio][1] = tokens[a];
+					declaraciones[inicio][2] = tokens[a+3];
 					inicio++;
 				}
 			}//cada token
@@ -1913,6 +1933,19 @@ public class Semantico
 						tokens[x+3] = "";
 						tokens[x+4] = "";
 					}
+
+					if (tokens[x].startsWith("TIPO_")
+						&& tokens[x+1].startsWith("CORCHETE_ABRE")
+						&& tokens[x+2].startsWith("CORCHETE_CIERRA")
+						&& tokens[x+3].startsWith("IDENTIFICADOR_")
+						&& tokens[x+4].equals("PUNTUACION_PUNTO_COMA"))
+					{
+						tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"[]-"+tokens[x+3].substring(14)+">";
+						tokens[x+1] = "NUMERO_LINEA_" + linea; 
+						tokens[x+2] = "";
+						tokens[x+3] = "";
+						tokens[x+4] = "";
+					}
 				}
 			}
 
@@ -1939,8 +1972,19 @@ public class Semantico
 			{
 				if (args[c].startsWith("TIPO_"))
 				{
-					args[c] = "<" + args[c].substring(5) + "-" + args[c+1].substring(14)+">";
-					args[c+1] = "";
+					if (args[c+1].equals("CORCHETE_ABRE"))
+					{
+						args[c] = "<" + args[c].substring(5) + "[]-" + args[c+3].substring(14)+">";
+						args[c+1] = "";
+						args[c+2] = "";
+						args[c+3] = "";
+					}
+					else
+					{
+						args[c] = "<" + args[c].substring(5) + "-" + args[c+1].substring(14)+">";
+						args[c+1] = "";
+					}
+
 				}
 
 				if (args[c].equals("PUNTUACION_COMA"))
@@ -2020,7 +2064,7 @@ public class Semantico
 
 			args = metodos[a].getArgumentos().split(" ");
 
-			if ( !metodos[a].getArgumentos().equals("NADA"))
+			if (!metodos[a].getArgumentos().equals("NADA"))
 			{
 				for (int z=0; z<args.length; z++)
 				{
@@ -2028,7 +2072,6 @@ public class Semantico
 					variables[declaracion_actual++] = _b[1].substring(0, _b[1].length()-1);///// error cuando no hay argumentos
 				}
 			}
-
 
 			for (int b=0; b<token.length; b++)
 			{
@@ -2075,6 +2118,16 @@ public class Semantico
 		}//for de metodos
 		return 0;
 	}//revisarExistenciaVariables
+
+	private static String join(String [] a, char c)
+	{
+		StringBuilder s = new StringBuilder();
+		for (String si : a)
+		{
+			s.append(si + c);
+		}
+		return s.toString();
+	}
 
 	void imprimirObjetos()
 	{

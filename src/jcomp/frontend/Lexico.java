@@ -84,6 +84,8 @@ public class Lexico
 				{")","PARENTESIS_CIERRA"},
 				{"{","LLAVE_ABRE"},
 				{"}","LLAVE_CIERRA"},
+				{"[","CORCHETE_ABRE"},
+				{"]","CORCHETE_CIERRA"},
 				{"=","ASIGNA"},
 				{"+","OP_SUMA"},
 				{"-","OP_RESTA"},

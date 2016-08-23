@@ -1,0 +1,32 @@
+
+def void #metodo(int [] a)
+{
+}
+
+def void #metodo2(String [] a)
+{
+}
+
+def void #metodo3(char [] a)
+{
+}
+
+def void #metodo4(int i, char [] a)
+{
+}
+
+def void #metodo5(char [] a, int i)
+{
+}
+
+def int #main()
+{
+	int [] a;
+	String [] b;
+	char [] c;
+
+	#metodo(a);
+
+	return 0;
+}
+

@@ -412,6 +412,35 @@ public class Ensambler2
 				tokens[a] = "*";
 			}
 
+			if (tokens[a].startsWith("<INT[] id"))
+			{
+				if (variableTag.get("scope").equals("global")) // Empujar variable global
+				{
+					cseg += "\tempujarapuntador "
+						+ variableTag.get("id") + "\n";
+				}
+				else if (variableTag.get("scope").equals("local")) // Empujar variable local
+				{
+					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+					cseg += "\t; empujar variable local \n"
+						+ "\tpush DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+				}
+				else if (variableTag.get("scope").equals("arg")) // Empujar variable local
+				{
+					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+					cseg += "\t; empujar arg \n"
+						+ "\tpush DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+				}
+				tokens[a] = "*";
+			}
+
+			// <STRING valor:"asdf"> Una literal
+			if (tokens[a].startsWith("<STRING valor:"))
+			{
+				cseg += "\tempujar " + variableTag.get("valor") + "\n";
+				tokens[a] = "*";
+			}
+
 			// <INT valor:7> Una literal
 			if (tokens[a].startsWith("<INT valor:"))
 			{
@@ -503,6 +532,14 @@ public class Ensambler2
 						}
 					}
 
+					if (tokens[a].indexOf("asignacion tipo:STRING") != -1)
+					{
+							tokenTag = mapaVariablesLocales.get(tokenTag.get("id"));
+							tokens[a] = "\n\t; asignacion local a " + tokenTag.get("id") + "\n";
+							tokens[a] += "\tpop eax\n";
+							tokens[a] += "\tmov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
+					}
+
 					if (tokens[a].indexOf("<llave") != -1 )
 					{
 						tokens[a] = "\n	jmp while_"+whileActual+"_cond\n";
@@ -512,7 +549,7 @@ public class Ensambler2
 					cseg += tokens[a] + "\n";
 
 					tokens[a] = "*";
-				}//if de metodo vacio
+				} //if de metodo vacio
 			}
 		}//for de cada metodo
 		return cseg;
