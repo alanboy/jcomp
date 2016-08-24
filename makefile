@@ -56,7 +56,7 @@ test1: $(EXECUTABLE_NAME) $(TEST_DIR)/1/1.jc
 	$(CMD_RUN)
 
 test2: $(TEST_DIR)/2/2.jc $(TEST_DIR)/2/2.c
-	java -cp bin jcomp.JComp $(TEST_DIR)/2/2.jc > NUL
+	java -cp bin jcomp.JComp $(TEST_DIR)/2/2.jc > out
 	$(CMD_ASSEMBLE) p.asm
 	$(CMD_LINK) p.o
 	$(CMD_RUN)
@@ -66,7 +66,7 @@ test2: $(TEST_DIR)/2/2.jc $(TEST_DIR)/2/2.c
 	@#diff --ignore-blank-lines 2s.asm ps.asm
 
 test3: $(TEST_DIR)/3/source.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/3/source.jc > NUL
+	java -cp bin jcomp.JComp $(TEST_DIR)/3/source.jc > out
 	$(CMD_ASSEMBLE) p.asm
 	$(CMD_LINK) p.o
 	$(CMD_RUN)
