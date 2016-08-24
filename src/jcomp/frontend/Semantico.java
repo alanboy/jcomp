@@ -6,7 +6,7 @@ import jcomp.util.Log;
 /**
  *
  * XML para las llamadas dentro de las llamadas, ejemplo:*
- * #met1( 43, #met2( a) , t)*
+ * #met1(43, #met2(a) , t)*
  * se convierte en:*
  * <llamada met1> 43 , <llamada met2> a </llamada> , t</llamada>*
  * y asi se forma el arbol.*
@@ -17,31 +17,31 @@ import jcomp.util.Log;
  * */
 public class Semantico
 {
-	String codigo;
-	Log debug;
-	Variables [] m_Variables;
-	Metodos [] m_Metodos;
+	private String m_Codigo;
+	private Log m_Debug;
+	private Variables [] m_Variables;
+	private Metodos [] m_Metodos;
 
 	public Semantico()
 	{
-		this.debug = Log.getInstance();
+		this.m_Debug = Log.getInstance();
 	}
 
-	public void setCodigo(String c)
+	public void setCodigo(String codigo)
 	{
-		codigo = c;
+		m_Codigo = codigo;
 	}
 
 	public String getCodigo()
 	{
-		return codigo;
+		return m_Codigo;
 	}
 
 	public int iniciar()
 	{
-		debug.imprimirLinea( "------------------------------");
-		debug.imprimirLinea( "      ANALISIS SEMANTICO");
-		debug.imprimirLinea( "------------------------------");
+		m_Debug.imprimirLinea("------------------------------");
+		m_Debug.imprimirLinea("      ANALISIS SEMANTICO");
+		m_Debug.imprimirLinea("------------------------------");
 
 		// Convertimos los tokens que me pasa el sintactico en objetos. Metodos y Variables
 		crearObjetos();
@@ -118,7 +118,7 @@ public class Semantico
 		//	en la variable codigo... la cual se puede obtener con un get de esta
 		//	clase
 		return 0;
-	}//inicio
+	} //inicio
 
 	void nombresDeVariables()
 	{
@@ -131,17 +131,17 @@ public class Semantico
 
 			for (int b=0; b<token.length; b++)
 			{
-				if ( token[b].indexOf( " id:") != -1)
+				if (token[b].indexOf(" id:") != -1)
 				{
 					String s1 = token[b].substring(0, token[b].indexOf(" id:")+4);
-					String s2 = token[b].substring( token[b].indexOf(" id:")+4);
+					String s2 = token[b].substring(token[b].indexOf(" id:")+4);
 					token[b] = s1+"_"+m_Metodos[a].getNombre().substring(14)+"_"+s2;
 				}
 
-				if ( (token[b].indexOf( "args:NADA") == -1)&&(token[b].startsWith("<METODO")))
+				if ((token[b].indexOf("args:NADA") == -1)&&(token[b].startsWith("<METODO")))
 				{
 					String s1 = token[b].substring(0, token[b].indexOf(" args:")+6);
-					String s2 = token[b].substring( token[b].indexOf(" regresa:"));
+					String s2 = token[b].substring(token[b].indexOf(" regresa:"));
 
 					String [] argus = token[b].substring(token[b].indexOf(" args:")+6, token[b].indexOf(" regresa:")).split(" ");
 					for (int j = 1; j<argus.length; j = j+2)
@@ -175,8 +175,8 @@ public class Semantico
 		{
 			int u = body.indexOf("<retorno");
 
-			String uu = body.substring( body.indexOf("<retorno linea:")+15, body.indexOf("<retorno linea:")+19);
-			uu = uu.substring( 0, uu.indexOf(">"));
+			String uu = body.substring(body.indexOf("<retorno linea:")+15, body.indexOf("<retorno linea:")+19);
+			uu = uu.substring(0, uu.indexOf(">"));
 
 			// si hay return y no deberia
 			if (!regresa)
@@ -210,7 +210,7 @@ public class Semantico
 		String token[]= body.split("\n");
 
 		boolean CAMBIO = true;
-		while(CAMBIO)
+		while (CAMBIO)
 		{
 			CAMBIO=false;
 
@@ -227,7 +227,7 @@ public class Semantico
 			{
 				if (token[a].startsWith("<declaracion tipo:VOID "))
 				{
-					String linea = token[a].substring( token[a].indexOf("linea:")+6, token[a].length()-1);
+					String linea = token[a].substring(token[a].indexOf("linea:")+6, token[a].length()-1);
 					System.err.println("Linea: "+linea);
 					System.err.println("Declaracion no valida.");
 					return false;
@@ -239,14 +239,14 @@ public class Semantico
 
 			boolean cambio = true;
 
-			while(cambio)
+			while (cambio)
 			{
 				cambio = false;
 				for (int a=0; a<token.length; a++)
 				{
 					if (token[a].startsWith("<llamada") && token[a+1].equals("</llamada>"))
 					{
-						token[a] = "<"+token[a].substring( token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" id:"))+">";
+						token[a] = "<"+token[a].substring(token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" id:"))+">";
 						token[a+1] = "";
 						cambio = true;
 						CAMBIO = true;
@@ -260,7 +260,7 @@ public class Semantico
 
 			cambio = true;
 
-			while(cambio)
+			while (cambio)
 			{
 				cambio = false;
 				for (int a=0; a<token.length; a++)
@@ -295,7 +295,7 @@ public class Semantico
 
 			cambio = true;
 
-			while(cambio)
+			while (cambio)
 			{
 				cambio = false;
 				for (int a=0; a<token.length; a++)
@@ -346,7 +346,7 @@ public class Semantico
 			token = body.split("\n");
 
 			cambio = true;
-			while(cambio)
+			while (cambio)
 			{
 				cambio = false;
 				for (int a=0; a<token.length; a++)
@@ -356,7 +356,7 @@ public class Semantico
 					int b=a+1;
 					boolean not_good = false;
 
-					while(!token[b].equals("</op>"))
+					while (!token[b].equals("</op>"))
 					{
 					if (token[b].startsWith("<op"))not_good = true;
 					if (token[b].startsWith("<llamada"))not_good = true;
@@ -368,7 +368,7 @@ public class Semantico
 						String linea = token[a].substring(token[a].indexOf("linea:")+6, token[a].length()-1);
 						String operacion = token[a].substring(token[a].indexOf("tipo:")+5, token[a].lastIndexOf(" "));
 
-						if ((token[a+1].equals( "<STRING>") || token[a+2].equals( "<STRING>")))
+						if ((token[a+1].equals("<STRING>") || token[a+2].equals("<STRING>")))
 						{
 							System.err.print("Operador "+operacion+" ");
 							System.err.println("no puede ser aplicado a : "+token[a+1]+" y "+token[a+2]);
@@ -391,7 +391,7 @@ public class Semantico
 			token = body.split("\n");
 
 			cambio = true;
-			while(cambio)
+			while (cambio)
 			{
 				cambio = false;
 				for (int a=0; a<token.length; a++)
@@ -401,7 +401,7 @@ public class Semantico
 						int b=a+1;
 						boolean not_good = false;
 
-						while(!token[b].equals("</asignacion>"))
+						while (!token[b].equals("</asignacion>"))
 						{
 							if (token[b].startsWith("<op"))not_good = true;
 							if (token[b].startsWith("<llamada"))not_good = true;
@@ -415,7 +415,7 @@ public class Semantico
 							String _id = token[a].substring(token[a].indexOf("id:")+3, token[a].lastIndexOf(" "));
 							recibe = "<" + recibe + ">";
 
-							if (!recibe.equals( token[a+1]))
+							if (!recibe.equals(token[a+1]))
 							{
 								System.err.println("Linea: "+linea);
 								System.err.println("Tipos incompatibles.");
@@ -443,7 +443,7 @@ public class Semantico
 			token = body.split("\n");
 
 			cambio = true;
-			while(cambio)
+			while (cambio)
 			{
 				cambio = false;
 				for (int a=0; a<token.length; a++)
@@ -464,7 +464,7 @@ public class Semantico
 					}
 				}
 			}
-		} // while(CAMBIO)
+		} // while (CAMBIO)
 
 		body = join(token, '\n');
 		return  true;
@@ -474,11 +474,11 @@ public class Semantico
 	{
 		String tokens[] = s.split("%");
 		//-</llamada tipo:INT id:numeros4 linea:12>
-		String id = tokens[0].substring( tokens[0].indexOf(" id:")+4, tokens[0].indexOf(" linea:"));
-		String linea = tokens[0].substring( tokens[0].indexOf(" linea:")+7, tokens[0].length()-1);
+		String id = tokens[0].substring(tokens[0].indexOf(" id:")+4, tokens[0].indexOf(" linea:"));
+		String linea = tokens[0].substring(tokens[0].indexOf(" linea:")+7, tokens[0].length()-1);
 
 		int a = tokens[0].length();
-		s = s.substring( a +1 , s.length()-12);
+		s = s.substring(a +1 , s.length()-12);
 
 		String argus_met = "";
 		for (int b=0; b<m_Metodos.length; b++)
@@ -490,20 +490,19 @@ public class Semantico
 		for (int b=0; b<partes.length; b++)
 			if (!partes[b].equals("<coma>")) s += partes[b]+" ";
 
-		partes = argus_met.split( " ");
+		partes = argus_met.split(" ");
 		argus_met = "";
 		for (int b=0; b<partes.length; b++)
 		{
 			argus_met += partes[b].substring(0, partes[b].indexOf("-"))+"> ";
 		}
 
-
-		if ( !argus_met.equals(s))
+		if (!argus_met.equals(s))
 		{
 			System.err.println("Linea : " + linea);
 			System.err.println("Error en argumentacion de metodo.");
-			System.err.println("Requerido : #"+id+" ( "+argus_met+ ")");
-			System.err.println("Encontrado: #"+id+" ( "+s+ ")");
+			System.err.println("Requerido : #"+id+" ("+argus_met+ ")");
+			System.err.println("Encontrado: #"+id+" ("+s+ ")");
 			return 1;
 		}
 	return 0;
@@ -514,7 +513,7 @@ public class Semantico
 		boolean found = false;
 		for (int a=0; a<m_Metodos.length; a++)
 		{
-			if ( m_Metodos[a].getNombre().substring(14).equals("main")
+			if (m_Metodos[a].getNombre().substring(14).equals("main")
 				&& m_Metodos[a].getArgumentos().equals("NADA")
 				&& m_Metodos[a].getTipoDeRetorno().equals("TIPO_INT"))
 			{
@@ -531,20 +530,20 @@ public class Semantico
 
 	void generarCodigo()
 	{
-		codigo = "";
+		m_Codigo = "";
 
 		// Bsucar declaracion de variables globales
 		for (int a=0; a<m_Variables.length; a++)
 		{
-			codigo += "<declaracion global tipo:"+m_Variables[a].getTipo().substring(5)
+			m_Codigo += "<declaracion global tipo:"+m_Variables[a].getTipo().substring(5)
 				+ " id:" +m_Variables[a].getNombre().substring(14)+">\n";
 		}
 
 		// Buscar declaracion de metodos
 		for (int a=0; a<m_Metodos.length; a++)
 		{
-			codigo += "<METODO id:"+m_Metodos[a].getNombre().substring(14)+" ";
-			codigo += "args:";
+			m_Codigo += "<METODO id:"+m_Metodos[a].getNombre().substring(14)+" ";
+			m_Codigo += "args:";
 
 			if (!m_Metodos[a].getArgumentos().equals("NADA"))
 			{
@@ -553,17 +552,17 @@ public class Semantico
 				{
 					args[c] = args[c].substring(1, args[c].length()-1);
 					String f [] = args[c].split("-");
-					codigo += f[0]+" "+f[1] + ", ";
+					m_Codigo += f[0]+" "+f[1] + ", ";
 				}
-				codigo = codigo.substring(0, codigo.length()-2) + " ";
+				m_Codigo = m_Codigo.substring(0, m_Codigo.length()-2) + " ";
 			}
 			else
 			{
-				codigo += "NADA ";
+				m_Codigo += "NADA ";
 			}
 
-			codigo += "regresa:" + m_Metodos[a].getTipoDeRetorno().substring(5) ;
-			codigo += ">\n";
+			m_Codigo += "regresa:" + m_Metodos[a].getTipoDeRetorno().substring(5) ;
+			m_Codigo += ">\n";
 
 			// Iterar por el cuerpo del metodo
 			String tokens [] = m_Metodos[a].getCuerpo().split("\n");
@@ -576,18 +575,18 @@ public class Semantico
 					// excepto en los while:
 					if (tokens[t].indexOf("<while") != -1)
 					{
-						codigo += tokens[t]+"\n";
+						m_Codigo += tokens[t]+"\n";
 						continue;
 					}
 					tokens[t] = tokens[t].substring(0, tokens[t].indexOf(" linea:"))+">";
 				}
 
-				codigo += tokens[t]+"\n";
+				m_Codigo += tokens[t]+"\n";
 			}
 
-			codigo += "</METODO>\n";
-		}//for de cada metodo
-	}//metodo
+			m_Codigo += "</METODO>\n";
+		} //for de cada metodo
+	} //metodo
 
 	String eliminarParentesis(String body)
 	{
@@ -610,6 +609,7 @@ public class Semantico
 		return body;
 	}
 
+	///
 	//	<INT valor:5 linea:19 scope:local>
 	//	<operacion tipo:MUL linea:19>
 	//	<INT id:a linea:19 scope:local>
@@ -620,11 +620,11 @@ public class Semantico
 	//		<INT valor:5 linea:19>
 	//		<INT id:a linea:19>
 	//	</op>
-	String convertirOP( String body)
+	String convertirOP(String body)
 	{
 		boolean cambio = true;
 
-		while(cambio)
+		while (cambio)
 		{
 			cambio = !cambio;
 			String [] token = body.split("\n");
@@ -642,19 +642,23 @@ public class Semantico
 
 			for (int a=0; a<token.length; a++)
 			{
-				if ( token[a].startsWith("</")) tabs--;
+				if (token[a].startsWith("</")) tabs--;
 
-				if ( token[a].startsWith("<operacion"))
+				if (token[a].startsWith("<operacion"))
 				{
-					if (tabs>mayor) { mayor=tabs; mayor_token=a; }
+					if (tabs > mayor)
+					{
+						mayor = tabs;
+						mayor_token=a;
+					}
 				}
-				if ( token[a].startsWith("<llamada")) tabs++;
-				if ( token[a].startsWith("<llave>")) tabs++;
-				if ( token[a].startsWith("<asignacion")) tabs++;
-				if ( token[a].startsWith("<parentesis>")) tabs++;
-				if ( token[a].startsWith("<if")) tabs++;
-				if ( token[a].startsWith("<while")) tabs++;
-				if ( token[a].startsWith("<op")) tabs++; //aguas akiii
+				if (token[a].startsWith("<llamada")) tabs++;
+				if (token[a].startsWith("<llave>")) tabs++;
+				if (token[a].startsWith("<asignacion")) tabs++;
+				if (token[a].startsWith("<parentesis>")) tabs++;
+				if (token[a].startsWith("<if")) tabs++;
+				if (token[a].startsWith("<while")) tabs++;
+				if (token[a].startsWith("<op")) tabs++; //aguas akiii
 			}
 
 			if (mayor==0)return body;
@@ -680,7 +684,7 @@ public class Semantico
 				int closure_o = 0;
 				_a--;
 
-				while( true)
+				while (true)
 				{
 					if (token[_a].startsWith(buscando) && closure_m == 0 && closure_p==0 && closure_o==0) break;
 
@@ -721,7 +725,7 @@ public class Semantico
 				int aperture_p = 0;
 				int aperture_o = 0;
 				_a++;
-				while( true)
+				while (true)
 				{
 					if (token[_a].startsWith(buscando) && aperture_m == 0 && aperture_p==0 && aperture_o==0) break;
 
@@ -759,9 +763,9 @@ public class Semantico
 			for (int b=0; b<token.length; b++)
 				if (!token[b].equals(""))body += token[b]+ "\n";
 
-		}//while de si hubo cambios
+		} //while de si hubo cambios
 		return body;
-	}//convertir OPeraciones a la nueva nomenclatura
+	} //convertir OPeraciones a la nueva nomenclatura
 
 	int arreglar()
 	{
@@ -803,7 +807,7 @@ public class Semantico
 
 			// Argumentos del metodo
 			args = m_Metodos[a].getArgumentos().split(" ");
-			if ( !m_Metodos[a].getArgumentos().equals("NADA"))
+			if (!m_Metodos[a].getArgumentos().equals("NADA"))
 			{
 				for (int z=0; z<args.length; z++)
 				{
@@ -882,11 +886,11 @@ public class Semantico
 
 			cuerpo = reorganizarLineas(cuerpo);
 
-			m_Metodos[a].setLinea( "<linea linea:"+m_Metodos[a].getLinea().substring(13)+">");
+			m_Metodos[a].setLinea("<linea linea:"+m_Metodos[a].getLinea().substring(13)+">");
 
 			cuerpo = reorganizarif (cuerpo, m_Metodos[a].getLinea());
 
-			cuerpo = reorganizarWhile(cuerpo, m_Metodos[a].getLinea());
+			cuerpo = reorganizarwhile (cuerpo, m_Metodos[a].getLinea());
 
 			cuerpo = reorganizarOpBoleanas(cuerpo, m_Metodos[a].getLinea());
 
@@ -902,7 +906,7 @@ public class Semantico
 		} //for metodos
 
 	return 0;
-	}//metodod
+	} //metodod
 
 	String quitarPuntoComaYLinea(String cuerpo)
 	{
@@ -978,7 +982,7 @@ public class Semantico
 		return body;
 	}
 
-	String reorganizarWhile(String body, String linea)
+	String reorganizarwhile (String body, String linea)
 	{
 		String [] token = body.split("\n");
 		body = "";
@@ -989,21 +993,21 @@ public class Semantico
 
 			if (token[a].equals("CONTROL_WHILE"))
 			{
-				linea = linea.substring( 13, linea.length() -1);
+				linea = linea.substring(13, linea.length() -1);
 				token[a] = "<~while linea:"+linea+">";
 				token[a+1] = "";
 			}
 		}
 
 		boolean cambio = true;
-		while(cambio)
+		while (cambio)
 		{
 			int r = token.length-1;
 
 			for (;;r--)
 			{
-				if ( r<0) { cambio=false; break; }
-				if ( token[r].startsWith("<~while linea:")) { cambio=true; break; }
+				if (r<0) { cambio=false; break; }
+				if (token[r].startsWith("<~while linea:")) { cambio=true; break; }
 			}
 
 			if (!cambio) break;
@@ -1011,7 +1015,7 @@ public class Semantico
 			token[r] = "<while "+token[r].substring(8);
 
 			int parentesis=0;
-			while( true)
+			while (true)
 			{
 				if (token[r].equals("</parentesis>") && parentesis ==0) break;
 				if (token[r].equals("<parentesis>")) parentesis++;
@@ -1026,7 +1030,7 @@ public class Semantico
 			if (!token[b].equals("")) body += token[b]+"\n";
 
 		return body;
-	}//metodo
+	} //metodo
 
 	String reorganizarif (String body, String linea)
 	{
@@ -1039,21 +1043,21 @@ public class Semantico
 
 			if (token[a].equals("CONTROL_IF"))
 			{
-				linea = linea.substring( 13, linea.length() -1);
+				linea = linea.substring(13, linea.length() -1);
 				token[a] = "<~if linea:"+linea+">";
 				token[a+1] = "";
 			}
 		}
 
 		boolean cambio=true;
-		while(cambio)
+		while (cambio)
 		{
 			int r = token.length-1;
 
 			for (;;r--)
 			{
-				if ( r<0) { cambio=false; break; }
-				if ( token[r].startsWith("<~if linea:")) { cambio=true; break; }
+				if (r<0) { cambio=false; break; }
+				if (token[r].startsWith("<~if linea:")) { cambio=true; break; }
 			}
 
 			if (!cambio) break;
@@ -1061,7 +1065,7 @@ public class Semantico
 			token[r] = "<if "+token[r].substring(5);
 
 			int parentesis=0;
-			while( true)
+			while (true)
 			{
 				if (token[r].equals("</parentesis>") && parentesis ==0) break;
 				if (token[r].equals("<parentesis>")) parentesis++;
@@ -1076,7 +1080,7 @@ public class Semantico
 			if (!token[b].equals("")) body += token[b]+"\n";
 
 	return body;
-	}//metodo
+	} //metodo
 
 	String reorganizarLineas(String body)
 	{
@@ -1092,7 +1096,6 @@ public class Semantico
 
 		return body;
 	}
-
 
 	String reorganizarOperaciones(String body, String linea)
 	{
@@ -1117,7 +1120,7 @@ public class Semantico
 		body += token[a]+ "\n";
 		}
 	return body;
-	}//metodo
+	} //metodo
 
 	String reorganizarParYLLaves(String body)
 	{
@@ -1135,7 +1138,7 @@ public class Semantico
 			body += token[a]+ "\n";
 		}
 	return body;
-	}//metodo
+	} //metodo
 
 	//old <asignacion-12-cadena>
 	//new <asignacion tipo:string id:cadena linea:12> </asignacion>
@@ -1149,7 +1152,7 @@ public class Semantico
 			nuevo = "";
 			if (token[a].startsWith("<asignacion-"))
 			{
-				token[a] = token[a].substring( 1, token[a].length()-1);
+				token[a] = token[a].substring(1, token[a].length()-1);
 				String g [] = token[a].split("-");
 				nuevo += "<asignacion tipo:";
 
@@ -1200,7 +1203,6 @@ public class Semantico
 		return body;
 	}
 
-
 	String reorganizarNumeros(String body, String linea)
 	{
 		String [] token = body.split("\n");
@@ -1243,7 +1245,7 @@ public class Semantico
 				int foundIndex = -1;
 				for (int z=0; z<variables.length; z++)
 				{
-					if (variables[z][0].equals( variableParts[2]))
+					if (variables[z][0].equals(variableParts[2]))
 					{
 						foundIndex = z;
 						break;
@@ -1323,8 +1325,7 @@ public class Semantico
 		}
 
 		return body;
-	}//metodo reorganizarDeclaraciones
-
+	} //metodo reorganizarDeclaraciones
 
 	//convertir el token IDENTIFICADOR_variable1
 	//en <var-13-_variable1>
@@ -1351,11 +1352,10 @@ public class Semantico
 			}
 
 			m_Metodos[a].setCuerpo(cuerpo);
-		}//cada metodo
+		} //cada metodo
 
 		return 0;
-	}//convertirVariables
-
+	} //convertirVariables
 
 	int revisarReturn()
 	{
@@ -1371,10 +1371,10 @@ public class Semantico
 				if (token[b].equals("CONTROL_RETORNO"))
 				{
 					token[b] = "<retorno-linea:"+linea.substring(13)+">";
-					while(!token[b].equals("PUNTUACION_PUNTO_COMA")) b++;
+					while (!token[b].equals("PUNTUACION_PUNTO_COMA")) b++;
 					token[b] = "</retorno>";
 				}
-			}//for de cada token
+			} //for de cada token
 
 			String body = "";
 			for (int b=0; b<token.length; b++)
@@ -1382,8 +1382,8 @@ public class Semantico
 				body += token[b] + " ";
 			}
 
-			m_Metodos[a].setCuerpo( body);
-		}//for de cada metodo
+			m_Metodos[a].setCuerpo(body);
+		} //for de cada metodo
 		return 0;
 	}
 
@@ -1424,7 +1424,7 @@ public class Semantico
 				if (!cambio) break;
 
 				// `r` es el indice donde esta la llamada
-				String llamada_a = token[r].substring( token[r].lastIndexOf("-")+1, token[r].length()-1);
+				String llamada_a = token[r].substring(token[r].lastIndexOf("-")+1, token[r].length()-1);
 				String linea = token[r].substring(9, token[r].lastIndexOf("-"));
 
 				token[r] = "<~llamada-"+token[r].substring(9);
@@ -1453,8 +1453,8 @@ public class Semantico
 					{
 						String [] t = m_Metodos[h].getArgumentos().split(" ");
 						deberian = t.length;
-						if ( m_Metodos[h].getArgumentos().equals("NADA")) deberian=0;
-						if ( deberian == argu) encontrado=true;
+						if (m_Metodos[h].getArgumentos().equals("NADA")) deberian=0;
+						if (deberian == argu) encontrado=true;
 					}
 				}
 
@@ -1465,10 +1465,10 @@ public class Semantico
 					return 1;
 				}
 
-			}//por cada cambio hecho
-		}//for de cada objeto
+			} //por cada cambio hecho
+		} //for de cada objeto
 		return 0;
-	}//revisarArgumentosDeLLamadas()
+	} //revisarArgumentosDeLLamadas()
 
 	int convertirAsignaciones()
 	{
@@ -1488,7 +1488,7 @@ public class Semantico
 					token[b] = "<asignacion-"+linea.substring(13)+"-"+token[b].substring(14)+">";
 					token[++b] = "";
 
-					while(!token[b].equals("PUNTUACION_PUNTO_COMA"))
+					while (!token[b].equals("PUNTUACION_PUNTO_COMA"))
 					{
 						b++;
 					}
@@ -1524,10 +1524,10 @@ public class Semantico
 				{
 					token[b] = "<~llamada-"+linea.substring(13)+"-"+token[b+1].substring(14)+">";
 
-					while(!token[b].startsWith("IDENTIFICADOR")) b++;
+					while (!token[b].startsWith("IDENTIFICADOR")) b++;
 						token[b] = "";
 
-					while(!token[b].equals("PARENTESIS_ABRE")) b++;
+					while (!token[b].equals("PARENTESIS_ABRE")) b++;
 						token[b] = "";
 				}
 			}
@@ -1536,7 +1536,7 @@ public class Semantico
 			for (int b=0; b<token.length; b++)
 				if (!token[b].equals("")) cuerpo += token[b]+" ";
 
-			m_Metodos[a].setCuerpo( cuerpo);
+			m_Metodos[a].setCuerpo(cuerpo);
 
 			token = m_Metodos[a].getCuerpo().split(" ");
 
@@ -1549,8 +1549,8 @@ public class Semantico
 
 				for (;;r--)
 				{
-					if ( r<0) break;
-					if ( token[r].startsWith("<~llamada-")) { cambio=true; break; }
+					if (r<0) break;
+					if (token[r].startsWith("<~llamada-")) { cambio=true; break; }
 				}
 
 				if (!cambio) break;
@@ -1558,7 +1558,7 @@ public class Semantico
 				token[r] = "<llamada-"+token[r].substring(10);
 
 				int parentesis=0;
-				while( true)
+				while (true)
 				{
 					if (token[r].equals("PARENTESIS_CIERRA") && parentesis ==0) break;
 					if (token[r].equals("PARENTESIS_ABRE")) parentesis++;
@@ -1573,8 +1573,8 @@ public class Semantico
 			for (int b=0; b<token.length; b++)
 				if (!token[b].equals("")) cuerpo += token[b]+" ";
 
-			m_Metodos[a].setCuerpo( cuerpo);
-		}//for de cada metodo
+			m_Metodos[a].setCuerpo(cuerpo);
+		} //for de cada metodo
 
 		return 0;
 	}
@@ -1596,7 +1596,7 @@ public class Semantico
 		ArrayList<Metodos> listaDeMetodos = new ArrayList<Metodos>();
 		ArrayList<Variables> listaDeVariables = new ArrayList<Variables>();
 
-		String [] definiciones = codigo.split("CONTROL_DEF");
+		String [] definiciones = m_Codigo.split("CONTROL_DEF");
 		String ultimoNumeroDeLinea = null;
 
 		for (String defCuerpo : definiciones)
@@ -1668,7 +1668,7 @@ public class Semantico
 				{
 					System.err.println("Linea: "+m_Metodos[b].getLinea().substring(13));
 					System.err.println("Metodo "+comp.substring(14)+" ya esta definido en este programa.");
-					debug.imprimirLinea("\nMetodo ya definido !!!");
+					m_Debug.imprimirLinea("\nMetodo ya definido !!!");
 					return 1;
 				}
 			}
@@ -1682,18 +1682,18 @@ public class Semantico
 			{
 				if (a==b) b++;
 				if (b==m_Variables.length) break;
-				if ( comp.equals( m_Variables[b].getNombre()))
+				if (comp.equals(m_Variables[b].getNombre()))
 				{
 					System.err.println("Linea: "+m_Variables[b].getLinea().substring(13));
 					System.err.println("Variable "+comp.substring(14)+" ya esta definido en este programa.");
-					debug.imprimirLinea("\nVariable ya definida !!!");
+					m_Debug.imprimirLinea("\nVariable ya definida !!!");
 					return 1;
 				}
 			}
 		}
 
 		return 0;
-	}//revisarDefiniciones()
+	} //revisarDefiniciones()
 
 	//revisar que dentro del cuerpo de los metodos no se declaren las variables dos veces
 	//acuerdate que los argumentos que recibe el metodo son tambien declaraciones
@@ -1716,7 +1716,7 @@ public class Semantico
 			String ss [] = s.split(" ");
 			for (int h=0; h<ss.length; h++)
 			{
-				if ( ss[h].startsWith("TIPO_") && ss[h+1].startsWith("IDENTIFICADOR_"))
+				if (ss[h].startsWith("TIPO_") && ss[h+1].startsWith("IDENTIFICADOR_"))
 				{
 					declaracion++;
 				}
@@ -1726,12 +1726,12 @@ public class Semantico
 
 			//contar cuantas declaraciones hay en el cuerpo--
 			for (int a=0; a<tokens.length; a++)
-				if ( tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
+				if (tokens[a].startsWith("TIPO_") && tokens[a+1].startsWith("IDENTIFICADOR_") && tokens[a+2].equals("PUNTUACION_PUNTO_COMA"))
 					declaracion++;
 
 			//contar cuantas declaraciones tipo arreglo
 			for (int a=0; a<tokens.length; a++)
-				if (tokens[a].startsWith("TIPO_") 
+				if (tokens[a].startsWith("TIPO_")
 						&& tokens[a+1].startsWith("CORCHETE_ABRE")
 						&& tokens[a+2].startsWith("CORCHETE_CIERRA")
 						&& tokens[a+3].startsWith("IDENTIFICADOR_")
@@ -1745,7 +1745,7 @@ public class Semantico
 
 			for (int h=0; h<ss.length; h++)
 			{
-				if ( ss[h].startsWith("TIPO_") && ss[h+1].startsWith("IDENTIFICADOR_"))
+				if (ss[h].startsWith("TIPO_") && ss[h+1].startsWith("IDENTIFICADOR_"))
 				{
 					declaraciones[inicio][0] = m_Metodos[d].getLinea();
 					declaraciones[inicio][1] = ss[h];
@@ -1757,7 +1757,7 @@ public class Semantico
 			linea = m_Metodos[d].getLinea();
 			for (int a=0; a<tokens.length; a++)
 			{
-				if ( tokens[a].startsWith("NUMERO_LINEA"))
+				if (tokens[a].startsWith("NUMERO_LINEA"))
 				{
 					linea = tokens[a];
 				}
@@ -1781,7 +1781,7 @@ public class Semantico
 					declaraciones[inicio][2] = tokens[a+3];
 					inicio++;
 				}
-			}//cada token
+			} //cada token
 
 			//por fin !! ya tengo la declaraciones de este metodo... ahora ver que no sean iguales
 			//o que no sean iguales a alguna definicion global
@@ -1791,9 +1791,9 @@ public class Semantico
 				String id = declaraciones[p][2];
 				for (int q=0; q<declaraciones.length; q++)
 				{
-					if ( p == q) q++;
-					if ( q == declaraciones.length) break;
-					if ( id.equals( declaraciones[q][2]))
+					if (p == q) q++;
+					if (q == declaraciones.length) break;
+					if (id.equals(declaraciones[q][2]))
 					{
 						System.err.println("Linea: "+declaraciones[q][0].substring(13));
 						System.err.println("Variable "+ declaraciones[p][2].substring(14)+" ya esta definida localmente.");
@@ -1803,14 +1803,14 @@ public class Semantico
 
 				for (int f=0; f<m_Variables.length; f++)
 				{
-					if ( id.equals( m_Variables[f].getNombre()))
+					if (id.equals(m_Variables[f].getNombre()))
 					{
 						System.err.println("Linea: "+declaraciones[p][0].substring(13));
 						System.err.println("Variable "+ declaraciones[p][2].substring(14)+" ya esta definida globalmente, en la linea "+m_Variables[f].getLinea().substring(13)+".");
 						return 1;
 					}
 				}
-			}// for de comprobaciones
+			} // for de comprobaciones
 
 			// en vez de tener 3 tokens, hacer unos solo
 			// que contenga <declaracion-linea-tipo-id>
@@ -1864,7 +1864,7 @@ public class Semantico
 						&& tokens[x+4].equals("PUNTUACION_PUNTO_COMA"))
 					{
 						tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"[]-"+tokens[x+3].substring(14)+">";
-						tokens[x+1] = "NUMERO_LINEA_" + linea; 
+						tokens[x+1] = "NUMERO_LINEA_" + linea;
 						tokens[x+2] = "";
 						tokens[x+3] = "";
 						tokens[x+4] = "";
@@ -1878,10 +1878,10 @@ public class Semantico
 					cuerpo2 += tokens[y] + " ";
 
 			m_Metodos[d].setCuerpo(cuerpo2);
-		}//for de cada cuerpo de cada metodo
+		} //for de cada cuerpo de cada metodo
 
 		return 0;
-	}//revisarCuerpoVariables()
+	} //revisarCuerpoVariables()
 
 	int revisarExistenciaMetodos()
 	{
@@ -1929,7 +1929,7 @@ public class Semantico
 			}
 
 			m_Metodos[b].setArgumentos(new_args);
-		}//okay con los argumentos
+		} //okay con los argumentos
 
 		//ahora si revisar que exista el id del metodo al que se esta llamando
 		for (int b=0; b<m_Metodos.length; b++)
@@ -1956,12 +1956,12 @@ public class Semantico
 						System.err.println("Metodo "+ id.substring(14) +" no ha sido definido.");
 						return 1;
 					}
-				}//si encuentra llamada a algun metodo
+				} //si encuentra llamada a algun metodo
 			}
-		}//for de cada cupero de cada metodo
+		} //for de cada cupero de cada metodo
 
 		return 0;
-	}//revisarMetodos()
+	} //revisarMetodos()
 
 	int revisarExistenciaVariables()
 	{
@@ -2048,10 +2048,10 @@ public class Semantico
 					}
 
 				}
-			}//for de cada token
-		}//for de metodos
+			} //for de cada token
+		} //for de metodos
 		return 0;
-	}//revisarExistenciaVariables
+	} //revisarExistenciaVariables
 
 	private static String join(String [] a, char c)
 	{
@@ -2082,42 +2082,45 @@ public class Semantico
 	{
 		for (int z=0; z < m_Metodos.length; z++)
 		{
-			debug.imprimirLinea( "\nMetodo "+z);
-			debug.imprimirLinea( "Linea: " + m_Metodos[z].getLinea());
-			debug.imprimirLinea( "Nombre: " + m_Metodos[z].getNombre());
-			debug.imprimirLinea( "Retorno: " + m_Metodos[z].getTipoDeRetorno());
-			debug.imprimirLinea( "Argumentos: " + m_Metodos[z].getArgumentos());
-			debug.imprimirLinea( "Cuerpo: ");
+			m_Debug.imprimirLinea("\n Metodo "+z);
+			m_Debug.imprimirLinea(" Linea: " + m_Metodos[z].getLinea());
+			m_Debug.imprimirLinea(" Nombre: " + m_Metodos[z].getNombre());
+			m_Debug.imprimirLinea(" Retorno: " + m_Metodos[z].getTipoDeRetorno());
+			m_Debug.imprimirLinea(" Argumentos: " + m_Metodos[z].getArgumentos());
+			m_Debug.imprimirLinea(" Cuerpo: ");
 
-			String _g [] = m_Metodos[z].getCuerpo().split("\n");
+			String linea [] = m_Metodos[z].getCuerpo().split("\n");
 			int tabs = 0;
 
-			for (int _h = 0; _h < _g.length; _h++)
+			for (int _h = 0; _h < linea.length; _h++)
 			{
-				if ( _g[_h].startsWith("</")) tabs--;
+				if (linea[_h].startsWith("</")) tabs--;
 
-				for (int b=0; b<tabs; b++) debug.imprimir("	");
+				for (int b=0; b<tabs; b++) m_Debug.imprimir("	");
 
-				debug.imprimirLinea( _g[_h]);
+				m_Debug.imprimirLinea(linea[_h]);
 
-				if ( _g[_h].startsWith("<llamada")) tabs++;
-				if ( _g[_h].startsWith("<llave>")) tabs++;
-				if ( _g[_h].startsWith("<asignacion")) tabs++;
-				if ( _g[_h].startsWith("<parentesis>")) tabs++;
-				if ( _g[_h].startsWith("<if")) tabs++;
-				if ( _g[_h].startsWith("<while")) tabs++;
-				if ( _g[_h].startsWith("<op ")) tabs++;
-				if ( _g[_h].startsWith("<retorno")) tabs++;
+				if (linea[_h].startsWith("<llamada")
+					|| linea[_h].startsWith("<llave>")
+					|| linea[_h].startsWith("<asignacion")
+					|| linea[_h].startsWith("<parentesis>")
+					|| linea[_h].startsWith("<if")
+					|| linea[_h].startsWith("<while")
+					|| linea[_h].startsWith("<op ")
+					|| linea[_h].startsWith("<retorno"))
+				{
+					tabs++;
+				}
 			}
 		}
 
 		for (int z=0; z<m_Variables.length; z++)
 		{
-			debug.imprimirLinea( "\nVariable "+z);
-			debug.imprimirLinea( "linea: " + m_Variables[z].getLinea());
-			debug.imprimirLinea( "nombre: " + m_Variables[z].getNombre());
-			debug.imprimirLinea( "tipo: " + m_Variables[z].getTipo());
+			m_Debug.imprimirLinea("\n Variable "+z);
+			m_Debug.imprimirLinea(" Linea: " + m_Variables[z].getLinea());
+			m_Debug.imprimirLinea(" Nombre: " + m_Variables[z].getNombre());
+			m_Debug.imprimirLinea(" Tipo: " + m_Variables[z].getTipo());
 		}
-	}//imprimir objetos
-}//clase analisis_semantico
+	} //imprimir objetos
+} //clase analisis_semantico
 
