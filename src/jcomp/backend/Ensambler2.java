@@ -54,7 +54,7 @@ public class Ensambler2
 
 		for (int a = 0; a < lineas.length; a++)
 		{
-			debug.imprimirLinea(lineas[a]);
+			debug.imprimirLinea(a + ": " + lineas[a]);
 		}
 
 		convertirMnemonicosFinales();
@@ -65,10 +65,7 @@ public class Ensambler2
 	private void convertirMnemonicosFinales()
 	{
 		String lineas [] = codigo.split("\n");
-
-		codigo = ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;\n";
-		codigo += "; Generado con jComp\n\n";
-
+		codigo = "";
 		for (int a = 0; a < lineas.length; a++)
 		{
 			if (lineas[a].trim().startsWith(";"))

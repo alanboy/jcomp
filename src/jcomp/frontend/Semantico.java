@@ -610,7 +610,7 @@ public class Semantico
 	//	<operacion tipo:MUL linea:19>
 	//	<INT id:a linea:19 scope:local>
 	//
-	//	convertir eso en ....
+	//	convertir eso en :
 	//
 	//	<op tipo:MUL linea:19>
 	//		<INT valor:5 linea:19>
@@ -636,9 +636,17 @@ public class Semantico
 			int lugar_inicio_b = 0;
 			int lugar_fin_b = 0;
 
-			for (int a = 0; a<token.length; a++)
+			for (int a = 0; a < token.length; a++)
 			{
 				if (token[a].startsWith("</")) tabs--;
+
+				if (token[a].startsWith("<llamada")) tabs++;
+				if (token[a].startsWith("<llave>")) tabs++;
+				if (token[a].startsWith("<asignacion")) tabs++;
+				if (token[a].startsWith("<parentesis>")) tabs++;
+				if (token[a].startsWith("<if")) tabs++;
+				if (token[a].startsWith("<while")) tabs++;
+				if (token[a].startsWith("<op")) tabs++; // El token completo se llama <operacion
 
 				if (token[a].startsWith("<operacion"))
 				{
@@ -648,16 +656,10 @@ public class Semantico
 						mayor_token = a;
 					}
 				}
-				if (token[a].startsWith("<llamada")) tabs++;
-				if (token[a].startsWith("<llave>")) tabs++;
-				if (token[a].startsWith("<asignacion")) tabs++;
-				if (token[a].startsWith("<parentesis>")) tabs++;
-				if (token[a].startsWith("<if")) tabs++;
-				if (token[a].startsWith("<while")) tabs++;
-				if (token[a].startsWith("<op")) tabs++; //aguas akiii
+
 			}
 
-			if (mayor == 0)return body;
+			if (mayor == 0) return body;
 
 			cambio = true;
 			lugar_operacion = mayor_token;
@@ -665,12 +667,15 @@ public class Semantico
 			String argumento_a = token[mayor_token-1];
 			String argumento_b = token[mayor_token+1];
 
-			//ahora guardar los argumentos que recibe la operacion
-			//si el que esta antes es una llamada o parentesis
+			// ahora guardar los argumentos que recibe la operacion
+			// si el que esta antes es una llamada o parentesis
 			int _a = mayor_token-1;
-			if (argumento_a.startsWith("</llamada>") || argumento_a.startsWith("</parentesis>") || argumento_a.startsWith("</op>"))
+			if (argumento_a.startsWith("</llamada>") 
+					|| argumento_a.startsWith("</parentesis>")
+					|| argumento_a.startsWith("</op>"))
 			{
-				String buscando ="";
+				String buscando = "";
+
 				if (argumento_a.equals("</parentesis>")) buscando = "<parentesis>";
 				if (argumento_a.startsWith("</llamada")) buscando = "<llamada";
 				if (argumento_a.startsWith("</op>")) buscando = "<op ";
@@ -757,9 +762,10 @@ public class Semantico
 
 			body = "";
 			for (int b = 0; b<token.length; b++)
-				if (!token[b].equals(""))body += token[b]+ "\n";
+				if (!token[b].equals("")) body += token[b]+ "\n";
 
 		} //while de si hubo cambios
+
 		return body;
 	} //convertir OPeraciones a la nueva nomenclatura
 
@@ -832,6 +838,7 @@ public class Semantico
 			/////////////////////////////////////
 			// HAY QUE REORGANIZAR LOS TOKENS
 			// ahora los tokens seran separados por el caracter '\n'
+			//
 			// <declaracion tipo:int8 id:alan linea:4>
 			// <llamada tipo:int id:metodo1 linea:4> </llamada>
 			// <int id:var1 linea:5>
@@ -962,19 +969,20 @@ public class Semantico
 
 			if (token[a].startsWith("BOL_"))
 			{
-			String g [] = token[a].split("_");
-			nuevo += "<operacion tipo:" + g[1] + " linea:" + linea.substring(13, linea.length()-1)+">";
-			token[a] = nuevo;
+				String g [] = token[a].split("_");
+				nuevo += "<operacion tipo:" + g[1] + " linea:" + linea.substring(13, linea.length()-1)+">";
+				token[a] = nuevo;
 			}
 
 			if (token[a].startsWith("ASIGNA") && token[a+1].startsWith("ASIGNA"))
 			{
-			token[a] = "<operacion tipo:IGUAL linea:"+ linea.substring(13, linea.length()-1)+">";
-			token[a+1] = "";
+				token[a] = "<operacion tipo:IGUAL linea:"+ linea.substring(13, linea.length()-1)+">";
+				token[a+1] = "";
 			}
 
 			if (!token[a].equals("")) body += token[a]+ "\n";
 		}
+
 		return body;
 	}
 
@@ -1028,7 +1036,7 @@ public class Semantico
 		return body;
 	} //metodo
 
-	String reorganizarif (String body, String linea)
+	String reorganizarif(String body, String linea)
 	{
 		String [] token = body.split("\n");
 		body = "";
@@ -1076,7 +1084,7 @@ public class Semantico
 			if (!token[b].equals("")) body += token[b]+"\n";
 
 	return body;
-	} //metodo
+	}
 
 	String reorganizarLineas(String body)
 	{
@@ -1098,25 +1106,30 @@ public class Semantico
 		String [] token = body.split("\n");
 		body = "";
 		String nuevo;
+
 		for (int a = 0; a<token.length; a++)
 		{
 			nuevo = "";
-			if (token[a].startsWith("NUMERO_LINEA_"))linea = token[a];
+			if (token[a].startsWith("NUMERO_LINEA_")) linea = token[a];
 
 			if (token[a].startsWith("OP_"))
 			{
-			String g [] = token[a].split("_");
-			nuevo += "<operacion tipo:";
-			if (g[1].equals("MULTIPLICACION"))g[1] = "MUL";
-			if (g[1].equals("DIVISION"))g[1] = "DIV";
-			nuevo += g[1] + " linea:" + linea.substring(13)+">";
-			token[a] = nuevo;
+				String g [] = token[a].split("_");
+				nuevo += "<operacion tipo:";
+
+				if (g[1].equals("MULTIPLICACION")) g[1] = "MUL";
+				if (g[1].equals("DIVISION")) g[1] = "DIV";
+
+				nuevo += g[1] + " linea:" + linea.substring(13)+">";
+
+				token[a] = nuevo;
 			}
 
-		body += token[a]+ "\n";
+			body += token[a]+ "\n";
 		}
-	return body;
-	} //metodo
+
+		return body;
+	}
 
 	String reorganizarParYLLaves(String body)
 	{

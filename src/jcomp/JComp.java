@@ -102,40 +102,25 @@ public class JComp
 		s_pLog.imprimirLinea("----------------------");
 		s_pLog.imprimirLinea(codigo);
 
-		if (lineaDeComandos.getNasmOrMasm().equals("nasm"))
-		{
-			Ensambler2 en = new Ensambler2(codigo);
 
-			if(en.iniciar() != 0) System.exit(1);
-
-			codigo = en.getCodigo();
-		}
-		else
-		{
-			Ensambler en = new Ensambler();
-
-			en.setCodigo(codigo);
-
-			if(en.iniciar() != 0) System.exit(1);
-
-			codigo = en.getCodigo();
-		}
-
-
-		s_pLog.imprimirLinea("");
-		s_pLog.imprimirLinea("");
 		s_pLog.imprimirLinea("----------------------");
-		s_pLog.imprimirLinea("CODIGO PARA ENSAMBLAR");
+		s_pLog.imprimirLinea("CODIGO PARA ENSAMBLAR NASM");
 		s_pLog.imprimirLinea("----------------------");
 
-		s_pLog.imprimirLinea(codigo);
+		Ensambler2 en = new Ensambler2(codigo);
+		en.iniciar();
 
-		try{
+		s_pLog.imprimirLinea("----------------------");
+		s_pLog.imprimirLinea("CODIGO PARA ENSAMBLAR NASM");
+		s_pLog.imprimirLinea("----------------------");
+		s_pLog.imprimirLinea(en.getCodigo());
+
+		try {
 			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter("p.asm")));
-			pw.print(codigo);
+			pw.print(en.getCodigo());
 			pw.close();
 
-		}catch(IOException ioe){
+		} catch(IOException ioe) {
 			System.out.println("error creando archivo asm");
 
 		}

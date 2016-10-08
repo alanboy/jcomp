@@ -1,5 +1,6 @@
 def int a;
 
-def void #main()
+def int #main()
 {
+	return 0;
 }
