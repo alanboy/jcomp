@@ -10,7 +10,7 @@ import jcomp.util.Log;
 /**
  * Lexico
  *
- * 
+ *
  *
  * @author Alan Gonzalez
  * @todo Hacer esta clase singleton
@@ -23,17 +23,14 @@ public class Lexico
 	String PROGRAMA_FUENTE;
 	Log debug;
 
-	public Lexico()
+	public Lexico(String source)
 	{
 		this.debug = Log.getInstance();
-	}
-
-	public void setCodigo(String source)
-	{
 		PROGRAMA_FUENTE = source;
 	}
 
-	public int iniciar(){
+	public int iniciar()
+	{
 		//todos los metodos ke manipulan el codigo fuente,
 		// lo leen de CODIGO_FUENTE y lo guardan manipulado
 		// en CODIGO_FUENTE tambien
@@ -42,8 +39,7 @@ public class Lexico
 		if(cargarConfiguracion() != 0) return 1;
 
 		/*		funciones del lenguaje ke implicitas */
-		// tenemos ke agregarlas aki tal vez....
-
+		// tenemos ke agregarlas aqui tal vez....
 
 		//elimina comentarios, regresa 0 si todo salio bien
 		if(eliminarComentarios() != 0) return 1;
@@ -69,15 +65,13 @@ public class Lexico
 	return 0;
 	}
 
-
-	public String getCodigo(){
+	public String getCodigo()
+	{
 		return PROGRAMA_FUENTE;
 	}
 
-
-
-	int cargarConfiguracion(){
-
+	int cargarConfiguracion()
+	{
 			//cargar los tokens en un arreglo
 			TOKENS = new String[][]{
 				{"(","PARENTESIS_ABRE"},
@@ -127,11 +121,11 @@ public class Lexico
 			ALFABETO[_a.length()] = 10;
 			ALFABETO[_a.length()+1] = 9;
 
-
 		return 0;
 	}//fin metodo cargarConfiguracion()
 
-	int eliminarComentarios(){
+	int eliminarComentarios()
+	{
 
 		String pf="";
 		String [] result = PROGRAMA_FUENTE.split("\n");
@@ -141,7 +135,7 @@ public class Lexico
 			String linea = result[x];
 			int d = linea.indexOf("//");
 
-			if( d != -1) 
+			if( d != -1)
 			{
 				linea = linea.substring( 0, d );
 			}
@@ -152,7 +146,8 @@ public class Lexico
 		return 0;
 	}
 
-	int verificarAlfabeto(){
+	int verificarAlfabeto()
+	{
 		int linea = 1;
 
 		for(int z=0; z < PROGRAMA_FUENTE.length(); z++)
@@ -207,17 +202,17 @@ public class Lexico
 				cambio = false;
 				int a = linea.indexOf("  ");
 				if( a != -1 )
-				{ 
-					linea.replace(a,a+2, " "); 
-					cambio = true; 
+				{
+					linea.replace(a,a+2, " ");
+					cambio = true;
 				}
 
 				int b = linea.indexOf(String.valueOf((char)9));
 
 				if( b != -1 )
 				{
-					linea.setCharAt(b, ' '); 
-					cambio = true; 
+					linea.setCharAt(b, ' ');
+					cambio = true;
 				}
 			}
 
@@ -242,7 +237,7 @@ public class Lexico
 	{
 		String numero_linea;//el caracter 175 separa el numero de linea de la instruccion
 		String linea;
-		String pf="";	//aki se guarda el resultado intermedio de este pedo
+		String pf="";	//aqui se guarda el resultado intermedio de este pedo
 		StringTokenizer separacion_linea;
 		String lineas [] = PROGRAMA_FUENTE.split("\n");
 
@@ -252,13 +247,15 @@ public class Lexico
 
 			try{
 				numero_linea = separacion_linea.nextToken();
-			}catch(Exception nsee){ 
+			}
+			catch(Exception nsee)
+			{
 				System.out.println("Archivo vacio");
-			   	return 1; 
+			   	return 1;
 			}
 			linea = separacion_linea.nextToken();
 
-			//aki ya analizo linea por linea
+			//aqui ya analizo linea por linea
 			//el contenido de la linea actual
 			//esta en el string linea
 			//La linea se procesa y se concatena al string pf
@@ -276,7 +273,7 @@ public class Lexico
 				cadena = false;
 				String s = st.nextToken();
 
-				//Chekar si estoy analizando una cadena
+				//Checar si estoy analizando una cadena
 				//si si encuentro comillas tons
 				//seguir agregando tokens hasta ke encuentre
 				//otras comillas
@@ -287,7 +284,7 @@ public class Lexico
 					//si no encuentra una comilla marka un error
 					s += st.nextToken();
 					try{
-						while (s.charAt(s.length()-1) != 34) 
+						while (s.charAt(s.length()-1) != 34)
 							s += st.nextToken();
 					}catch(Exception e)
 					{
@@ -297,8 +294,7 @@ public class Lexico
 					}
 				}
 
-
-				//chekar si es un white_space
+				//checar si es un white_space
 				if((s.length() == 1) && (s.charAt(0)==32))
 					espacio = true; else espacio = false;
 
@@ -309,7 +305,7 @@ public class Lexico
 
 		}//for de cada linea
 
-		//aki el programa fuente ya tiene los tokens en cada linea
+		//aqui el programa fuente ya tiene los tokens en cada linea
 		//ahora hay ke compararlos con las palabras reservadas
 		PROGRAMA_FUENTE = pf;
 
@@ -346,11 +342,16 @@ public class Lexico
 				String token = lineas[a];
 
 				//intentemos ver si es un numero
-				try{
+				try
+				{
 					int num = Integer.parseInt( token );
 					pf += "VALOR_NUMERO_" + lineas[a] + "\n";
 					yaloencontre = true;
-				}catch(Exception e){}
+				}
+				catch(Exception e)
+				{
+					// Nada que hacer
+				}
 
 				//VEAMOS SI ES UN NUMERO DE LINEA
 				if(token.startsWith("NUMERO_LINEA"))
@@ -402,6 +403,7 @@ public class Lexico
 		pf += "FINAL\n";
 		PROGRAMA_FUENTE = pf;
 
-	return 0;
+		return 0;
 	}
-}//clase alanlisis_lexico
+
+}

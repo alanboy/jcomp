@@ -1,15 +1,18 @@
+/*------------------------------------------------------------------------------------
+ 				ANALISIS SINTACTICO
+	Todo:
+		Usar una gramatica como esta: https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_Form
+-------------------------------------------------------------------------------------*/
+
 package jcomp.frontend;
 
 import jcomp.automata.*;
 import jcomp.util.Log;
 
-/*------------------------------------------------------------------------------------
- 				ANALISIS SINTACTICO
--------------------------------------------------------------------------------------*/
 public class Sintactico
 {
-	String codigo_fuente;
-	Log debug;
+	private String codigo_fuente;
+	private Log debug;
 
 	public Sintactico()
 	{
@@ -28,10 +31,7 @@ public class Sintactico
 
 	public int iniciar()
 	{
-		debug.imprimirLinea( " " );
-		debug.imprimirLinea( "------------------------------" );
-		debug.imprimirLinea( "ANALISIS SINTACTICO:" );
-		debug.imprimirLinea( "------------------------------" );
+		debug.imprimirEncabezado( "ANALISIS SINTACTICO:" );
 
 		// primero checar que este bien, ya despues ornaizar el codigo para el semantico
 		String s [] = codigo_fuente.split("\n");

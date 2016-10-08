@@ -8,16 +8,18 @@ TEST_DIR=tests
 CMD_DEL=del
 CMD_DEL_RECURSIVO=del /s/q
 CMD_FIND_JAVA=dir /s/b src\*.java 
-CMD_ASSEMBLE=C:\Users\alan\AppData\Local\NASM\nasm.exe -f win32 -o p.o 
 CMD_LINK=link p.o  /SUBSYSTEM:windows /ENTRY:start
 CMD_RUN=p.exe
+OUTPUT_ASM=out.windows.x86.asm
+CMD_ASSEMBLE=nasm.exe -f win32 -o p.o $(OUTPUT_ASM)
 #else
 #CMD_DEL=rm
 #CMD_DEL_RECURSIVO=rm -rf
 #CMD_FIND_JAVA=find src/ | grep java
-#CMD_ASSEMBLE=nasm -f elf 
-#CMD_LINK=ld -s -o a.out p.out
+#CMD_LINK=ld -m elf_i386 -s -o a.out p.out
 #CMD_RUN=./a.out
+#OUTPUT_ASM=out.linux.x86.asm
+#CMD_ASSEMBLE=nasm -f elf -o p.out $(OUTPUT_ASM)
 #RED='\033[1;32m'
 #NC='\033[0m' # No Color
 #endif
@@ -49,53 +51,53 @@ clean-tests:
 	$(CMD_DEL) *.lnk
 	$(CMD_DEL) *.pdb
 
-test1: $(EXECUTABLE_NAME) $(TEST_DIR)/1/1.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc > out
-	$(CMD_ASSEMBLE) p.asm
+test1: $(EXECUTABLE_NAME) $(TEST_DIR)/2/2.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/2/2.jc
+	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN)
 
-test2: $(EXECUTABLE_NAME) $(TEST_DIR)/2/2.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/2/2.jc > out
-	$(CMD_ASSEMBLE) p.asm
+test2: $(EXECUTABLE_NAME) $(TEST_DIR)/3/source.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/3/source.jc
+	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN)
 
-test3: $(EXECUTABLE_NAME) $(TEST_DIR)/3/source.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/3/source.jc > out
-	$(CMD_ASSEMBLE) p.asm
+test3: $(EXECUTABLE_NAME) $(TEST_DIR)/locals/source.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc
+	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN)
 
 test4: $(EXECUTABLE_NAME) $(TEST_DIR)/locals/source.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc > out
-	$(CMD_ASSEMBLE) p.asm
+	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc
+	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN)
 
 test5: $(EXECUTABLE_NAME) $(TEST_DIR)/args/args.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/args/args.jc > out
-	$(CMD_ASSEMBLE) p.asm
+	java -cp bin jcomp.JComp $(TEST_DIR)/args/args.jc
+	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN)
 
 test6: $(EXECUTABLE_NAME) $(TEST_DIR)/print/print.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/print/print.jc > out
-	$(CMD_ASSEMBLE) p.asm
+	java -cp bin jcomp.JComp $(TEST_DIR)/print/print.jc
+	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN) > TestOut.txt
 	diff --ignore-all-space tests/print/Ref.txt TestOut.txt
 
 test7: $(EXECUTABLE_NAME) $(TEST_DIR)/while/while.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/while/while.jc > out
-	$(CMD_ASSEMBLE) p.asm
+	java -cp bin jcomp.JComp $(TEST_DIR)/while/while.jc
+	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN) > TestOut.txt
 	diff --ignore-all-space tests/while/Ref.txt TestOut.txt 
 
 test8: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos/arreglos.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/arreglos/arreglos.jc > out
-	$(CMD_ASSEMBLE) p.asm
+	java -cp bin jcomp.JComp $(TEST_DIR)/arreglos/arreglos.jc
+	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN)
 

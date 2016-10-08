@@ -39,9 +39,7 @@ public class Semantico
 
 	public int iniciar()
 	{
-		m_Debug.imprimirLinea("------------------------------");
-		m_Debug.imprimirLinea("      ANALISIS SEMANTICO");
-		m_Debug.imprimirLinea("------------------------------");
+		m_Debug.imprimirEncabezado("ANALISIS SEMANTICO");
 
 		// Convertimos los tokens que me pasa el sintactico en objetos. Metodos y Variables
 		crearObjetos();
@@ -2096,7 +2094,7 @@ public class Semantico
 			m_Debug.imprimirLinea(" Nombre: " + m_Metodos[z].getNombre());
 			m_Debug.imprimirLinea(" Retorno: " + m_Metodos[z].getTipoDeRetorno());
 			m_Debug.imprimirLinea(" Argumentos: " + m_Metodos[z].getArgumentos());
-			m_Debug.imprimirLinea(" Cuerpo: ");
+			m_Debug.imprimirLinea(" Cuerpo:");
 
 			String linea [] = m_Metodos[z].getCuerpo().split("\n");
 			int tabs = 0;

@@ -7,7 +7,7 @@ import jcomp.util.Log;
 /*------------------------------------------------------------------------------------
  				AUTOMATA DE PILA
 -------------------------------------------------------------------------------------*/
-// su constructor recibe...Automata( Produccion [] prod, String cadena a probar )
+// su constructor recibe...Automata(Produccion [] prod, String cadena a probar)
 // asi: Produccion [] prod = { new Produccion("<oracion>", "<sujeto> <predicado>") }
 // el conssstructor de produccion es Produccion (String ladoIzquierdo, String ladoDerecho)
 public class Automata
@@ -15,8 +15,8 @@ public class Automata
 	private Produccion [] prods;
 	private String cadena;
 	private String [] tokens;
-	Stack <String> pila = new Stack<String>();
-	Log l;
+	private Stack <String> pila = new Stack<String>();
+	private Log l;
 
 	public Automata(Produccion [] prod, String cad)
 	{
@@ -29,31 +29,25 @@ public class Automata
 	{
 		tokens = cadena.split(" ");
 		pila.push("$");
-		pila.push("$");
-		pila.push("$");
-		pila.push("$");
-		pila.push("$");
-		pila.push("$");
 
 		int numero_linea=1;
 		boolean cambio;
 
 		for(int index = 0; index < tokens.length; index++)
 		{
-			verPila();
-
-			pila.push( tokens[index] );
+			pila.push(tokens[index]);
 
 			// si lo ke encuentra en la pila es el numero de linea
 			// guardarlo en la variable numero_linea...
 			// pero bueno ya despues de algo servira
+
 			if (pila.peek().startsWith("NUMERO_LINEA_"))
 			{
-				numero_linea = Integer.parseInt( pila.pop().substring(13) );
-				pila.push( tokens[++index] );
+				numero_linea = Integer.parseInt(pila.pop().substring(13));
+				pila.push(tokens[++index]);
 			}
 
-			cambio =true;
+			cambio = true;
 
 			while (cambio)
 			{
@@ -65,30 +59,43 @@ public class Automata
 				}
 
 				verPila();
+
 				cambio = false;
 
-				for(int b=0; b<prods.length; b++)
+				for(int b=0; b < prods.length; b++)
 				{
-
 					String [] derecho = prods[b].getLadoDer().split(" ");
 					String s = "";
 					StringBuffer sb = new StringBuffer("");
 
-					for(int c=0; c<derecho.length; c++) 
+					// Si el numero de tokens en la pila es menor
+					// que el numero de tokens que estan del lado
+					// derecho, entonces no hay manera posible de
+					// que termine reduciendo, asi que saltarme a la
+					// siguiente produccion.
+					if (derecho.length > pila.size())
+					{
+						continue;
+					}
+
+					for(int c = 0; c < derecho.length; c++)
 					{
 						sb.insert(0, pila.pop()+" ");
 					}
 
-					sb.setLength( sb.length() - 1 );
-					s = String.valueOf( sb );
+					sb.setLength(sb.length() - 1);
+					s = String.valueOf(sb);
 
-					//pl("Analizando: "+s+" y "+prods[b].getLadoDer());
+					// Analizando: s y prods[b].getLadoDer()
 
-					if(s.equals( prods[b].getLadoDer() ))
+					if(s.equals(prods[b].getLadoDer()))
 					{
-						//pl("reduciendo: "+s+" por "+prods[b].getLadoIzq());
+						// Reduciendo: s por prods[b].getLadoIzq()
 						StringTokenizer sb12 = new StringTokenizer(prods[b].getLadoIzq(), " ");
-						while(sb12.hasMoreTokens())pila.push( sb12.nextToken() );
+						while(sb12.hasMoreTokens())
+						{
+							pila.push(sb12.nextToken());
+						}
 						cambio=true;
 						break;
 					}
@@ -99,50 +106,48 @@ public class Automata
 						String r [] = s.split(" ");
 						for(int f=0; f<r.length; f++)
 						{
-							pila.push( r[f] );
+							pila.push(r[f]);
 						}
 					}
 				}//for producciones
 			}//while de volver a chekar si hubo cambio
 		}//for de tokens
 
-		//verPila();
-
 		Stack <String> pila2_a = new Stack<String>();
 		String pilaString="";
 
 		while(!pila.empty())
 		{
-			pila2_a.push( pila.pop() );
+			pila2_a.push(pila.pop());
 		}
 
-		while(!pila2_a.empty()) 
+		while(!pila2_a.empty())
 		{
 			pilaString += (pila2_a.pop() +" ");
 		}
 
 		return pilaString;
-	}//metodo
+	}
 
 	void verPila()
 	{
 		Stack <String> pila2 = new Stack<String>();
 		while(!pila.empty())
 		{
-			pila2.push( pila.pop() );
+			pila2.push(pila.pop());
 		}
 
 		while(!pila2.empty())
 		{
 			String s = pila2.pop();
-			l.imprimir( s + " " );
-			pila.push( s );
+			l.imprimir(s + " ");
+			pila.push(s);
 		}
 
 		if(l != null)
 		{
-			l.imprimirLinea( " " ); 
+			l.imprimirLinea("");
 		}
-	}//ver Pila()
-}//Automata
+	}
+}
 

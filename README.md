@@ -43,3 +43,6 @@ def int #method(){
 	return #adding(1, 5); 
 }
 ```
+http://askubuntu.com/questions/454253/how-to-run-32-bit-app-in-ubuntu-64-bit
+http://www.csee.umbc.edu/portal/help/nasm/sample.shtml
+

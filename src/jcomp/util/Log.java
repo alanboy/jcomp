@@ -5,47 +5,29 @@ import java.util.*;
 
 public class Log
 {
-	PrintWriter pw;
-	static Log instance;
-	String logFilename;
-	LOG_DESTINATION destination;
+	private PrintWriter printWriterObj;
+	private static Log instance;
+	private String logFilename;
 
 	public static Log getInstance()
 	{
 		if (instance == null)
 		{
-			instance = new Log();
+			instance = new Log("build.out");
 		}
 		return instance;
 	}
 
-	public boolean setFilename(String sf)
-	{
-		boolean status = false;
-		if (pw == null)
-		{
-			status = true;
-			this.logFilename = sf;
-		}
-		return status;
-	}
-
 	public void warning(String s)
 	{
-		pw.print("WARNING:" + s);
+		printWriterObj.print("WARNING:" + s);
 	}
 
-	public void log(String s)
+	public void imprimirEncabezado(String s)
 	{
-		switch(destination)
-		{
-			case LOG_TO_STDOUT:
-				System.out.print(s);
-			break;
-			case LOG_TO_FILE:
-				pw.println(s);
-			break;
-		}
+		log("------------------------------------------------\n");
+		log("- " + s + "\n");
+		log("------------------------------------------------\n");
 	}
 
 	public void imprimirLinea(String s)
@@ -53,29 +35,41 @@ public class Log
 		log(s + "\n");
 	}
 
+	public void close()
+	{
+		printWriterObj.flush();
+		printWriterObj.close();
+		printWriterObj = null;
+	}
+
 	public void imprimir(String s)
 	{
 		log(s);
 	}
 
-	private enum LOG_DESTINATION
+	public void log(String s)
 	{
-		LOG_TO_FILE,
-		LOG_TO_STDOUT,
-		LOG_TO_STDERR
-	};
+		if (printWriterObj != null)
+		{
+			printWriterObj.print(s);
+		}
+		else
+		{
+			System.err.println("Compilador: El log ya ha sido cerrado.");
+		}
+	}
 
-	private Log ()
+	private Log(String filename)
 	{
-		logFilename = "output.log";
-		destination = LOG_DESTINATION.LOG_TO_STDOUT;
+		logFilename = filename;
+		OpenLogFile();
 	}
 
 	private void OpenLogFile()
 	{
 		try
 		{
-			pw = new PrintWriter(
+			printWriterObj = new PrintWriter(
 					new BufferedWriter(
 						new FileWriter(logFilename)));
 		}
@@ -84,16 +78,5 @@ public class Log
 			System.out.println(ioe);
 		}
 	}
-
-	private void closeFile()
-	{
-		pw.close();
-	}
-
-}//class Log
-
-
-class Debugger{
-
-
 }
+

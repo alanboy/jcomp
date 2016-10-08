@@ -55,75 +55,65 @@ public class JComp
 
 	static int iniciar(Opciones lineaDeComandos)
 	{
-		String codigo = "";
+		Log logger = Log.getInstance();
+		String codigoFuente = "";
 
-		// Cargar el archivo fuente
+		//
+		// Cargar el archivo con el codigo fuente
+		//
 		try{
 			BufferedReader br = new BufferedReader(new FileReader(lineaDeComandos.getCodigoFuentePath()));
-			codigo = "";
+			codigoFuente = "";
 			String k = "";
-			while((k = br.readLine()) != null ) codigo += (k+"\n");
+			while((k = br.readLine()) != null ) codigoFuente += (k+"\n");
 
 		}catch(IOException e){
 			System.out.println("No he podido leer el archivo de entrada:" + lineaDeComandos.getCodigoFuentePath());
 			System.exit(1);
 		}
 
-		Lexico a_lex = new Lexico();
-		Sintactico a_sin = new Sintactico();
-		Semantico a_sem = new Semantico();
-		Log s_pLog = Log.getInstance();
-
-		a_lex.setCodigo(codigo);
-
+		//
+		// FrontEnd: Analisis Lexico
+		//
+		Lexico a_lex = new Lexico(codigoFuente);
 		if(a_lex.iniciar() != 0)
 		{
 			System.exit(1);
 		}
 
-		codigo = a_lex.getCodigo();
-		a_sin.setCodigo(codigo);
+		//
+		// FrontEnd: Analisis sintactico
+		//
+		Sintactico a_sin = new Sintactico();
+		a_sin.setCodigo(a_lex.getCodigo());
 		if(a_sin.iniciar() != 0)
 		{
 			System.exit(1);
 		}
 
-		codigo = a_sin.getCodigo();
-		a_sem.setCodigo(codigo);
-
+		//
+		// FrontEnd: Analisis semantico
+		//
+		Semantico a_sem = new Semantico();
+		a_sem.setCodigo(a_sin.getCodigo());
 		if(a_sem.iniciar() != 0)
 		{
 			System.exit(1);
 		}
-		codigo = a_sem.getCodigo();
 
-		s_pLog.imprimirLinea("----------------------");
-		s_pLog.imprimirLinea("CODIGO OBJETO !!");
-		s_pLog.imprimirLinea("----------------------");
-		s_pLog.imprimirLinea(codigo);
-
-
-		s_pLog.imprimirLinea("----------------------");
-		s_pLog.imprimirLinea("CODIGO PARA ENSAMBLAR NASM");
-		s_pLog.imprimirLinea("----------------------");
-
-		Ensambler2 en = new Ensambler2(codigo);
+		//
+		// BackEnd: Generacion de codigo intermedio
+		//
+		Ensambler2 en = new Ensambler2(a_sem.getCodigo());
 		en.iniciar();
 
-		s_pLog.imprimirLinea("----------------------");
-		s_pLog.imprimirLinea("CODIGO PARA ENSAMBLAR NASM");
-		s_pLog.imprimirLinea("----------------------");
-		s_pLog.imprimirLinea(en.getCodigo());
+		//
+		// BackEnd: Generacion de codigo final dependiente de arquitectura
+		//
+		GeneracionDeCodigoAsm asmGen = new GeneracionDeCodigoAsm(en.getCodigo());
+		asmGen.iniciar();
 
-		try {
-			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter("p.asm")));
-			pw.print(en.getCodigo());
-			pw.close();
-
-		} catch(IOException ioe) {
-			System.out.println("error creando archivo asm");
-
-		}
+		logger.close();
 
 		return 0;
 	}
