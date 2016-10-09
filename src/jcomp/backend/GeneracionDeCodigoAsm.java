@@ -129,6 +129,11 @@ public class GeneracionDeCodigoAsm
 				continue;
 			}
 
+			if (lineas[a].indexOf("UsosExternos") != -1 )
+			{
+				lineas[a] = "";
+			}
+
 			if (lineas[a].indexOf("empujar ") != -1 )
 			{
 				lineas[a] = lineas[a].substring( 9 );
@@ -180,7 +185,7 @@ public class GeneracionDeCodigoAsm
 			if (lineas[a].indexOf("retornar") != -1 )
 			{
 				// Retornar de otra function es RET
-				lineas[a] = "\n\t; return explicito de funcion \n";
+				lineas[a] =  "  ; return explicito\n";
 				lineas[a] += "  pop eax\n";    // El valor a regresar (exit value)
 				lineas[a] += "  mov esp, ebp\n";
 				lineas[a] += "  pop ebp\n";
@@ -270,6 +275,13 @@ public class GeneracionDeCodigoAsm
 				continue;
 			}
 
+			if (lineas[a].indexOf("UsosExternos") != -1 )
+			{
+				lineas[a] = "  extern  _GetStdHandle@4\n";
+				lineas[a] += "  extern  _WriteFile@20\n";
+				lineas[a] += "  extern  _ExitProcess@4\n";
+			}
+
 			if (lineas[a].indexOf("empujar ") != -1 )
 			{
 				lineas[a] = lineas[a].substring( 9 );
@@ -321,7 +333,7 @@ public class GeneracionDeCodigoAsm
 			if (lineas[a].indexOf("retornar") != -1 )
 			{
 				// Retornar de otra function es RET
-				lineas[a] = "\n\t; return explicito de funcion \n";
+				lineas[a] =  "  ; return explicito\n";
 				lineas[a] += "  pop eax\n";    // El valor a regresar (exit value)
 				lineas[a] += "  mov esp, ebp\n";
 				lineas[a] += "  pop ebp\n";
@@ -331,10 +343,9 @@ public class GeneracionDeCodigoAsm
 			if (lineas[a].indexOf("salir") != -1 )
 			{
 				// Retornar de main sinfica hacer syscall
-				lineas[a] = "\n\t; return explicito \n";
-				lineas[a] += "  mov eax, 1\n"; // Syscall para salir del proces (sys_exit)
-				lineas[a] += "  pop ebx\n";    // El valor a regresar (exit value)
-				lineas[a] += "  int 80h\n";
+				lineas[a] += "  ; ExitProcess(0)\n";
+				lineas[a] += "  push    0\n";
+				lineas[a] += "  call    _ExitProcess@4\n";
 			}
 
 			if (lineas[a].indexOf("MAYOR_") != -1 )
@@ -377,20 +388,32 @@ public class GeneracionDeCodigoAsm
 			"putc:",
 			"  push ebp",
 			"  mov ebp, esp",
-
+			"",
+			"  ; make space for first argument and 1 local var (bytes)",
+			"  sub esp, 8",
+			"",
 			"  mov eax, ebp",
 			"  mov ebx, 8",
 			"  add eax, ebx",
-			"  push eax            ; calcular la direccion del primer argumento",
-			"  pop ecx             ; ebp+8 y ponerla en ecx ",
-
-			"  mov eax,4           ; la system call para escribir en la pantalla (sys_write)",
-			"  mov ebx,1           ; file descriptor 1 - standard output",
-			"  mov edx,1           ; la longitud de bytes que queremos imprimir",
-			"  int 80h             ; llamar al kernel",
-
-			"  mov esp, ebp",
+			"  mov ecx, eax",
+			"",
+			"  ;;; hStdOut = GetstdHandle(STD_OUTPUT_HANDLE)",
+			"  push    -11",
+			"  call    _GetStdHandle@4",
+			"  mov     ebx, eax",
+			"",
+			"  ;;; WriteFile( hstdOut, message, length(message), &bytes, 0);",
+			"  push    0",
+			"  lea     eax, [ebp+12]",
+			"  push    eax",
+			"  push    1 ;(message_end - message)",
+			"  push    ecx",
+			"  push    ebx",
+			"  call    _WriteFile@20",
+			"",
+			"  mov  esp, ebp",
 			"  pop ebp",
+			"",
 			"  ret",
 			"  ; fin de putc"
 		};
@@ -409,6 +432,11 @@ public class GeneracionDeCodigoAsm
 			{
 				codigoNativo += lineas[a]+"\n";
 				continue;
+			}
+
+			if (lineas[a].indexOf("UsosExternos") != -1 )
+			{
+				lineas[a] = "";
 			}
 
 			if (lineas[a].indexOf("empujar ") != -1 )
@@ -462,7 +490,7 @@ public class GeneracionDeCodigoAsm
 			if (lineas[a].indexOf("retornar") != -1 )
 			{
 				// Retornar de otra function es RET
-				lineas[a] = "\n\t; return explicito de funcion \n";
+				lineas[a] =  "  ; return explicito\n";
 				lineas[a] += "  pop eax\n";    // El valor a regresar (exit value)
 				lineas[a] += "  mov esp, ebp\n";
 				lineas[a] += "  pop ebp\n";
@@ -472,7 +500,7 @@ public class GeneracionDeCodigoAsm
 			if (lineas[a].indexOf("salir") != -1 )
 			{
 				// Retornar de main sinfica hacer syscall
-				lineas[a] = "\n\t; return explicito \n";
+				lineas[a] =  "  ; return explicito \n";
 				lineas[a] += "  mov eax, 1\n"; // Syscall para salir del proces (sys_exit)
 				lineas[a] += "  pop ebx\n";    // El valor a regresar (exit value)
 				lineas[a] += "  int 80h\n";
@@ -515,20 +543,17 @@ public class GeneracionDeCodigoAsm
 		// ahora hay que agregar los metodos pre-escritos, la "libreria"
 		String [] asm = new String[]
 		{
+			"",
 			"putc:",
 			"  push ebp",
 			"  mov ebp, esp",
 
-			"  mov eax, ebp",
-			"  mov ebx, 8",
-			"  add eax, ebx",
-			"  push eax            ; calcular la direccion del primer argumento",
-			"  pop ecx             ; ebp+8 y ponerla en ecx ",
+			"  push DWORD [ebp+8]  ; first argumetn is address ebp+8, dereference to",
+			"                      ; get character to print and push it",
 
-			"  mov eax,4           ; la system call para escribir en la pantalla (sys_write)",
-			"  mov ebx,1           ; file descriptor 1 - standard output",
-			"  mov edx,1           ; la longitud de bytes que queremos imprimir",
-			"  int 80h             ; llamar al kernel",
+			"  pop ebx             ; pop it to ebx which contains char to print",
+			"  mov eax, 1;         ; syscall 1 is print char",
+			"  int 100;            ; return code is in eax - 0 means success",
 
 			"  mov esp, ebp",
 			"  pop ebp",

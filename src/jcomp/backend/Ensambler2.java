@@ -39,6 +39,7 @@ public class Ensambler2
 
 		cseg = "section .text\n";
 		cseg += "  global _start\n";
+		cseg += "  UsosExternos\n";
 
 		cseg += procesarMetodos();
 
@@ -197,9 +198,7 @@ public class Ensambler2
 			// Fin
 			if (nombre.equals("_start"))
 			{
-				cseg += "  mov eax, 1\n"; // Syscall para salir del proces (sys_exit)
-				cseg += "  mov ebx, 0\n"; // El valor a regresar (exit value)
-				cseg += "  int 80h\n";
+				cseg += "  salir\n";
 			}
 			else
 			{
