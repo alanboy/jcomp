@@ -391,7 +391,7 @@ public class Ensambler2
 
 					if (tokens[a].indexOf("<llave") != -1 )
 					{
-						tokens[a] = "\n	jmp while_"+whileActual+"_cond\n";
+						tokens[a] = "\n  jmp while_"+whileActual+"_cond\n";
 						tokens[a] += "while_"+whileActual+"_fin:\n";
 					}
 

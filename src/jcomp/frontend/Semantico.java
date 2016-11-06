@@ -504,22 +504,32 @@ public class Semantico
 
 	int buscarMain()
 	{
-		boolean found = false;
+		int indiceDeMain = -1;
+
 		for (int a = 0; a<m_Metodos.length; a++)
 		{
 			if (m_Metodos[a].getNombre().substring(14).equals("main")
 				&& m_Metodos[a].getArgumentos().equals("NADA")
 				&& m_Metodos[a].getTipoDeRetorno().equals("TIPO_INT"))
 			{
-				found = true;
+				indiceDeMain = a;
 			}
 		}
 
-		if (!found)
+		if (indiceDeMain == -1)
 		{
 			System.err.println("WARNING: Metodo void #main() no existe.");
 		}
-	return 0;
+
+		if (indiceDeMain != 0)
+		{
+			// Poner main al inicio
+			Metodos temp = m_Metodos[indiceDeMain];
+			m_Metodos[indiceDeMain] = m_Metodos[0];
+			m_Metodos[0] = temp;
+		}
+
+		return 0;
 	}
 
 	void generarCodigo()

@@ -26,7 +26,7 @@ CMD_ASSEMBLE=nasm.exe -f win32 -o p.o $(OUTPUT_ASM)
 
 all: clean $(EXECUTABLE_NAME) tests
 
-tests: clean-tests test1 test2 test3 test4 test5 test6 test7 test8
+tests: clean-tests test1 test2 test5 test6 test7 test8
 	@echo "$(RED)============== TESTS SUCCEDED ==============$(NC)"
 
 clean: clean-tests clean-build
@@ -50,6 +50,9 @@ clean-tests:
 	$(CMD_DEL) *.asm
 	$(CMD_DEL) *.lnk
 	$(CMD_DEL) *.pdb
+	$(CMD_DEL) *.ilk
+	$(CMD_DEL) *.o
+	$(CMD_DEL) *.out
 
 test1: $(EXECUTABLE_NAME) $(TEST_DIR)/2/2.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/2/2.jc
@@ -64,12 +67,6 @@ test2: $(EXECUTABLE_NAME) $(TEST_DIR)/3/source.jc
 	$(CMD_RUN)
 
 test3: $(EXECUTABLE_NAME) $(TEST_DIR)/locals/source.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc
-	$(CMD_ASSEMBLE)
-	$(CMD_LINK)
-	$(CMD_RUN)
-
-test4: $(EXECUTABLE_NAME) $(TEST_DIR)/locals/source.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/locals/source.jc
 	$(CMD_ASSEMBLE)
 	$(CMD_LINK)

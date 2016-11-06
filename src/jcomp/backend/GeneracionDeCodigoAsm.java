@@ -75,14 +75,18 @@ public class GeneracionDeCodigoAsm
 
 			// imprimir el numero de linea
 			if ((i+1) < 10) {
-				logger.imprimir((i+1) + " :");
+				logger.imprimir((i+1) + "  ");
+			} else if ((i+1) < 100) {
+				logger.imprimir((i+1) + " ");
 			} else {
-				logger.imprimir((i+1) + ":");
+				logger.imprimir((i+1) + "");
 			}
 
 			for (int j = 0 ; j < 3; j++)
 			{
 				int len = 0;
+
+				logger.imprimir("| ");
 
 				if (multiCodigo[j].length <= i)
 				{
@@ -92,7 +96,7 @@ public class GeneracionDeCodigoAsm
 				else
 				{
 					len = multiCodigo[j][i].length();
-					logger.imprimir("| " + multiCodigo[j][i].substring(0, Math.min(len, caracteresParaCadaCodigo)));
+					logger.imprimir(multiCodigo[j][i].substring(0, Math.min(len, caracteresParaCadaCodigo)));
 				}
 
 				String padding = "";
@@ -195,7 +199,7 @@ public class GeneracionDeCodigoAsm
 			if (lineas[a].indexOf("salir") != -1 )
 			{
 				// Retornar de main sinfica hacer syscall
-				lineas[a] = "\n\t; return explicito \n";
+				lineas[a] =  "  ; return explicito \n";
 				lineas[a] += "  mov eax, 1\n"; // Syscall para salir del proces (sys_exit)
 				lineas[a] += "  pop ebx\n";    // El valor a regresar (exit value)
 				lineas[a] += "  int 80h\n";
@@ -218,7 +222,7 @@ public class GeneracionDeCodigoAsm
 				String id = lineas[a].trim().split("_")[1];
 				id = id.substring(0, id.length() - 2);
 
-				lineas[a] = "\n	pop eax\n";
+				lineas[a] = "\n  pop eax\n";
 				lineas[a] += "  pop ebx\n";
 				lineas[a] += "  cmp ebx, eax\n";
 				lineas[a] += "  je while_" + id + "_fin\n";
@@ -227,7 +231,7 @@ public class GeneracionDeCodigoAsm
 
 			if (lineas[a].indexOf("while_fin:") != -1 )
 			{
-				lineas[a] = "\n	jmp while_cond\n";
+				lineas[a] = "\n  jmp while_cond\n";
 				lineas[a] += "while_fin:\n";
 			}
 
@@ -343,8 +347,8 @@ public class GeneracionDeCodigoAsm
 			if (lineas[a].indexOf("salir") != -1 )
 			{
 				// Retornar de main sinfica hacer syscall
-				lineas[a] += "  ; ExitProcess(0)\n";
-				lineas[a] += "  push    0\n";
+				lineas[a]  = "  ; ExitProcess(0)\n";
+				//lineas[a] += "  push    0\n";
 				lineas[a] += "  call    _ExitProcess@4\n";
 			}
 
@@ -353,7 +357,7 @@ public class GeneracionDeCodigoAsm
 				String id = lineas[a].trim().split("_")[1];
 				id = id.substring(0, id.length() - 2);
 
-				lineas[a] = "\n	pop eax\n";
+				lineas[a] = "\n  pop eax\n";
 				lineas[a] += "  pop ebx\n";
 		 		lineas[a] += "  cmp ebx, eax\n";
 				lineas[a] += "  je while_" + id + "_fin\n";
@@ -365,7 +369,7 @@ public class GeneracionDeCodigoAsm
 				String id = lineas[a].trim().split("_")[1];
 				id = id.substring(0, id.length() - 2);
 
-				lineas[a] = "\n	pop eax\n";
+				lineas[a] = "\n  pop eax\n";
 				lineas[a] += "  pop ebx\n";
 				lineas[a] += "  cmp ebx, eax\n";
 				lineas[a] += "  je while_" + id + "_fin\n";
@@ -374,7 +378,7 @@ public class GeneracionDeCodigoAsm
 
 			if (lineas[a].indexOf("while_fin:") != -1 )
 			{
-				lineas[a] = "\n	jmp while_cond\n";
+				lineas[a] = "\n  jmp while_cond\n";
 				lineas[a] += "while_fin:\n";
 			}
 
@@ -389,13 +393,10 @@ public class GeneracionDeCodigoAsm
 			"  push ebp",
 			"  mov ebp, esp",
 			"",
-			"  ; make space for first argument and 1 local var (bytes)",
-			"  sub esp, 8",
-			"",
 			"  mov eax, ebp",
 			"  mov ebx, 8",
-			"  add eax, ebx",
-			"  mov ecx, eax",
+			"  add eax, ebx             ; calcular la direccion del primer argumento",
+			"  mov ecx, eax             ; ebp+8 y ponerla en ecx ",
 			"",
 			"  ;;; hStdOut = GetstdHandle(STD_OUTPUT_HANDLE)",
 			"  push    -11",
@@ -403,12 +404,11 @@ public class GeneracionDeCodigoAsm
 			"  mov     ebx, eax",
 			"",
 			"  ;;; WriteFile( hstdOut, message, length(message), &bytes, 0);",
-			"  push    0",
-			"  lea     eax, [ebp+12]",
-			"  push    eax",
-			"  push    1 ;(message_end - message)",
-			"  push    ecx",
-			"  push    ebx",
+			"  push    0    ; flags",
+			"  push    0    ; bytes written? can be nullptr",
+			"  push    1    ; (message_end - message)",
+			"  push    ecx  ; print message",
+			"  push    ebx  ; handle from GetstdHandle",
 			"  call    _WriteFile@20",
 			"",
 			"  mov  esp, ebp",
@@ -532,7 +532,7 @@ public class GeneracionDeCodigoAsm
 
 			if (lineas[a].indexOf("while_fin:") != -1 )
 			{
-				lineas[a] = "\n	jmp while_cond\n";
+				lineas[a] = "\n  jmp while_cond\n";
 				lineas[a] += "while_fin:\n";
 			}
 

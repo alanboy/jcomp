@@ -1,8 +1,8 @@
 
 def void #putc(int c)
 {
-	// El contenido de este 
-	// metodo lo inyecta el 
+	// El contenido de este
+	// metodo lo inyecta el
 	// compilador.
 }
 
@@ -26,6 +26,6 @@ def int #main()
 		a = a - 1;
 	}
 
-	#putc(10);	
-    return 0;
+	#putc(10);
+	return 0;
 }

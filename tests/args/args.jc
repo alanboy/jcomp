@@ -7,7 +7,9 @@ def int #sum(int a, int b)
 def int #main()
 {
 	int resultado;
-	resultado = #sum(10, 11); 
-	return resultado - 21;	
+
+	resultado = #sum(10, 11);
+
+	return resultado - 21;
 }
 
