@@ -108,6 +108,11 @@ public class Ensambler2
 				continue;
 			}
 
+			if (nombre.equals("getc"))
+			{
+				continue;
+			}
+
 			// Cambiar el nombre del metodo main
 			if (nombre.equals("main"))
 			{

@@ -283,6 +283,7 @@ public class GeneracionDeCodigoAsm
 			{
 				lineas[a] = "  extern  _GetStdHandle@4\n";
 				lineas[a] += "  extern  _WriteFile@20\n";
+				lineas[a] += "  extern  _ReadFile@20\n";
 				lineas[a] += "  extern  _ExitProcess@4\n";
 			}
 
@@ -410,6 +411,38 @@ public class GeneracionDeCodigoAsm
 			"  push    ecx  ; print message",
 			"  push    ebx  ; handle from GetstdHandle",
 			"  call    _WriteFile@20",
+			"",
+			"  mov  esp, ebp",
+			"  pop ebp",
+			"",
+			"  ret",
+			"  ; fin de putc",
+			"",
+			"getc:",
+			"  push ebp",
+			"  mov ebp, esp",
+			"",
+			"  sub esp, 4   ; espacio para una variable local",
+			"",
+			"  mov eax, ebp",
+			"  mov ebx, 4",
+			"  sub eax, ebx ; ",
+			"  mov ecx, eax ; ebp-4 y ponerla en ecx ",
+			"",
+			"  ;;; hstdIn = GetstdHandle(STD_INPUT_HANDLE)",
+			"  push    -10",
+			"  call    _GetStdHandle@4",
+			"  mov     ebx, eax",
+			"",
+			"  ;;; ReadFile( hstdIn, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped );",
+			"  push    0    ; lpOverlapped",
+			"  push    0    ; lpNumberOfBytesRead",
+			"  push    1    ; nNumberOfBytesToRead",
+			"  push    ecx  ; ",
+			"  push    ebx  ; ",
+			"  call    _ReadFile@20",
+			"",
+			"  mov eax, DWORD [ebp-4]",
 			"",
 			"  mov  esp, ebp",
 			"  pop ebp",

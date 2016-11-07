@@ -26,7 +26,7 @@ CMD_ASSEMBLE=nasm.exe -f win32 -o p.o $(OUTPUT_ASM)
 
 all: clean $(EXECUTABLE_NAME) tests
 
-tests: clean-tests test1 test2 test5 test6 test7 test8
+tests: clean-tests test1 test2 test5 test6 test7 test8 test9
 	@echo "$(RED)============== TESTS SUCCEDED ==============$(NC)"
 
 clean: clean-tests clean-build
@@ -97,4 +97,11 @@ test8: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos/arreglos.jc
 	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN)
+
+test9: $(EXECUTABLE_NAME) $(TEST_DIR)/getc/getc.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/getc/getc.jc
+	$(CMD_ASSEMBLE)
+	$(CMD_LINK)
+	echo zg | $(CMD_RUN) > TestOut.txt
+	diff --ignore-all-space tests/getc/Ref.txt TestOut.txt
 

@@ -1,0 +1,40 @@
+
+def int #getc()
+{
+    return 0;
+}
+
+def void #putc(int c)
+{
+}
+
+def int #main()
+{
+	int c;
+	c = 65;
+	c = #getc();
+
+	#putc(c);
+	#putc(c);
+	#putc(10);
+	#putc(c);
+	#putc(c);
+	#putc(10);
+	#putc(c);
+	#putc(c);
+	#putc(10);
+
+	c = #getc();
+
+	#putc(c);
+	#putc(c);
+	#putc(10);
+	#putc(c);
+	#putc(c);
+	#putc(10);
+	#putc(c);
+	#putc(c);
+	#putc(10);
+
+	return 0;
+}
