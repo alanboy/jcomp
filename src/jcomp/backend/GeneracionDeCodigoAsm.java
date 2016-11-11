@@ -591,7 +591,22 @@ public class GeneracionDeCodigoAsm
 			"  mov esp, ebp",
 			"  pop ebp",
 			"  ret",
-			"  ; fin de putc"
+			"  ; fin de putc",
+			"",
+			"",
+			"getc:",
+			"  push ebp",
+			"  mov ebp, esp",
+			"",
+			"  mov eax, 2         ; syscall 2 is get char",
+			"  int 100",
+			"",
+			"  mov eax, ebx",
+			"",
+			"  mov esp, ebp",
+			"  pop ebp",
+			"  ret",
+			"  ; fin de getc"
 		};
 
 		return codigoNativo + join(asm, '\n');

@@ -96,7 +96,8 @@ test8: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos/arreglos.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/arreglos/arreglos.jc
 	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
-	$(CMD_RUN)
+	$(CMD_RUN) > TestOut.txt
+	diff --ignore-all-space tests/arreglos/Ref.txt TestOut.txt
 
 test9: $(EXECUTABLE_NAME) $(TEST_DIR)/getc/getc.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/getc/getc.jc
@@ -104,4 +105,10 @@ test9: $(EXECUTABLE_NAME) $(TEST_DIR)/getc/getc.jc
 	$(CMD_LINK)
 	echo zg | $(CMD_RUN) > TestOut.txt
 	diff --ignore-all-space tests/getc/Ref.txt TestOut.txt
+
+console: $(EXECUTABLE_NAME) $(TEST_DIR)/console/console.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/console/console.jc
+	$(CMD_ASSEMBLE)
+	$(CMD_LINK)
+	$(CMD_RUN)
 

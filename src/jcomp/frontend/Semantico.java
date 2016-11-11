@@ -80,29 +80,29 @@ public class Semantico
 
 		// continuar construllendo el arbol...
 
+		boolean error = false;
+
 		// para ahorrarme un for dentro de cada metodo..
 		for (int iMetodo = 0; iMetodo < m_Metodos.length; iMetodo++)
 		{
-			boolean exito = false;
-
 			// convertir las operaciones en la nueva nomenclatura
 			m_Metodos[iMetodo].setCuerpo(convertirOP(m_Metodos[iMetodo].getCuerpo()));
 
 			// eliminar los parentesis que ya de nada sirven
 			m_Metodos[iMetodo].setCuerpo(eliminarParentesis(m_Metodos[iMetodo].getCuerpo()));
 
-			exito = revisarRetorno(m_Metodos[iMetodo].getCuerpo(), iMetodo);
-			if (!exito) return 1;
+			error = error || !revisarRetorno(m_Metodos[iMetodo].getCuerpo(), iMetodo);
 
 			// hacer un analisis dimensional
-			exito = analisisDimensional(m_Metodos[iMetodo].getCuerpo(), iMetodo);
-			if (!exito) return 1;
+			error = error || !analisisDimensional(m_Metodos[iMetodo].getCuerpo(), iMetodo);
 		}
+
+		imprimirObjetos();
+
+		if (error) return 1;
 
 		//buscar un main
 		if (buscarMain() != 0) return 1;
-
-		imprimirObjetos();
 
 		// Cambiar el nombre de las variables agregarles el nombre del metodo, para que si se
 		// ddeclaran variables con el mismo nombre en distintos metodos, estas sean consideradas diferentes
@@ -381,7 +381,11 @@ public class Semantico
 				}
 			}
 
-			body = "";for (int h = 0; h<token.length; h++)if (!token[h].equals(""))body += token[h] + "\n";
+			body = "";
+			for (int h = 0; h<token.length; h++)
+				if (!token[h].equals(""))
+					body += token[h] + "\n";
+
 			token = body.split("\n");
 
 			cambio = true;
@@ -397,8 +401,8 @@ public class Semantico
 
 						while (!token[b].equals("</asignacion>"))
 						{
-							if (token[b].startsWith("<op"))not_good = true;
-							if (token[b].startsWith("<llamada"))not_good = true;
+							if (token[b].startsWith("<op")) not_good = true;
+							if (token[b].startsWith("<llamada")) not_good = true;
 							b++;
 						}
 
@@ -678,7 +682,7 @@ public class Semantico
 			// ahora guardar los argumentos que recibe la operacion
 			// si el que esta antes es una llamada o parentesis
 			int _a = mayor_token-1;
-			if (argumento_a.startsWith("</llamada>") 
+			if (argumento_a.startsWith("</llamada>")
 					|| argumento_a.startsWith("</parentesis>")
 					|| argumento_a.startsWith("</op>"))
 			{
@@ -880,15 +884,16 @@ public class Semantico
 
 			cuerpo = reorganizarLLamadas(cuerpo);
 
-			// <var-8-a> TO <int8 id:var1 linea:5 scope:local>
+			// <var-8-a>
+			// <int8 id:var1 linea:5 scope:local>
 			cuerpo = reorganizarVars(cuerpo, variables);
 
 			cuerpo = reorganizarNumeros(cuerpo, m_Metodos[a].getLinea());
 
 			cuerpo = reorganizarStrings(cuerpo, m_Metodos[a].getLinea());
 
-			//old <asignacion-12-cadena>
-			//new <asignacion tipo:string id:cadena linea:12> </asignacion>
+			// <asignacion-12-cadena>
+			// <asignacion tipo:string id:cadena linea:12> </asignacion>
 			cuerpo = reorganizarAsignacion(cuerpo, variables);
 
 			cuerpo = reorganizarParYLLaves(cuerpo);
@@ -1157,39 +1162,70 @@ public class Semantico
 	return body;
 	} //metodo
 
-	//old <asignacion-12-cadena>
-	//new <asignacion tipo:string id:cadena linea:12> </asignacion>
+
+	// Token antes:
+	//   <asignacion-12-cadena>
+	//
+	// Tokens despues:
+	//   <asignacion tipo:INT id:z scope:local linea:28>
+	//       <INT valor:3 linea:28>
+	//   </asignacion>
+	//
+	//   <asignacion tipo:INT id:a[0] scope:local linea:29>
+	//       <INT valor:1 linea:29>
+	//   </asignacion>
 	String reorganizarAsignacion(String body, String [][] variables)
 	{
 		String [] token = body.split("\n");
 		body = "";
-		String nuevo;
+
 		for (int a = 0; a<token.length; a++)
 		{
-			nuevo = "";
-			if (token[a].startsWith("<asignacion-"))
+			String nuevo = "";
+			if (!token[a].startsWith("<asignacion-"))
 			{
-				token[a] = token[a].substring(1, token[a].length()-1);
-				String g [] = token[a].split("-");
-				nuevo += "<asignacion tipo:";
-
-				int foundIndex = -1;
-				for (int b = 0; b<variables.length; b++)
-				{
-					if (variables[b][0].equals(g[2]))
-					{
-						foundIndex = b;
-						break;
-					}
-				}
-
-				nuevo += variables[foundIndex][1];
-				nuevo += " id:" + g[2];
-				nuevo += " scope:" + variables[foundIndex][2];
-				nuevo += " linea:" + g[1];
-				nuevo += ">";
-				token[a] = nuevo;
+				body += token[a]+ "\n";
+				continue;
 			}
+
+			token[a] = token[a].substring(1, token[a].length()-1);
+			String asignacionPartes [] = token[a].split("-");
+
+			nuevo += "<asignacion tipo:";
+
+			String variableNombre = asignacionPartes[2];
+			if (variableNombre.indexOf("[") >= 0)
+			{
+				variableNombre = variableNombre.substring(0, variableNombre.indexOf("["));
+			}
+
+			// buscar esta variable en la lista de variables
+			// para determinar su tipo
+			int foundIndex = -1;
+			for (int b = 0; b < variables.length; b++)
+			{
+				if (variables[b][0].equals(variableNombre))
+				{
+					foundIndex = b;
+					break;
+				}
+			}
+
+			if (variables[foundIndex][1].indexOf("[") >= 0)
+			{
+				nuevo += variables[foundIndex][1].substring(0, variables[foundIndex][1].indexOf("["));
+			}
+			else
+			{
+				nuevo += variables[foundIndex][1];
+			}
+
+			nuevo += " id:" + asignacionPartes[2];
+			nuevo += " scope:" + variables[foundIndex][2];
+			nuevo += " linea:" + asignacionPartes[1];
+			nuevo += ">";
+			token[a] = nuevo;
+
 			body += token[a]+ "\n";
 		}
 		return body;
@@ -1244,47 +1280,84 @@ public class Semantico
 		return body;
 	}
 
-	// <var-8-a>
-	// <int8 id:var1 linea:5 scope:local>
+	// Todo: el metodo convertirVariables() organiza de tokens a XML
+	//       y este medoto organize de nuevo ese XML a otro estilo de
+	//       XML. Hay que modificar convertirVariables() para que llegue
+	//       al estilo final sin tener que dar tanta vuelta.
+	//
+	// Convierte:
+	//     <var-8-a>
+	//     <int8 id:var1 linea:5 scope:local>
+	//
+	// variables[][] es un arreglo con las variables locales de este metodo
 	String reorganizarVars(String body, String variables[][])
 	{
 		String [] token = body.split("\n");
 		body = "";
 		for (int a = 0; a<token.length; a++)
 		{
-			String nuevo = "";
-			if (token[a].startsWith("<var"))
+			if (!token[a].startsWith("<var"))
 			{
-				String f = token[a].substring(1, token[a].length()-1);
-				String [] variableParts = f.split("-");
-				nuevo += "<";
-
-				int foundIndex = -1;
-				for (int z = 0; z<variables.length; z++)
-				{
-					if (variables[z][0].equals(variableParts[2]))
-					{
-						foundIndex = z;
-						break;
-					}
-				}
-
-				// Agregar el tipo
-				nuevo += variables[foundIndex][1];
-
-				// Agregar el id de la variable....
-				nuevo += " id:" + variableParts[2];
-
-				// Agregar el scope de la variable
-				nuevo += " scope:"+variables[foundIndex][2];
-
-				// Agregar la linea de la variable
-				nuevo += " linea:" + variableParts[1] ;
-
-				nuevo += ">";
-
-				token[a] = nuevo;
+				body += token[a]+"\n";
+				continue;
 			}
+
+			String f = token[a].substring(1, token[a].length()-1);
+			String [] variableParts = f.split("-");
+			String nuevo = "<";
+
+			// Buscar este uso de variable en la declaracion
+			// para establecer su tipo
+			int foundIndex = -1;
+			for (int z = 0; z<variables.length; z++)
+			{
+				if (variables[z][0].equals(nombreDeVariable(variableParts[2])))
+				{
+					foundIndex = z;
+					break;
+				}
+			}
+
+			if (foundIndex == -1)
+			{
+				System.out.println("No encontre la variable local: " + variableParts[2]);
+				continue;
+			}
+
+			// si la variable que estoy procesando es un indice dentro de un arreglo:
+			//    <INT[5] id:a[0] scope:local linea:35>
+			//        ^^^    ^^^^
+			//     VarLoc    EstaVar
+			// entonces el tipo en `variables` me diria que es `INT[5]` pero dado que
+			// estoy indexando un solo elemento, el tipo resultante es ahora solo `INT`
+			//
+
+			String tipoDeVariableLocal = variables[foundIndex][1];
+
+			if (variableParts[2].contains("["))
+			{
+				// Agregar el tipo
+				nuevo += "INT";
+			}
+			else
+			{
+				// Agregar el tipo
+				nuevo += tipoDeVariableLocal;
+			}
+
+			// Agregar el id de la variable....
+			nuevo += " id:" + variableParts[2];
+
+			// Agregar el scope de la variable
+			nuevo += " scope:"+variables[foundIndex][2];
+
+			// Agregar la linea de la variable
+			nuevo += " linea:" + variableParts[1] ;
+
+			nuevo += ">";
+
+			token[a] = nuevo;
+
 			body += token[a]+"\n";
 		}
 		return body;
@@ -1351,20 +1424,29 @@ public class Semantico
 		for (int a = 0; a<m_Metodos.length; a++)
 		{
 			String [] token = m_Metodos[a].getCuerpo().split(" ");
-			String linea = m_Metodos[a].getLinea();
+			String numDeLinea = m_Metodos[a].getLinea().substring(13);
 			String cuerpo = "";
 
 			for (int b = 0; b<token.length; b++)
 			{
 				if (token[b].startsWith("NUMERO_LINEA"))
 				{
-					linea = token[b];
+					numDeLinea = token[b].substring(13);
 				}
+
+				if (BuscarPatron("IDENTIFICADOR_* CORCHETE_ABRE VALOR_NUMERO_* CORCHETE_CIERRA", token, b))
+				{
+					String indice = token[b+2].substring(13);
+					token[b] = "<var-"+numDeLinea +"-"+token[b].substring(14)+"["+ indice +"]>";
+					token[b+1] = token[b+2] = token[b+3] = "";
+				}
+
 
 				if (token[b].startsWith("IDENTIFICADOR_"))
 				{
-					token[b] = "<var-"+linea.substring(13)+"-"+token[b].substring(14)+">";
+					token[b] = "<var-"+numDeLinea +"-"+token[b].substring(14)+">";
 				}
+
 				cuerpo += token[b] + " ";
 			}
 
@@ -1500,9 +1582,34 @@ public class Semantico
 					linea = token[b];
 				}
 
+				// asignacion simple: a = 3;
 				if (token[b].startsWith("IDENTIFICADOR_") && token[b+1].equals("ASIGNA") && !token[b+2].equals("ASIGNA"))
 				{
 					token[b] = "<asignacion-"+linea.substring(13)+"-"+token[b].substring(14)+">";
+					token[++b] = "";
+
+					while (!token[b].equals("PUNTUACION_PUNTO_COMA"))
+					{
+						b++;
+					}
+					token[b] = "</asignacion>";
+				}
+
+				// asignacion a un elemento de un arreglo: a[1] = 3;
+				// IDENTIFICADOR_a CORCHETE_ABRE VALOR_NUMERO_3 CORCHETE_CIERRA ASIGNA <INT valor:1 linea:29>
+
+				if (token[b].startsWith("IDENTIFICADOR_")
+						&& token[b+1].equals("CORCHETE_ABRE")
+						&& token[b+3].equals("CORCHETE_CIERRA")
+						&& token[b+4].equals("ASIGNA"))
+				{
+
+					int indiceEnElArreglo = Integer.parseInt(token[b+2].substring(13));
+
+					token[b] = "<asignacion-"+linea.substring(13)+"-"+token[b].substring(14)+"["+ indiceEnElArreglo +"]>";
+					token[++b] = "";
+					token[++b] = "";
+					token[++b] = "";
 					token[++b] = "";
 
 					while (!token[b].equals("PUNTUACION_PUNTO_COMA"))
@@ -1712,9 +1819,9 @@ public class Semantico
 		return 0;
 	} //revisarDefiniciones()
 
-	//revisar que dentro del cuerpo de los metodos no se declaren las variables dos veces
-	//acuerdate que los argumentos que recibe el metodo son tambien declaraciones
-	//y que no pueden tener el mismo nombre que declaraciones globales def
+	// revisar que dentro del cuerpo de los metodos no se declaren las variables dos veces
+	// acuerdate que los argumentos que recibe el metodo son tambien declaraciones
+	// y que no pueden tener el mismo nombre que declaraciones globales def
 	int revisarCuerpoVariables()
 	{
 		String cuerpo ="";
@@ -1749,10 +1856,10 @@ public class Semantico
 			//contar cuantas declaraciones tipo arreglo
 			for (int a = 0; a<tokens.length; a++)
 				if (tokens[a].startsWith("TIPO_")
-						&& tokens[a+1].startsWith("CORCHETE_ABRE")
-						&& tokens[a+2].startsWith("CORCHETE_CIERRA")
-						&& tokens[a+3].startsWith("IDENTIFICADOR_")
-						&& tokens[a+4].equals("PUNTUACION_PUNTO_COMA"))
+						&& tokens[a+1].startsWith("IDENTIFICADOR_")
+						&& tokens[a+2].startsWith("CORCHETE_ABRE")
+						&& tokens[a+4].startsWith("CORCHETE_CIERRA")
+						&& tokens[a+5].equals("PUNTUACION_PUNTO_COMA"))
 					declaracion++;
 
 			//crear un vector bidimensional.. declaracion-> linea, tipo, id
@@ -1788,14 +1895,14 @@ public class Semantico
 				}
 
 				if (tokens[a].startsWith("TIPO_")
-						&& tokens[a+1].startsWith("CORCHETE_ABRE")
-						&& tokens[a+2].startsWith("CORCHETE_CIERRA")
-						&& tokens[a+3].startsWith("IDENTIFICADOR_")
-						&& tokens[a+4].equals("PUNTUACION_PUNTO_COMA"))
+						&& tokens[a+1].startsWith("IDENTIFICADOR_")
+						&& tokens[a+2].startsWith("CORCHETE_ABRE")
+						&& tokens[a+4].startsWith("CORCHETE_CIERRA")
+						&& tokens[a+5].equals("PUNTUACION_PUNTO_COMA"))
 				{
 					declaraciones[inicio][0] = linea;
 					declaraciones[inicio][1] = tokens[a];
-					declaraciones[inicio][2] = tokens[a+3];
+					declaraciones[inicio][2] = tokens[a+1];
 					inicio++;
 				}
 			} //cada token
@@ -1842,6 +1949,23 @@ public class Semantico
 
 				if (tokens[x].startsWith("TIPO_"))
 				{
+					// Declaracion de un arreglo:
+					// TIPO_INT IDENTIFICADOR_a CORCHETE_ABRE VALOR_NUMERO_5 CORCHETE_CIERRA PUNTUACION_PUNTO_COMA
+					if (tokens[x+1].startsWith("IDENTIFICADOR_")
+							&& tokens[x+2].equals("CORCHETE_ABRE")
+							&& tokens[x+3].startsWith("VALOR_NUMERO_")
+							&& tokens[x+4].equals("CORCHETE_CIERRA")
+							&& tokens[x+5].equals("PUNTUACION_PUNTO_COMA"))
+					{
+						int tamArreglo = Integer.parseInt(tokens[x+3].substring(13));
+						tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"["+tamArreglo+"]-"+tokens[x+1].substring(14)+">";
+						tokens[x+1] = "";
+						tokens[x+2] = "";
+						tokens[x+3] = "";
+						tokens[x+4] = "";
+						tokens[x+5] = "";
+					}
+
 					if (tokens[x+1].startsWith("IDENTIFICADOR_") && tokens[x+2].equals("PUNTUACION_PUNTO_COMA"))
 					{
 						tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+1].substring(14)+">";
@@ -2037,8 +2161,11 @@ public class Semantico
 				if (token[b].startsWith("IDENTIFICADOR_"))
 				{
 					boolean found = false;
+
 					for (int h = 0; h<variables.length; h++)
+					{
 						if (variables[h].equals(token[b].substring(14))) found = true;
+					}
 
 					if (!found)
 					{
@@ -2052,6 +2179,11 @@ public class Semantico
 				{
 					String [] _t = token[b].split("-");
 					String _id = _t[2].substring(0, _t[2].length() - 1);
+
+					if (_id.contains("["))
+					{
+						_id = _id.substring(0, _id.indexOf("["));
+					}
 
 					boolean found = false;
 					for (int h = 0; h<variables.length; h++)
@@ -2093,6 +2225,46 @@ public class Semantico
 		}
 
 		return resultado.toArray(new String[resultado.size()]);
+	}
+
+	private String nombreDeVariable(String nombreDelArreglo)
+	{
+		int llave = nombreDelArreglo.indexOf("[");
+		if (llave >= 0)
+		{
+			nombreDelArreglo = nombreDelArreglo.substring(0, llave);
+		}
+
+		return nombreDelArreglo;
+	}
+
+	private boolean BuscarPatron(String patron, String [] tokens, int inicio)
+	{
+		boolean encontrado = true;
+		String [] patronTokens = patron.split(" ");
+
+		if (inicio + patronTokens.length >= tokens.length)
+		{
+			return false;
+		}
+
+		for (String pT : patronTokens)
+		{
+			if (pT.indexOf("*") >= 0)
+			{
+				pT = pT.replaceAll("\\*", "");
+				encontrado = tokens[inicio].startsWith(pT);
+			}
+			else
+			{
+				encontrado = tokens[inicio].equals(pT);
+			}
+
+			if (encontrado == false) break;
+			inicio++;
+		}
+
+		return encontrado;
 	}
 
 	void imprimirObjetos()

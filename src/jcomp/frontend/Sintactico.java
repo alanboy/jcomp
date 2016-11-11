@@ -50,8 +50,8 @@ public class Sintactico
 			cf += s[a]+" ";
 		}
 
-		//crear las producciones para la gramatica
-		//y despues se las pasare al automata
+		// crear las producciones para la gramatica
+		// y despues se las pasare al automata
 		Produccion [] prod =
 		{
 		new Produccion("<PROGRAMA>","$ <instruccion_basica> FINAL"),
@@ -76,7 +76,7 @@ public class Sintactico
 
 
 		new Produccion("<casi_if>", "CONTROL_IF PARENTESIS_ABRE"),
-		new Produccion("<error_1>", "CONTROL_IF <id>"), //////////////////////////////////////
+		new Produccion("<error_1>", "CONTROL_IF <id>"),
 		new Produccion("<error_1>", "CONTROL_IF <op_bool>"),
 		new Produccion("<if>", "<casi_if> <expression_booleana> PARENTESIS_CIERRA <statement_block>"),
 
@@ -95,7 +95,6 @@ public class Sintactico
 		new Produccion("<expression_booleana>", "PARENTESIS_ABRE <expression_booleana> PARENTESIS_CIERRA"),
 		new Produccion("<expression_booleana>", "<expression_booleana> <op_bool> <expression_booleana>"),
 
-		//nuevas
 		new Produccion("<expression_booleana>", "<llamada> <op_bool> <expression>"),
 		new Produccion("<expression_booleana>", "<llamada> <op_bool> <llamada>"),
 		new Produccion("<expression_booleana>", "<expression> <op_bool> <llamada>"),
@@ -109,22 +108,21 @@ public class Sintactico
 
 		new Produccion("<op_bool>", "BOL_MENOR_QUE"),
 		new Produccion("<op_bool>", "BOL_MAYOR_QUE"),
-		new Produccion("<op_bool>", "BOL_MENOR_QUE ASIGNA"),//aki falta manosear
+		new Produccion("<op_bool>", "BOL_MENOR_QUE ASIGNA"), //aqui falta manosear
 		new Produccion("<op_bool>", "BOL_MAYOR_QUE ASIGNA"),
 		new Produccion("<op_bool>", "ASIGNA ASIGNA"),
 
 		new Produccion("<asignacion>", "<id> ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> ASIGNA <id> PUNTUACION_PUNTO_COMA"),
-		new Produccion("<asignacion>", "<id> ASIGNA <llamada> PUNTUACION_PUNTO_COMA"), //--------
+		new Produccion("<asignacion>", "<id> ASIGNA <llamada> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <expression> CORCHETE_CIERRA ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
 
-		//new Produccion("<variable_declaration>", "TIPO <asignacion>"),
-		new Produccion("<variable_declarator>", "TIPO CORCHETE_ABRE CORCHETE_CIERRA <id> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<variable_declarator>", "TIPO <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 		new Produccion("<variable_declarator>", "TIPO <id> PUNTUACION_PUNTO_COMA"),
 
 		new Produccion("<statement_block>", "LLAVE_ABRE <statement> LLAVE_CIERRA"),
 		new Produccion("<statement_block>", "LLAVE_ABRE LLAVE_CIERRA"),
 
-		//new Produccion("<statement>", "<expression> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<statement>", "<statement> <statement>"),
 		new Produccion("<statement>", "<variable_declaration>"),
 		new Produccion("<statement>", "<variable_declarator>"),
@@ -138,7 +136,6 @@ public class Sintactico
 		new Produccion("<retorno>", "CONTROL_RETORNO <llamada> PUNTUACION_PUNTO_COMA"),
 
 		new Produccion("<expression>", "<literal_expression>"),
-		//new Produccion("<expression>", "<llamada>"),
 
 		new Produccion("<expression>", "<expression> <op> <expression>"),
 		new Produccion("<expression>", "<id> <op> <expression>"),
@@ -147,6 +144,7 @@ public class Sintactico
 
 		new Produccion("<expression>", "<literal_expression>"),
 		new Produccion("<expression>", "PARENTESIS_ABRE <expression> PARENTESIS_CIERRA"),
+
 
 		new Produccion("<ARGS>", "<expression> PUNTUACION_COMA <expression>"),
 		new Produccion("<ARGS>", "<expression> PUNTUACION_COMA <id>"),
@@ -157,11 +155,16 @@ public class Sintactico
 		new Produccion("<ARGS>", "<ARGS> <op> <expression>"),
 		new Produccion("<ARGS>", "<ARGS> <op> <id>"),
 
+		// Esta regla tiene que incluir el `casi_llamada`, de lo contrario seria un prefijo de `variable_declarator`
+		// habilita esto: #funcion( a[3] );
+		new Produccion("<casi_llamada>", "<casi_llamada> <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA"),
 		new Produccion("<casi_llamada>", "PUNTUACION_GATO <id> PARENTESIS_ABRE"),
+
 		new Produccion("<llamada>", "<casi_llamada> <expression> PARENTESIS_CIERRA"),
 		new Produccion("<llamada>", "<casi_llamada> <id> PARENTESIS_CIERRA"),
 		new Produccion("<llamada>", "<casi_llamada> PARENTESIS_CIERRA"),
 		new Produccion("<llamada>", "<casi_llamada> <ARGS> PARENTESIS_CIERRA"),
+
 
 		new Produccion("LLAVE_ABRE <statement>", "LLAVE_ABRE <llamada> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<statement>", "<statement> <llamada> PUNTUACION_PUNTO_COMA"),

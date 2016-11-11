@@ -1,9 +1,19 @@
 
 def void #putc(int c)
 {
-	// El contenido de este
-	// metodo lo inyecta el
-	// compilador.
+}
+
+// Esto parece tonto, pero arreglo un bug.
+// No se podia tener un while que fuera
+// terminara siendo la ultima instruccion del
+// metodo. No borrar.
+def void #m1()
+{
+	int c;
+	c = 1;
+	while (c > 11)
+	{
+	}
 }
 
 def int #main()

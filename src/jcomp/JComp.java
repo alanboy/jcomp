@@ -62,6 +62,8 @@ public class JComp
 		// Cargar el archivo con el codigo fuente
 		//
 		try{
+			logger.imprimirLinea("Compilando " + lineaDeComandos.getCodigoFuentePath());
+
 			BufferedReader br = new BufferedReader(new FileReader(lineaDeComandos.getCodigoFuentePath()));
 			codigoFuente = "";
 			String k = "";
@@ -69,6 +71,7 @@ public class JComp
 
 		}catch(IOException e){
 			System.out.println("No he podido leer el archivo de entrada:" + lineaDeComandos.getCodigoFuentePath());
+			logger.close();
 			System.exit(1);
 		}
 
@@ -78,6 +81,7 @@ public class JComp
 		Lexico a_lex = new Lexico(codigoFuente);
 		if(a_lex.iniciar() != 0)
 		{
+			logger.close();
 			System.exit(1);
 		}
 
@@ -88,6 +92,7 @@ public class JComp
 		a_sin.setCodigo(a_lex.getCodigo());
 		if(a_sin.iniciar() != 0)
 		{
+			logger.close();
 			System.exit(1);
 		}
 
@@ -98,6 +103,7 @@ public class JComp
 		a_sem.setCodigo(a_sin.getCodigo());
 		if(a_sem.iniciar() != 0)
 		{
+			logger.close();
 			System.exit(1);
 		}
 

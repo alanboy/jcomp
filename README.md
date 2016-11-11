@@ -81,14 +81,8 @@ a.out: ELF 32-bit LSB  executable, Intel 80386, version 1 (SYSV), statically lin
 Supported emulations: elf_x86_64 elf32_x86_64 elf_i386 i386linux elf_l1om elf_k1om i386pep i386pe
 
 http://www.nasm.us/doc/nasmdoc9.html
-
-
 https://www.cs.uaf.edu/2006/fall/cs301/support/x86/
-
 http://matthieuhauglustaine.blogspot.com/
-
-
 http://www.cavestory.org/guides/csasm/guide/structure_of_func.html
-
-
 https://www.cs.uaf.edu/2006/fall/cs301/support/x86/
+

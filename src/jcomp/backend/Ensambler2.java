@@ -87,8 +87,6 @@ public class Ensambler2
 		boolean returnExplicto = false;
 
 		// Declarar variables locales
-		String localVarDeclaraciones = "";
-
 		String tokens[] = codigo.split("\n");
 
 		for (int a = 0; a<tokens.length; a++)
@@ -149,41 +147,54 @@ public class Ensambler2
 
 				for (String argumento : argumentos)
 				{
-					String variableName = argumento.trim().split(" ")[1];
+					String variableNombre = argumento.trim().split(" ")[1];
 
 					PseudoTag variableLocal = new PseudoTag("", true /*failSilently*/);
-					variableLocal.set("id", variableName);
+					variableLocal.set("id", variableNombre);
 					variableLocal.set("stackpos", "+"  + argumentoActual);
 					variableLocal.set("scope", "arg");
 
 					argumentoActual += 4;
 
-					mapaVariablesLocales.put(variableName, variableLocal);
-
+					mapaVariablesLocales.put(variableNombre, variableLocal);
 				}
 			}
 
 			while (!tokens[++a].equals("</METODO>"))
 			{
+				// Hay dos tipos de declaraciones, tipos primitivos y arreglos:
+				// <declaracion tipo:INT id:z linea:24>
+				// <declaracion tipo:INT[5] id:a linea:25>
+				//
 				if (tokens[a].startsWith("<declaracion tipo:"))
 				{
-					// por ahora todas las variables locales son de 4 bytes
-					espacioParaVariablesLocales += 4;
-
 					// Obtener el nombre de la variable
 					String declaracionLocalSp [] = tokens[a].split(" ");
-					String variableName = declaracionLocalSp[2].substring(3, declaracionLocalSp[2].length()-1);
+					String variableNombre = declaracionLocalSp[2].substring(3, declaracionLocalSp[2].length()-1);
+					String variableTipo = declaracionLocalSp[1].substring(5);
 
-					// Guardar la declaracion de las variables locales
-					// localVarDeclaraciones += (variableName + "$ = -" +espacioParaVariablesLocales+ "            ; size = 4\n");
+					if (variableTipo.contains("[")) {
+						// este es un arrelgo, y el tamano es el tamano del arreglo
+						// multiplicado por el tamano de la variable que contiene
+						int tamArreglo = Integer.parseInt(variableTipo.substring(variableTipo.indexOf("[")+1, variableTipo.length() - 1));
+						espacioParaVariablesLocales += (4 * tamArreglo);
 
-					// Escribir la inicializacion : mov	DWORD PTR _local_var$[ebp], 5
-					cseg_temp += "  mov DWORD [ebp-" + espacioParaVariablesLocales + "], 0 ; "+ variableName + "\n";
+						// los arreglos no estan inicializados por el momento
+						cseg_temp += "                      "
+									+ ";  variable="+ variableNombre + ", tipo=" + variableTipo + " no ha sido inicializado\n";
+
+					} else {
+						// por ahora todas las variables locales son de 4 bytes
+						espacioParaVariablesLocales += 4;
+
+						// Escribir la inicializacion : mov	DWORD PTR _local_var$[ebp], 5
+						cseg_temp += "  mov DWORD [ebp-" + espacioParaVariablesLocales + "], 0 "
+									+ ";  variable="+ variableNombre + ", tipo=" + variableTipo + "\n";
+					}
 
 					PseudoTag variableLocal = new PseudoTag(tokens[a]);
 					variableLocal.set("stackpos", "-" + espacioParaVariablesLocales);
-					mapaVariablesLocales.put(variableName, variableLocal);
-
+					mapaVariablesLocales.put(variableNombre, variableLocal);
 				}
 			}
 
@@ -216,24 +227,18 @@ public class Ensambler2
 			cseg += "  ; fin de "+nombre + "\n\n";
 		}
 
-		// Invertir el orden de localVarDeclaraciones
-		String localInitParts [] = localVarDeclaraciones.split("\n");
-		String localVarDeclaracionesBuff = "";
-		for (int localDefI = localInitParts.length - 1;  localDefI >= 0 ; localDefI--)
-		{
-			localVarDeclaracionesBuff += localInitParts[ localDefI ] + "\n";
-		}
+		return cseg;
+	} //procedimientos
 
-		return localVarDeclaracionesBuff + cseg;
-	}//procedimientos
-
+	// Convertir tokens dentro del metodo. Los tokens de este metodo inician
+	// en `inicio` y terminan en `fin`.
 	String convertirNomenclatura(int inicio, int fin, boolean metodoMain)
 	{
 		String [] tokens = codigo.split("\n");
 		String cseg = "";
 		String whileActual = "";
 
-		for (int a = inicio; a < fin; a++)
+		for (int a = inicio; a <= fin; a++)
 		{
 			while (tokens[a].equals("<coma>") || tokens[a].startsWith("<declaracion"))
 			{
@@ -253,40 +258,43 @@ public class Ensambler2
 				}
 				else if (variableTag.get("scope").equals("local")) // Empujar variable local
 				{
-					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+					PseudoTag tokenTag = mapaVariablesLocales.get(nombreDeVariable(variableTag.get("id")));
+
 					cseg += "  ; empujar variable local \n"
-						+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+						  + "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
 				}
 				else if (variableTag.get("scope").equals("arg")) // Empujar variable local
 				{
 					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+
 					cseg += "  ; empujar arg \n"
-						+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+						  + "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
 				}
 				tokens[a] = "*";
 			}
 
-			if (tokens[a].startsWith("<INT[] id"))
-			{
-				if (variableTag.get("scope").equals("global")) // Empujar variable global
-				{
-					cseg += "  empujarapuntador "
-						+ variableTag.get("id") + "\n";
-				}
-				else if (variableTag.get("scope").equals("local")) // Empujar variable local
-				{
-					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
-					cseg += "  ; empujar variable local \n"
-						+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
-				}
-				else if (variableTag.get("scope").equals("arg")) // Empujar variable local
-				{
-					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
-					cseg += "  ; empujar arg \n"
-						+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
-				}
-				tokens[a] = "*";
-			}
+			// Esto sera necesario cuando quiera implmentar arreglos como argumentos de un metodo
+			//if (tokens[a].startsWith("<INT[] id"))
+			//{
+			//	if (variableTag.get("scope").equals("global")) // Empujar variable global
+			//	{
+			//		cseg += "  empujarapuntador "
+			//			+ variableTag.get("id") + "\n";
+			//	}
+			//	else if (variableTag.get("scope").equals("local")) // Empujar variable local
+			//	{
+			//		PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+			//		cseg += "  ; empujar variable local \n"
+			//			+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+			//	}
+			//	else if (variableTag.get("scope").equals("arg")) // Empujar variable local
+			//	{
+			//		PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+			//		cseg += "  ; empujar arg \n"
+			//			+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+			//	}
+			//	tokens[a] = "*";
+			//}
 
 			// <STRING valor:"asdf"> Una literal
 			if (tokens[a].startsWith("<STRING valor:"))
@@ -341,72 +349,84 @@ public class Ensambler2
 					if (a == inicio) vacio = true;
 				}
 
-				if (!vacio)
+				if (vacio)
 				{
-					if (tokens[a].indexOf("llamada tipo:") != -1 )
-					{
-						tokens[a] = "  call "+ tokens[a].substring( tokens[a].indexOf("id:") + 3, tokens[a].length()-1 )
-							+ "\n  push eax\n";
-					}
+					continue;
+				}
 
-					if (tokens[a].indexOf("op tipo:") != -1 )
-					{
-						tokens[a] = "  "+tokens[a].substring(tokens[a].indexOf("tipo:") + 5, tokens[a].length()-1);
-					}
+				if (tokens[a].indexOf("llamada tipo:") != -1 )
+				{
+					tokens[a] = "  call "+ tokens[a].substring( tokens[a].indexOf("id:") + 3, tokens[a].length()-1 )
+						+ "\n  push eax\n";
+				}
 
-					if (tokens[a].indexOf("<retorno>") != -1 )
-					{
-						tokens[a] = metodoMain ? "  salir" : "  retornar";
-					}
+				if (tokens[a].indexOf("op tipo:") != -1 )
+				{
+					tokens[a] = "  "+tokens[a].substring(tokens[a].indexOf("tipo:") + 5, tokens[a].length()-1);
+				}
 
-					// Resolver los id's de la asignacion.
-					// Si es una variable global:
-					// 			mov     DWORD PTR _global_var, 45
-					//
-					// Si es una variable logal:
-					//			mov     eax, DWORD PTR _local_var$[ebp]
-					//
-					PseudoTag tokenTag = new PseudoTag(tokens[a]);
-					if (tokens[a].indexOf("asignacion tipo:INT") != -1)
+				if (tokens[a].indexOf("<retorno>") != -1 )
+				{
+					tokens[a] = metodoMain ? "  salir" : "  retornar";
+				}
+
+				// Resolver los id's de la asignacion.
+				// Si es una variable global:
+				// 			mov     DWORD PTR _global_var, 45
+				//
+				// Si es una variable logal:
+				//			mov     eax, DWORD PTR _local_var$[ebp]
+				//
+				PseudoTag tokenTag = new PseudoTag(tokens[a]);
+				if (tokens[a].indexOf("asignacion tipo:INT") != -1)
+				{
+					tokenTag = mapaVariablesLocales.get(nombreDeVariable(tokenTag.get("id")));
+					if (tokenTag == null)
 					{
+						// Variable global
+						tokenTag = new PseudoTag(tokens[a]);
+						tokens[a] = "  asignaAGlobal "+ tokenTag.get("id") + "\n";
+					}
+					else
+					{
+						// Esta es una variable local
+						tokens[a] = "\n  ; asignacion local a " + tokenTag.get("id") + "\n";
+						tokens[a] += "  pop eax\n";
+						tokens[a] += "  mov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
+					}
+				}
+
+				if (tokens[a].indexOf("asignacion tipo:STRING") != -1)
+				{
 						tokenTag = mapaVariablesLocales.get(tokenTag.get("id"));
-                		if (tokenTag == null)
-						{
-							tokenTag = new PseudoTag(tokens[a]);
-							// si no esta en el mapa de variables locales, entonces
-							// esta es una variable global
-							tokens[a] = "  asignaAGlobal "+ tokenTag.get("id") + "\n";
-						}
-						else
-						{
-							// Para las variables locales NO puedo usar el nombre
-							tokens[a] = "\n  ; asignacion local a " + tokenTag.get("id") + "\n";
-							tokens[a] += "  pop eax\n";
-							tokens[a] += "  mov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
-						}
-					}
+						tokens[a] = "\n  ; asignacion local a " + tokenTag.get("id") + "\n";
+						tokens[a] += "  pop eax\n";
+						tokens[a] += "  mov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
+				}
 
-					if (tokens[a].indexOf("asignacion tipo:STRING") != -1)
-					{
-							tokenTag = mapaVariablesLocales.get(tokenTag.get("id"));
-							tokens[a] = "\n  ; asignacion local a " + tokenTag.get("id") + "\n";
-							tokens[a] += "  pop eax\n";
-							tokens[a] += "  mov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
-					}
+				if (tokens[a].indexOf("<llave") != -1 )
+				{
+					tokens[a] = "\n  jmp while_"+whileActual+"_cond\n";
+					tokens[a] += "while_"+whileActual+"_fin:\n";
+				}
 
-					if (tokens[a].indexOf("<llave") != -1 )
-					{
-						tokens[a] = "\n  jmp while_"+whileActual+"_cond\n";
-						tokens[a] += "while_"+whileActual+"_fin:\n";
-					}
+				cseg += tokens[a] + "\n";
 
-					cseg += tokens[a] + "\n";
-
-					tokens[a] = "*";
-				} //if de metodo vacio
+				tokens[a] = "*";
 			}
 		}//for de cada metodo
 		return cseg;
+	}
+
+	private String nombreDeVariable(String nombreDelArreglo)
+	{
+		int llave = nombreDelArreglo.indexOf("[");
+		if (llave >= 0)
+		{
+			nombreDelArreglo = nombreDelArreglo.substring(0, llave);
+		}
+
+		return nombreDelArreglo;
 	}
 }//class ensambler
 
