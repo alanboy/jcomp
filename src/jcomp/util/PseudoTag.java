@@ -7,14 +7,23 @@ import java.util.Set;
 
 
 // Parser for pseudo xml tag I use:
-// <INT id:_local_var scope:local>
-// getType() regresaria "INT"
-// get("id") regresaria "_local_var"
-// get("scope") regresaria "local"
+//
+// Ejemplos de PseudoTag:
+//  <INT id:_local_var scope:local>
+//      Type=INT
+//      id=_local_var
+//      scope=local
+//
+//  <asignacion tipo:INT id:a[0] scope:local>
+//      getType()   asignacion
+//      get("tipo") INT
+//      get("id")   a[0]
+//      get("scope") local
+//
 public class PseudoTag
 {
 	private String _raw;
-	private Hashtable <String,String> _hashtable;
+	private Hashtable <String, String> _hashtable;
 	private String _type;
 
 	public PseudoTag(String raw)
@@ -41,18 +50,18 @@ public class PseudoTag
 	{
 		// Test for < >
 		int len = _raw.length()-1;
-		if (_raw.charAt(0) != '<'
-				|| _raw.charAt(len) != '>')
+
+		if (_raw.charAt(0) != '<' || _raw.charAt(len) != '>')
 		{
 			throw new Exception("Malformed string.");
 		}
 
-		String parts [] = _raw.substring(1,len).split(" ");
+		String parts [] = _raw.substring(1, len).split(" ");
 
 		// First part is the type
 		_type = parts[0];
 
-		for(int i=1; i < parts.length; i++)
+		for(int i = 1; i < parts.length; i++)
 		{
 			String [] keyValue = parts[i].split(":");
 			_hashtable.put(keyValue[0], keyValue[1]);

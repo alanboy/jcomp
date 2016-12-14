@@ -91,7 +91,6 @@ public class GeneracionDeCodigoAsm
 				if (multiCodigo[j].length <= i)
 				{
 					// Este codigo ya termino
-
 				}
 				else
 				{
@@ -263,7 +262,7 @@ public class GeneracionDeCodigoAsm
 			"  ; fin de putc"
 		};
 
-		return codigoNativo + join(asm, '\n');
+		return codigoNativo + String.join("\n", asm);
 	}
 
 	private String x86Windows()
@@ -451,7 +450,7 @@ public class GeneracionDeCodigoAsm
 			"  ; fin de putc"
 		};
 
-		return codigoNativo + join(asm, '\n');
+		return codigoNativo + String.join("\n", asm);
 	}
 
 	private String x86Valdosta()
@@ -609,16 +608,6 @@ public class GeneracionDeCodigoAsm
 			"  ; fin de getc"
 		};
 
-		return codigoNativo + join(asm, '\n');
-	}
-
-	private static String join(String [] a, char c)
-	{
-		StringBuilder s = new StringBuilder();
-		for (String si : a)
-		{
-			s.append(si + c);
-		}
-		return s.toString();
+		return codigoNativo + String.join("\n", asm);
 	}
 }

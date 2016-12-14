@@ -36,7 +36,7 @@ $(BIN_DIR):
 
 $(EXECUTABLE_NAME): clean-build $(BIN_DIR)
 	$(CMD_FIND_JAVA) > filelist
-	javac @filelist -d $(BIN_DIR)
+	javac -g @filelist -d $(BIN_DIR)
 	$(CMD_DEL) filelist
 	@echo "$(RED)============== BUILD SUCCEDED ==============$(NC)"
 

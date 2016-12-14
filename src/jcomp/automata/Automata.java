@@ -33,7 +33,7 @@ public class Automata
 		int numero_linea=1;
 		boolean cambio;
 
-		for(int index = 0; index < tokens.length; index++)
+		for (int index = 0; index < tokens.length; index++)
 		{
 			pila.push(tokens[index]);
 

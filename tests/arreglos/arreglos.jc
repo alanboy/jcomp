@@ -1,63 +1,29 @@
 def void #putc(int j){}
 
-def void #metodo()
-{
-	int a[1];
-	a[0] = 80; // P
-	#putc(10);
-	#putc(a[0]);
-	#putc(10);
-}
-
-def void #metodo1(int [] a)
-{
-}
-
-def void #metodo2(String [] a)
-{
-}
-
-def void #metodo3(char [] a)
-{
-}
-
-def void #metodo4(int i, char [] a)
-{
-}
-
-def void #metodo5(char [] a, int i)
-{
-}
-
 def int #main()
 {
-	int a [5];
-	char c [3];
+    int index;
+	int buffer[27];
+	int temp;
 
-	int z;
-	z = 65;
 
-	a[0] = 65; // A
-	#putc(a[0]);
+	index = 0;
+	while(index < 26)
+	{
+		buffer[index] = index + 65;
+		index = index + 1;
+	}
 
-	a[0] = 66; // B
-	#putc(a[0]);
+	index = 0;
 
-	a[0] = 65; // A
-	#putc(a[0]);
-
-	#metodo();
-
-	#putc(a[0]); // debe seguir siento A
+	while(index < 26)
+	{
+		temp = buffer[index];
+		#putc(temp);
+		index = index + 1;
+	}
 
 	#putc(10);
-
-	// Falta arreglar esto:
-	//  Error en argumentacion de metodo.
-	//  Requerido : #metodo1 (<INT[]> )
-	//  Encontrado: #metodo1 (<INT[5] id:a scope:local linea:56> )
-	//#metodo1(a);
-
-	return 0;
+    return 0;
 }
 

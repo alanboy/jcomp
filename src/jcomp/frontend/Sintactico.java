@@ -38,15 +38,15 @@ public class Sintactico
 		String cf = "";
 
 		// pegar el codigo en una sola linea
-		// y ya quee para el analizis sintactico
+		// y ya que para el analizis sintactico
 		// solo necesitamos saber que es un id, o un numero
 		// y no el numero en si
-		for(int a=0; a<s.length; a++)
+		for (int a=0; a < s.length; a++)
 		{
-			if(s[a].startsWith("IDENTIFICADOR_")) s[a]="<id>";
-			if(s[a].startsWith("VALOR_NUMERO_")) s[a]="NUM";
-			if(s[a].startsWith("TIPO_")) s[a]="TIPO";
-			if(s[a].startsWith("STRING_")) s[a]="STRING";
+			if (s[a].startsWith("IDENTIFICADOR_")) s[a]="<id>";
+			if (s[a].startsWith("VALOR_NUMERO_")) s[a]="NUM";
+			if (s[a].startsWith("TIPO_")) s[a]="TIPO";
+			if (s[a].startsWith("STRING_")) s[a]="STRING";
 			cf += s[a]+" ";
 		}
 
@@ -115,7 +115,13 @@ public class Sintactico
 		new Produccion("<asignacion>", "<id> ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> ASIGNA <id> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> ASIGNA <llamada> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> ASIGNA <id> CORCHETE_ABRE <id> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
+
 		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <expression> CORCHETE_CIERRA ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <id> PUNTUACION_PUNTO_COMA"),
+
+		new Produccion("<asignacion>", "<id> ASIGNA <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 
 		new Produccion("<variable_declarator>", "TIPO <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 		new Produccion("<variable_declarator>", "TIPO <id> PUNTUACION_PUNTO_COMA"),
@@ -188,9 +194,9 @@ public class Sintactico
 
 		Automata aut = new Automata(prod, cf);
 		String resultado = aut.iniciar();
-		debug.imprimirLinea( resultado );
+		debug.imprimirLinea(resultado);
 
-		if( !resultado.endsWith("<PROGRAMA> "))
+		if (!resultado.endsWith("<PROGRAMA> "))
 		{
 			System.out.println("Error de Syntaxis.");
 			System.err.println("Error de Syntaxis.");

@@ -10,16 +10,6 @@ public class Ensambler2
 	private String codigo;
 	private Hashtable<String, PseudoTag> mapaVariablesLocales;
 
-	private static String join(String [] a, char c)
-	{
-		StringBuilder s = new StringBuilder();
-		for (String si : a)
-		{
-			s.append(si + c);
-		}
-		return s.toString();
-	}
-
 	public Ensambler2(String codigo)
 	{
 		this.mapaVariablesLocales = new Hashtable<String, PseudoTag>();
@@ -34,6 +24,8 @@ public class Ensambler2
 
 	public int iniciar()
 	{
+		debug.imprimirEncabezado("GENERACION DE CODIGO INTERMEDIO");
+
 		String dseg, cseg;
 		dseg = agregarDeclaracionesGlobales();
 
@@ -44,8 +36,6 @@ public class Ensambler2
 		cseg += procesarMetodos();
 
 		codigo = dseg + cseg;
-
-		debug.imprimirEncabezado("GENERACION DE CODIGO INTERMEDIO");
 
 		String lineas [] = codigo.split("\n");
 
@@ -156,6 +146,7 @@ public class Ensambler2
 
 					argumentoActual += 4;
 
+					debug.imprimirLinea("Nueva variable local: " + variableNombre);
 					mapaVariablesLocales.put(variableNombre, variableLocal);
 				}
 			}
@@ -194,6 +185,8 @@ public class Ensambler2
 
 					PseudoTag variableLocal = new PseudoTag(tokens[a]);
 					variableLocal.set("stackpos", "-" + espacioParaVariablesLocales);
+
+					debug.imprimirLinea("Nueva variable local: " + variableNombre);
 					mapaVariablesLocales.put(variableNombre, variableLocal);
 				}
 			}
@@ -253,8 +246,7 @@ public class Ensambler2
 			{
 				if (variableTag.get("scope").equals("global")) // Empujar variable global
 				{
-					cseg += "  empujarapuntador "
-						+ variableTag.get("id") + "\n";
+					cseg += "  empujarapuntador " + variableTag.get("id") + "\n";
 				}
 				else if (variableTag.get("scope").equals("local")) // Empujar variable local
 				{
@@ -267,9 +259,9 @@ public class Ensambler2
 				{
 					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
 
-					cseg += "  ; empujar arg \n"
-						  + "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+					cseg += "  ; empujar arg \n" + "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
 				}
+
 				tokens[a] = "*";
 			}
 
@@ -344,6 +336,7 @@ public class Ensambler2
 			if (tokens[a].startsWith("</"))
 			{
 				tokens[a] = "*";
+
 				while (!tokens[--a].startsWith("<"))
 				{
 					if (a == inicio) vacio = true;
@@ -354,9 +347,28 @@ public class Ensambler2
 					continue;
 				}
 
-				if (tokens[a].indexOf("llamada tipo:") != -1 )
+				if (tokens[a].indexOf("<arreglo") != -1)
 				{
-					tokens[a] = "  call "+ tokens[a].substring( tokens[a].indexOf("id:") + 3, tokens[a].length()-1 )
+					PseudoTag variableTag1 = new PseudoTag(tokens[a].replaceAll("-", " "));
+					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag1.get("id"));
+
+					cseg += "  ;;;;;;;;; deref a un arreglo \n";
+					cseg += "  mov ebx, ebp\n";
+					cseg += "  mov eax, "+tokenTag.get("stackpos")+"\n";
+
+					cseg += "  add eax, ebx\n";
+
+					cseg += "  pop ecx\n";
+					cseg += "  imul ecx, 4\n";
+					cseg += "  add eax, ecx\n";
+
+					cseg += "  push DWORD [eax]\n\n";
+					tokens[a] = "";
+				}
+
+				if (tokens[a].indexOf("llamada tipo:") != -1)
+				{
+					tokens[a] = "  call "+ tokens[a].substring(tokens[a].indexOf("id:") + 3, tokens[a].length()-1)
 						+ "\n  push eax\n";
 				}
 
@@ -365,9 +377,9 @@ public class Ensambler2
 					tokens[a] = "  "+tokens[a].substring(tokens[a].indexOf("tipo:") + 5, tokens[a].length()-1);
 				}
 
-				if (tokens[a].indexOf("<retorno>") != -1 )
+				if (tokens[a].indexOf("<retorno>") != -1)
 				{
-					tokens[a] = metodoMain ? "  salir" : "  retornar";
+					tokens[a] = metodoMain ? "\n  salir" : "  retornar";
 				}
 
 				// Resolver los id's de la asignacion.
@@ -377,7 +389,10 @@ public class Ensambler2
 				// Si es una variable logal:
 				//			mov     eax, DWORD PTR _local_var$[ebp]
 				//
+                // Token tag se reescribe ?
 				PseudoTag tokenTag = new PseudoTag(tokens[a]);
+				String varId = tokenTag.get("id");
+
 				if (tokens[a].indexOf("asignacion tipo:INT") != -1)
 				{
 					tokenTag = mapaVariablesLocales.get(nombreDeVariable(tokenTag.get("id")));
@@ -387,10 +402,19 @@ public class Ensambler2
 						tokenTag = new PseudoTag(tokens[a]);
 						tokens[a] = "  asignaAGlobal "+ tokenTag.get("id") + "\n";
 					}
+					else if (varId.contains("["))
+					{
+						int indice = Integer.parseInt(varId.substring(varId.indexOf("[")+1, varId.indexOf("]")));
+
+						// Esta es una variable local
+						tokens[a] = "\n  ; asignacion local indice en arreglo: " + varId + "\n";
+						tokens[a] += "  pop eax\n";
+						tokens[a] += "  mov DWORD [ebp"+tokenTag.get("stackpos")+"+" + (indice*4) +"], eax\n";
+					}
 					else
 					{
 						// Esta es una variable local
-						tokens[a] = "\n  ; asignacion local a " + tokenTag.get("id") + "\n";
+						tokens[a] = "\n  ; asignacion local " + varId + "\n";
 						tokens[a] += "  pop eax\n";
 						tokens[a] += "  mov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
 					}
@@ -398,13 +422,46 @@ public class Ensambler2
 
 				if (tokens[a].indexOf("asignacion tipo:STRING") != -1)
 				{
-						tokenTag = mapaVariablesLocales.get(tokenTag.get("id"));
-						tokens[a] = "\n  ; asignacion local a " + tokenTag.get("id") + "\n";
-						tokens[a] += "  pop eax\n";
-						tokens[a] += "  mov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
+					tokenTag = mapaVariablesLocales.get(tokenTag.get("id"));
+					tokens[a] = "\n  ; asignacion local a " + tokenTag.get("id") + "\n";
+					tokens[a] += "  pop eax\n";
+					tokens[a] += "  mov DWORD [ebp"+tokenTag.get("stackpos")+"], eax\n";
 				}
 
-				if (tokens[a].indexOf("<llave") != -1 )
+				if (tokens[a].indexOf("derecho") != -1)
+				{
+					tokens[a] = "  ; termina lado dercho\n";
+				}
+
+				if (tokens[a].indexOf("izquierdo") != -1)
+				{
+					tokens[a] = "  ; termina lado izquiero\n";
+				}
+
+				if (tokens[a].indexOf("asignacion tipo:[]INT") != -1)
+				{
+					tokenTag = mapaVariablesLocales.get(tokenTag.get("id"));
+
+					tokens[a] = "\n  ; asignacion a elemento de arreglo " + tokenTag.get("id") + "\n";
+					tokens[a] += "  ; el arreglo esta en ebp" + tokenTag.get("stackpos") + " el indice esta en la pila\n";
+
+					tokens[a] += "  pop ecx  \n\n";
+					tokens[a] += "  push " + tokenTag.get("stackpos") + " \n";
+					tokens[a] += "  push ebp\n";
+					tokens[a] += "  SUMA\n";
+
+					tokens[a] += "  pop ebx         ; the address\n";
+					tokens[a] += "  pop eax         ; the index\n";
+					tokens[a] += "  imul eax, 4     ; \n";
+
+					tokens[a] += "  add ebx, eax    ; final address in ebx\n";
+
+					tokens[a] += "\n  ; termina asignacion aca\n";
+					tokens[a] += "  mov DWORD [ebx], ecx\n";
+					tokens[a] += "\n";
+				}
+
+				if (tokens[a].indexOf("<llave") != -1)
 				{
 					tokens[a] = "\n  jmp while_"+whileActual+"_cond\n";
 					tokens[a] += "while_"+whileActual+"_fin:\n";
@@ -414,7 +471,7 @@ public class Ensambler2
 
 				tokens[a] = "*";
 			}
-		}//for de cada metodo
+		} //for de cada metodo
 		return cseg;
 	}
 
