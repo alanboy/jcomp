@@ -50,6 +50,7 @@ public class Semantico
 		}
 		catch (Exception e)
 		{
+			System.err.println(e);
 			imprimirObjetos();
 			return 1;
 		}
@@ -230,7 +231,7 @@ public class Semantico
 	//  Asignacion a variables
 	//  LLamadas a metodos
 	//  Operaciones aritmeticas
-	boolean analisisDimensional(String body, int iMetodo)
+	boolean analisisDimensional(String body, int iMetodo) throws Exception
 	{
 		String token[] = body.split("\n");
 
@@ -493,42 +494,78 @@ public class Semantico
 		return  true;
 	}
 
-	int revisarTipoArgumentos(String s)
+	// Revisar que la llamada al metodo sea correcta incluyendo los tipos
+	// <llamada tipo:VOID id:putc linea:20>%<INT>%</llamada>%
+	int revisarTipoArgumentos(String llamadaAMetodoTags) throws Exception
 	{
-		String tokens[] = s.split("%");
-		//-</llamada tipo:INT id:numeros4 linea:12>
-		String id = tokens[0].substring(tokens[0].indexOf(" id:")+4, tokens[0].indexOf(" linea:"));
-		String linea = tokens[0].substring(tokens[0].indexOf(" linea:")+7, tokens[0].length()-1);
+		String llamadaNombreMetodo = llamadaAMetodoTags.substring(llamadaAMetodoTags.indexOf(" id:")+4, llamadaAMetodoTags.indexOf(" linea:"));
+		String llamadaLinea = llamadaAMetodoTags.substring(llamadaAMetodoTags.indexOf(" linea:")+7, llamadaAMetodoTags.length()-1);
+		String llamadaArgumentos = llamadaAMetodoTags.substring(llamadaAMetodoTags.indexOf("%")+1, llamadaAMetodoTags.length()-12);
 
-		int a = tokens[0].length();
-		s = s.substring(a +1 , s.length()-12);
-
-		String argus_met = "";
+		// buscar el metodo que estamos llamando para saber cuales son los argumentos correctos
+		String metodoArgumentos = "";
 		for (int b = 0; b<m_Metodos.length; b++)
-			if (m_Metodos[b].getNombre().substring(14).equals(id))
-				argus_met = m_Metodos[b].getArgumentos();
+			if (m_Metodos[b].getNombre().substring(14).equals(llamadaNombreMetodo))
+				metodoArgumentos = m_Metodos[b].getArgumentos();
 
-		String partes [] = s.split("%");
-		s = "";
-		for (int b = 0; b<partes.length; b++)
-			if (!partes[b].equals("<coma>")) s += partes[b]+" ";
-
-		partes = argus_met.split(" ");
-		argus_met = "";
-		for (int b = 0; b<partes.length; b++)
+		if (!compararArgumentos(metodoArgumentos, llamadaArgumentos))
 		{
-			argus_met += partes[b].substring(0, partes[b].indexOf("-"))+"> ";
-		}
-
-		if (!argus_met.equals(s))
-		{
-			System.err.println("Linea : " + linea);
+			System.err.println("Linea : " + llamadaLinea);
 			System.err.println("Error en argumentacion de metodo.");
-			System.err.println("Requerido : #"+id+" ("+argus_met+ ")");
-			System.err.println("Encontrado: #"+id+" ("+s+ ")");
-			return 1;
+			System.err.println("Requerido : #" + llamadaNombreMetodo +" ("+ metodoArgumentos + ")");
+			System.err.println("Encontrado: #" + llamadaNombreMetodo +" ("+ llamadaArgumentos + ")");
+
+			throw new Exception();
 		}
-	return 0;
+
+		return 0;
+	}
+
+	// Validar si los tipos son iguales en tokens que pueden tener ids, por ejemplo:
+	//
+	//   <INT-j>         y <INT>
+	//   <INT[]-arreglo> y <INT[27] id:buffer scope:local linea:25>
+	//   <INT-a> <INT-b> y <INT>%<coma>%<INT>
+	//
+	// deben ser compatibles ya que son los mismos tipos.
+	//
+	private boolean compararArgumentos(String metodoArgumentos, String llamadaArgumentos)
+	{
+		// las comas no importan, porque vamos a hacer tokens basados en `<`
+		String [] metodoArgTokens = metodoArgumentos.replaceAll("<coma>", "").split("<");
+		String [] llamadaArgTokens = llamadaArgumentos.replaceAll("<coma>", "").split("<");
+
+		if (metodoArgTokens.length != llamadaArgTokens.length)
+		{
+			return false;
+		}
+
+		nextTag:
+		for (int i =0; i < metodoArgTokens.length; i++)
+		{
+			// comparar caracter por caracter
+			for (int j = 0; j < metodoArgTokens[i].length(); j++)
+			{
+				if (metodoArgTokens[i].charAt(j) == llamadaArgTokens[i].charAt(j))
+				{
+					continue;
+				}
+
+				// encontramos loa diferencia, vamos a ver si lo que
+				// tenemos hasta ahora es valido
+				switch (metodoArgTokens[i].substring(0, j))
+				{
+					case "INT":
+					case "INT[":
+						continue nextTag;
+
+					default:
+						return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	int buscarMain()
@@ -1514,17 +1551,8 @@ public class Semantico
 	{
 		for (int a = 0; a < m_Metodos.length; a++)
 		{
-			String token[] = m_Metodos[a].getCuerpo().split("\n");
+			String [] token = m_Metodos[a].getCuerpo().split("\n");
 
-			// Filtrar los numeros de linea de este metodo
-			String __g = "";
-			for (int g = 0; g < token.length; g++)
-				if (!token[g].startsWith("NUMERO_LINEA"))
-					__g += token[g] + " ";
-
-			token = __g.split(" ");
-
-			int argu = 0;
 			boolean cambio = true;
 
 			while (cambio)
@@ -1534,9 +1562,8 @@ public class Semantico
 				int indiceDeTokenDeLlamada = token.length - 1;
 
 				// Continuar procesando mientras existan mas llamadas a metodos
-				for (;;indiceDeTokenDeLlamada--)
+				for (; indiceDeTokenDeLlamada >= 0; indiceDeTokenDeLlamada--)
 				{
-					if (indiceDeTokenDeLlamada<0) break;
 					if (token[indiceDeTokenDeLlamada].startsWith("<llamada-"))
 					{
 						cambio = true;
@@ -1544,6 +1571,7 @@ public class Semantico
 					}
 				}
 
+				// ya no hay mas llamadas a metodos
 				if (!cambio) break;
 
 				// `indiceDeTokenDeLlamada` es el indice donde esta la llamada
@@ -1556,28 +1584,24 @@ public class Semantico
 				token[indiceDeTokenDeLlamada] = "<~llamada-"+token[indiceDeTokenDeLlamada].substring(9);
 
 				indiceDeTokenDeLlamada++;
-				argu = 0;
+				int argumentosEnLaLlamada = 0;
+
 				while (true)
 				{
-					if (token[indiceDeTokenDeLlamada].equals("</llamada>")) break;
+					if (token[indiceDeTokenDeLlamada].equals("</llamada>"))
+					{
+						break;
+					}
 
-                                        if (token[indiceDeTokenDeLlamada].equals("PUNTUACION_COMA"))
-                                        {
-                                            token[indiceDeTokenDeLlamada] = "";
-                                            indiceDeTokenDeLlamada++;
-                                            continue;
-                                        }
+					// si hay algo dentro de la llamada, es un argumento siempre y cuando no sea una coma `,`
+					if (token[indiceDeTokenDeLlamada].trim().length() > 0 && !(token[indiceDeTokenDeLlamada].equals("PUNTUACION_COMA")))
+					{
+						argumentosEnLaLlamada++;
+					}
 
-                                        if (token[indiceDeTokenDeLlamada].trim().length() > 0)
-                                        {
-                                            argu++;
-                                        }
-                                        
 					token[indiceDeTokenDeLlamada] = "";
 					indiceDeTokenDeLlamada++;
 				}
-
-				token[indiceDeTokenDeLlamada] = "</llamada>";
 
 				boolean encontrado = false;
 				int deberian = 0;
@@ -1586,16 +1610,21 @@ public class Semantico
 					if (m_Metodos[h].getNombre().substring(14).equals(llamada_a))
 					{
 						String [] t = m_Metodos[h].getArgumentos().split(" ");
+
 						deberian = t.length;
+
 						if (m_Metodos[h].getArgumentos().equals("NADA")) deberian = 0;
-						if (deberian == argu) encontrado = true;
+
+						if (deberian == argumentosEnLaLlamada) encontrado = true;
+
+						break;
 					}
 				}
 
 				if (!encontrado)
 				{
 					System.err.println("Linea: "+linea);
-					System.err.println("Metodo "+llamada_a+" deberia recibir "+deberian+" argumentos, enviando " + argu + ".");
+					System.err.println("Metodo "+llamada_a+" deberia recibir "+deberian+" argumentos, enviando " + argumentosEnLaLlamada + ".");
 
 					throw new Exception();
 				}

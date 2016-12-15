@@ -6,7 +6,6 @@ def int #main()
 	int buffer[27];
 	int temp;
 
-
 	index = 0;
 	while(index < 26)
 	{
@@ -23,7 +22,16 @@ def int #main()
 		index = index + 1;
 	}
 
+	#metodo1(buffer);
+
 	#putc(10);
     return 0;
+}
+
+def void #metodo1(int [] arreglo)
+{
+	int num;
+	num  = arreglo[1];
+	#putc(num);
 }
 

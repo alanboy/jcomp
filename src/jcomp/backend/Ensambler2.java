@@ -266,27 +266,37 @@ public class Ensambler2
 			}
 
 			// Esto sera necesario cuando quiera implmentar arreglos como argumentos de un metodo
-			//if (tokens[a].startsWith("<INT[] id"))
-			//{
-			//	if (variableTag.get("scope").equals("global")) // Empujar variable global
-			//	{
-			//		cseg += "  empujarapuntador "
-			//			+ variableTag.get("id") + "\n";
-			//	}
-			//	else if (variableTag.get("scope").equals("local")) // Empujar variable local
-			//	{
-			//		PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
-			//		cseg += "  ; empujar variable local \n"
-			//			+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
-			//	}
-			//	else if (variableTag.get("scope").equals("arg")) // Empujar variable local
-			//	{
-			//		PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
-			//		cseg += "  ; empujar arg \n"
-			//			+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
-			//	}
-			//	tokens[a] = "*";
-			//}
+			if (tokens[a].startsWith("<INT["))
+			{
+				cseg += "\n";
+
+				if (variableTag.get("scope").equals("global"))
+				{
+					cseg += "  empujarapuntador "
+						+ variableTag.get("id") + "\n";
+				}
+				else if (variableTag.get("scope").equals("local"))
+				{
+					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+					cseg += "  ; empujar referencia a variable local \n";
+					cseg += "  mov ebx, ebp\n";
+					cseg += "  mov eax, "+tokenTag.get("stackpos")+"\n";
+					cseg += "  add eax, ebx\n";
+					cseg += "  push eax\n";
+				}
+				else if (variableTag.get("scope").equals("arg"))
+				{
+					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+					cseg += "  ; empujar referencia a variable local (argumento al metodo)\n";
+					cseg += "  mov ebx, ebp\n";
+					cseg += "  mov eax, "+tokenTag.get("stackpos")+"\n";
+					cseg += "  add eax, ebx\n";
+					cseg += "  push eax\n";
+				}
+
+
+				tokens[a] = "*";
+			}
 
 			// <STRING valor:"asdf"> Una literal
 			if (tokens[a].startsWith("<STRING valor:"))
@@ -368,7 +378,8 @@ public class Ensambler2
 
 				if (tokens[a].indexOf("llamada tipo:") != -1)
 				{
-					tokens[a] = "  call "+ tokens[a].substring(tokens[a].indexOf("id:") + 3, tokens[a].length()-1)
+					tokens[a] = "\n  ; llamada a metodo\n"
+					    + "  call "+ tokens[a].substring(tokens[a].indexOf("id:") + 3, tokens[a].length()-1)
 						+ "\n  push eax\n";
 				}
 
