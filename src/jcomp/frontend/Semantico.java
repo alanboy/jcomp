@@ -2209,9 +2209,9 @@ public class Semantico
 
 	int revisarExistenciaVariables()
 	{
-		for (int a = 0; a<m_Metodos.length; a++)
+		for (int a = 0; a < m_Metodos.length; a++)
 		{
-			//contar cuantas declaraciones hay en TOTAL
+			// contar cuantas declaraciones hay en TOTAL
 			String [] token = m_Metodos[a].getCuerpo().split("<declaracion-");
 			String [] args = m_Metodos[a].getArgumentos().split(" ");
 
@@ -2257,42 +2257,46 @@ public class Semantico
 
 				if (token[b].startsWith("<declaracion-"))
 				{
-					String [] _a = token[b].split("-");
-					variablesDeclaradas.add(_a[3].substring(0, _a[3].length()-1));
+					String [] partes = token[b].split("-");
+					variablesDeclaradas.add(partes[3].substring(0, partes[3].length()-1));
 				}
+
+				String id = null;
 
 				if (token[b].startsWith("IDENTIFICADOR_"))
 				{
-					if (!variablesDeclaradas.contains(token[b].substring(14)))
-					{
-						System.err.println("Linea: " + linea.substring(13));
-						System.err.println("Variable " + token[b].substring(14) + " es utilizada antes de ser declarada.");
-						return 1;
-					}
+					id = token[b].substring(14);
+				}
+
+				if (token[b].startsWith("<arreglo"))
+				{
+					String [] partes = token[b].split("-");
+					id = partes[3].substring(3, partes[3].length() - 1);
 				}
 
 				if (token[b].startsWith("<asignacion-"))
 				{
-					String [] _t = token[b].split("-");
-					String _id = _t[2].substring(0, _t[2].length() - 1);
+					String [] partes = token[b].split("-");
+					id = partes[2].substring(0, partes[2].length() - 1);
 
-					if (_id.contains("["))
+					if (id.contains("["))
 					{
-						_id = _id.substring(0, _id.indexOf("["));
+						id = id.substring(0, id.indexOf("["));
 					}
-
-					if (!variablesDeclaradas.contains(_id))
-					{
-						System.err.println("Linea: " + linea.substring(13));
-						System.err.println("Variable " + _id + " es asignada antes de ser declarada.");
-						return 1;
-					}
-
 				}
+
+				if (id != null && !variablesDeclaradas.contains(id))
+				{
+					System.err.println("Linea: " + linea.substring(13));
+					System.err.println("Variable " + id + " es asignada antes de ser declarada.");
+					return 1;
+				}
+
 			} //for de cada token
 		} //for de metodos
+
 		return 0;
-	} //revisarExistenciaVariables
+	}
 
 	private static String join(String [] a, char c)
 	{
