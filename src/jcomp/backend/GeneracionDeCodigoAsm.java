@@ -18,17 +18,17 @@ public class GeneracionDeCodigoAsm
 
 	private void escribirArchivo(String codigo, String nombreDeArchivo)
 	{
-
 		logger.imprimirLinea("Escribiendo " + nombreDeArchivo + " ...");
 
-		try {
+		try
+		{
 			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(nombreDeArchivo)));
 			pw.print(codigo);
 			pw.close();
-
-		} catch(IOException ioe) {
+		}
+		catch(IOException ioe)
+		{
 			System.out.println("Error creando archivo " + nombreDeArchivo);
-
 		}
 	}
 

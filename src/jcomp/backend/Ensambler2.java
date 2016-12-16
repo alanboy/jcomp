@@ -114,7 +114,7 @@ public class Ensambler2
 			cseg += "  mov ebp, esp\n";
 
 			int espacioParaVariablesLocales = 0;
-			String cseg_temp = "\n  ; inicializar las variables locales\n";
+			String cseg_temp = "\n  ; inicializar las variables locales que han sido declaradas aqui (no los argumentos)\n";
 
 			// Un metodo que recibe argumentos se ve asi:
 			//
@@ -141,12 +141,12 @@ public class Ensambler2
 
 					PseudoTag variableLocal = new PseudoTag("", true /*failSilently*/);
 					variableLocal.set("id", variableNombre);
-					variableLocal.set("stackpos", "+"  + argumentoActual);
+					variableLocal.set("stackpos", "+" + argumentoActual);
 					variableLocal.set("scope", "arg");
 
 					argumentoActual += 4;
 
-					debug.imprimirLinea("Nueva variable local: " + variableNombre);
+					debug.imprimirLinea("Nueva argumento, declarando como variable local: " + variableNombre + "");
 					mapaVariablesLocales.put(variableNombre, variableLocal);
 				}
 			}
@@ -253,7 +253,7 @@ public class Ensambler2
 					PseudoTag tokenTag = mapaVariablesLocales.get(nombreDeVariable(variableTag.get("id")));
 
 					cseg += "  ; empujar variable local \n"
-						  + "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
+						+ "  push DWORD [ebp"+tokenTag.get("stackpos")+"]\n";
 				}
 				else if (variableTag.get("scope").equals("arg")) // Empujar variable local
 				{
@@ -362,17 +362,37 @@ public class Ensambler2
 					PseudoTag variableTag1 = new PseudoTag(tokens[a].replaceAll("-", " "));
 					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag1.get("id"));
 
-					cseg += "  ;;;;;;;;; deref a un arreglo \n";
-					cseg += "  mov ebx, ebp\n";
-					cseg += "  mov eax, "+tokenTag.get("stackpos")+"\n";
+					// los arreglos declarados en este metodo, la direccion esta en ebp + el offset,
+					// para los arreglos que me pasaron por arguemntos, usar esa direccion en vez de
+					// ebp
+					if (tokenTag.get("scope") != null && tokenTag.get("scope").equals("arg"))
+					{
+						cseg += "\n  ;;;;;;;;; deref a un arreglo pasado como argumento\n";
+						cseg += "  mov ebx, ebp\n";
+						cseg += "  mov eax, " + tokenTag.get("stackpos")+"\n";
+						cseg += "  add eax, ebx\n";
 
-					cseg += "  add eax, ebx\n";
+						cseg += "  mov ecx, [eax]\n";
+						cseg += "  mov eax, ecx\n";
 
-					cseg += "  pop ecx\n";
-					cseg += "  imul ecx, 4\n";
-					cseg += "  add eax, ecx\n";
+						cseg += "  pop ecx\n";
+						cseg += "  imul ecx, 4\n";
+						cseg += "  add eax, ecx\n";
+						cseg += "  push DWORD [eax]\n\n";
+					}
+					else
+					{
+						cseg += "\n  ;;;;;;;;; deref a un arreglo declarado localmente\n";
+						cseg += "  mov ebx, ebp\n";
+						cseg += "  mov eax, " + tokenTag.get("stackpos")+"\n";
+						cseg += "  add eax, ebx\n";
 
-					cseg += "  push DWORD [eax]\n\n";
+						cseg += "  pop ecx\n";
+						cseg += "  imul ecx, 4\n";
+						cseg += "  add eax, ecx\n";
+						cseg += "  push DWORD [eax]\n\n";
+					}
+
 					tokens[a] = "";
 				}
 

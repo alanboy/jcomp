@@ -22,16 +22,43 @@ def int #main()
 		index = index + 1;
 	}
 
-	#metodo1(buffer);
+	#putc(10);
+
+	#imprimirPares(buffer);
+
+	#imprimirImpares(buffer);
+
+	return 0;
+}
+
+def void #imprimirPares(int [] arreglo)
+{
+	int index;
+	int temp;
+	index = 0;
+
+	while(index < 26)
+	{
+		temp = arreglo[index];
+		#putc(temp);
+		index = index + 2;
+	}
 
 	#putc(10);
-    return 0;
 }
 
-def void #metodo1(int [] arreglo)
+def void #imprimirImpares(int [] arreglo)
 {
-	int num;
-	num  = arreglo[1];
-	#putc(num);
-}
+	int index;
+	int temp;
+	index = 1;
 
+	while(index < 26)
+	{
+		temp = arreglo[index];
+		#putc(temp);
+		index = index + 2;
+	}
+
+	#putc(10);
+}
