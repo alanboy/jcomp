@@ -258,7 +258,7 @@ public class Semantico
 				}
 			}
 
-			body = join(token, '\n');
+			body = String.join("\n", token);
 			token = body.split("\n");
 
 			boolean cambio = true;
@@ -277,8 +277,7 @@ public class Semantico
 				}
 			}
 
-			body = "";
-			body = join(token, '\n');
+			body = String.join("\n", token);
 			token = body.split("\n");
 
 			cambio = true;
@@ -311,7 +310,7 @@ public class Semantico
 			}
 
 			// Unir los tokes de nuevo en un string
-			body = join(token, '\n');
+			body = String.join("\n", token);
 			token = body.split("\n");
 
 			cambio = true;
@@ -490,7 +489,7 @@ public class Semantico
 			}
 		} // while (CAMBIO)
 
-		body = join(token, '\n');
+		body = String.join("\n", token);
 		return  true;
 	}
 
@@ -2270,10 +2269,12 @@ public class Semantico
 
 				if (token[b].startsWith("<arreglo"))
 				{
+
 					String [] partes = token[b].split("-");
 					id = partes[3].substring(3, partes[3].length() - 1);
 				}
 
+				// TODO: Arreglar esto
 				if (token[b].startsWith("<asignacion-"))
 				{
 					String [] partes = token[b].split("-");
@@ -2283,6 +2284,12 @@ public class Semantico
 					{
 						id = id.substring(0, id.indexOf("["));
 					}
+				}
+
+				if (token[b].startsWith("<asignacion "))
+				{
+					String [] partes = token[b].split(" ");
+					id = partes[2].substring(3, partes[2].length());
 				}
 
 				if (id != null && !variablesDeclaradas.contains(id))
@@ -2296,16 +2303,6 @@ public class Semantico
 		} //for de metodos
 
 		return 0;
-	}
-
-	private static String join(String [] a, char c)
-	{
-		StringBuilder s = new StringBuilder();
-		for (String si : a)
-		{
-			s.append(si + c);
-		}
-		return s.toString();
 	}
 
 	private static String[] filtrar(String [] cadenas, String filtro)

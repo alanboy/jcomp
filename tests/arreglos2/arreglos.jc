@@ -1,0 +1,46 @@
+def void #putc(int j){}
+
+def int #main()
+{
+    int index;
+	int buffer[27];
+	int temp;
+
+	index = 0;
+	while(index < 26)
+	{
+		buffer[index] = index + 65;
+		index = index + 1;
+	}
+
+	#rev(buffer, 25);
+
+	index = 0;
+	while(index < 26)
+	{
+		temp = buffer[index];
+		#putc(temp);
+		index = index + 1;
+	}
+
+	#putc(10);
+
+	return 0;
+}
+
+def void #rev(int [] arreglo, int tam)
+{
+	int index;
+	int temp;
+	int mitad;
+	mitad = tam/2;
+	index = 0;
+	while(index < mitad)
+	{
+		temp = arreglo[index];
+		arreglo[index] = arreglo[tam-index];
+		arreglo[tam-index] = temp;
+		index = index + 1;
+	}
+}
+

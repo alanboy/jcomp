@@ -118,9 +118,10 @@ public class Sintactico
 		new Produccion("<asignacion>", "<id> ASIGNA <id> CORCHETE_ABRE <id> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 
 		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <expression> CORCHETE_CIERRA ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <id> PUNTUACION_PUNTO_COMA"),
-
+		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <expression> CORCHETE_CIERRA ASIGNA <id> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> ASIGNA <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 
 		new Produccion("<variable_declarator>", "TIPO <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),

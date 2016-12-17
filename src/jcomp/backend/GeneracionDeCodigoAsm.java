@@ -185,6 +185,15 @@ public class GeneracionDeCodigoAsm
 				lineas[a] += "  push ax\n";
 			}
 
+			if (lineas[a].indexOf("DIV") != -1 )
+			{
+				lineas[a] = "\n  pop ecx\n";
+				lineas[a] += "  pop eax\n";
+				lineas[a] += "  mov edx, 0\n";
+				lineas[a] += "  div ecx\n";
+				lineas[a] += "  push eax\n";
+			}
+
 			if (lineas[a].indexOf("retornar") != -1 )
 			{
 				// Retornar de otra function es RET
@@ -332,6 +341,15 @@ public class GeneracionDeCodigoAsm
 				lineas[a] += "  pop bx\n";
 				lineas[a] += "  mul bx\n";
 				lineas[a] += "  push ax\n";
+			}
+
+			if (lineas[a].indexOf("DIV") != -1 )
+			{
+				lineas[a] = "\n  pop ecx\n";
+				lineas[a] += "  pop eax\n";
+				lineas[a] += "  mov edx, 0\n";
+				lineas[a] += "  div ecx\n";
+				lineas[a] += "  push eax\n";
 			}
 
 			if (lineas[a].indexOf("retornar") != -1 )
@@ -517,6 +535,15 @@ public class GeneracionDeCodigoAsm
 				lineas[a] += "  pop bx\n";
 				lineas[a] += "  mul bx\n";
 				lineas[a] += "  push ax\n";
+			}
+
+			if (lineas[a].indexOf("DIV") != -1 )
+			{
+				lineas[a] = "\n  pop ecx\n";
+				lineas[a] += "  pop eax\n";
+				lineas[a] += "  mov edx, 0\n";
+				lineas[a] += "  div ecx\n";
+				lineas[a] += "  push eax\n";
 			}
 
 			if (lineas[a].indexOf("retornar") != -1 )

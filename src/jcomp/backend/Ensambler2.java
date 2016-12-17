@@ -3,6 +3,7 @@ package jcomp.backend;
 import jcomp.util.Log;
 import jcomp.util.PseudoTag;
 import java.util.Hashtable;
+import java.util.Arrays;
 
 public class Ensambler2
 {
@@ -107,6 +108,8 @@ public class Ensambler2
 				nombre = "_start";
 			}
 
+			debug.imprimirLinea("\nProcesando metodo: " + nombre);
+
 			// Prologo
 			cseg += nombre +":\n";
 			cseg += "  ; create the stack frame\n";
@@ -135,8 +138,9 @@ public class Ensambler2
 
 				int argumentoActual = 8;
 
-				for (String argumento : argumentos)
+				for (int i = argumentos.length-1; i >= 0; i--)
 				{
+					String argumento = argumentos[i];
 					String variableNombre = argumento.trim().split(" ")[1];
 
 					PseudoTag variableLocal = new PseudoTag("", true /*failSilently*/);
@@ -144,10 +148,10 @@ public class Ensambler2
 					variableLocal.set("stackpos", "+" + argumentoActual);
 					variableLocal.set("scope", "arg");
 
-					argumentoActual += 4;
-
-					debug.imprimirLinea("Nueva argumento, declarando como variable local: " + variableNombre + "");
+					debug.imprimirLinea("Nuevo argumento: id=" + variableNombre + " \nposicion en stack=+" + argumentoActual);
 					mapaVariablesLocales.put(variableNombre, variableLocal);
+
+					argumentoActual += 4;
 				}
 			}
 
@@ -186,7 +190,8 @@ public class Ensambler2
 					PseudoTag variableLocal = new PseudoTag(tokens[a]);
 					variableLocal.set("stackpos", "-" + espacioParaVariablesLocales);
 
-					debug.imprimirLinea("Nueva variable local: " + variableNombre);
+					debug.imprimirLinea("Nueva variable local: id=" + variableNombre + " \n posicion en stack= -" + espacioParaVariablesLocales);
+
 					mapaVariablesLocales.put(variableNombre, variableLocal);
 				}
 			}
@@ -473,15 +478,22 @@ public class Ensambler2
 				{
 					tokenTag = mapaVariablesLocales.get(tokenTag.get("id"));
 
-					tokens[a] = "\n  ; asignacion a elemento de arreglo " + tokenTag.get("id") + "\n";
+					tokens[a] = "\n  ; asignacion a elemento de arreglo `" + tokenTag.get("id") + "`\n";
 					tokens[a] += "  ; el arreglo esta en ebp" + tokenTag.get("stackpos") + " el indice esta en la pila\n";
 
-					tokens[a] += "  pop ecx  \n\n";
+					tokens[a] += "  pop ecx ; el valor a guardar\n\n";
 					tokens[a] += "  push " + tokenTag.get("stackpos") + " \n";
 					tokens[a] += "  push ebp\n";
 					tokens[a] += "  SUMA\n";
 
 					tokens[a] += "  pop ebx         ; the address\n";
+
+					if (tokenTag.get("scope") != null && tokenTag.get("scope").equals("arg"))
+					{
+						tokens[a] += "  mov eax, [ebx] ; este es un apuntador\n";
+						tokens[a] += "  mov ebx, eax\n";
+					}
+
 					tokens[a] += "  pop eax         ; the index\n";
 					tokens[a] += "  imul eax, 4     ; \n";
 
