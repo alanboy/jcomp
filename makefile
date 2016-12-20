@@ -85,37 +85,31 @@ test6: $(EXECUTABLE_NAME) $(TEST_DIR)/print/print.jc
 	$(CMD_RUN) > TestOut.txt
 	diff --text --ignore-all-space tests/print/Ref.txt TestOut.txt
 
-test7: $(EXECUTABLE_NAME) $(TEST_DIR)/while/while.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/while/while.jc
-	$(CMD_ASSEMBLE)
-	$(CMD_LINK)
-	$(CMD_RUN) > TestOut.txt
-	diff --text --ignore-all-space tests/while/Ref.txt TestOut.txt 
-
-test8: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos/arreglos.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/arreglos/arreglos.jc
-	$(CMD_ASSEMBLE)
-	$(CMD_LINK)
-	$(CMD_RUN) > TestOut.txt
-	diff --text --ignore-all-space tests/arreglos/Ref.txt TestOut.txt
-
-test9: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos2/arreglos.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/arreglos2/arreglos.jc
-	$(CMD_ASSEMBLE)
-	$(CMD_LINK)
-	$(CMD_RUN) > TestOut.txt
-	diff --text --ignore-all-space tests/arreglos2/Ref.txt TestOut.txt
-
-test10: $(EXECUTABLE_NAME) $(TEST_DIR)/getc/getc.jc
+test7: $(EXECUTABLE_NAME) $(TEST_DIR)/getc/getc.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/getc/getc.jc
 	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	echo zg | $(CMD_RUN) > TestOut.txt
 	diff --text --ignore-all-space tests/getc/Ref.txt TestOut.txt
 
-console: $(EXECUTABLE_NAME) $(TEST_DIR)/console/console.jc
-	java -cp bin jcomp.JComp $(TEST_DIR)/console/console.jc
+test8: $(EXECUTABLE_NAME) $(TEST_DIR)/while/while.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/while/while.jc
 	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
-	$(CMD_RUN)
+	$(CMD_RUN) > TestOut.txt
+	diff --text --ignore-all-space tests/while/Ref.txt TestOut.txt
+
+test9: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos/arreglos.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/arreglos/arreglos.jc
+	$(CMD_ASSEMBLE)
+	$(CMD_LINK)
+	$(CMD_RUN) > TestOut.txt
+	diff --text --ignore-all-space tests/arreglos/Ref.txt TestOut.txt
+
+test10: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos2/arreglos.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/arreglos2/arreglos.jc
+	$(CMD_ASSEMBLE)
+	$(CMD_LINK)
+	$(CMD_RUN) > TestOut.txt
+	diff --text --ignore-all-space tests/arreglos2/Ref.txt TestOut.txt
 

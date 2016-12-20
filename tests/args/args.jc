@@ -1,15 +1,15 @@
 
 def int #sum(int a, int b)
 {
-	return a + b;
+	return a - b;
 }
 
 def int #main()
 {
 	int resultado;
 
-	resultado = #sum(10, 11);
+	resultado = #sum(100, 100);
 
-	return resultado - 21;
+	return resultado;
 }
 

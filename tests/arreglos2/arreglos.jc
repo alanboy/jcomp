@@ -2,7 +2,7 @@ def void #putc(int j){}
 
 def int #main()
 {
-    int index;
+	int index;
 	int buffer[27];
 	int temp;
 

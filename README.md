@@ -2,59 +2,60 @@ jcomp
 =====
 
 ```
-//define a global variable
-def int myvar;  
+// Variables globales
+def int myvar;
 
-//defining a method
-def void #main(){
-	
-	//character not in alphabet
-	//@
+def int #main()
+{
+	// Declaracion de variables locales
+	int index;
+	int buffer[27]; // Arreglos !
+	int temp;
 
-	//unfinished string
-	String foo;
-	//foo = "this string is missing ending quote
+	index = 0;
+	while(index < 26) // Ciclos !
+	{
+		buffer[index] = index + 65;
+		index = index + 1;
+	}
 
-	
-	//return from a void
-	//return 3;
-
-	//strong typed lang
-	String foobar;
-	int bar;
-	//bar = foobar + bar;
-
-	//using before declaring
-	//undeclared = 9;
+	#rev(buffer, 25);
 }
 
-//functions with parameters
-def int #adding( int a , int b ){
-
-	//complex expressions	
-	return a+b+1000-5-995;
+// Metodos con arreglos como argumentos
+def void #rev(int [] arreglo, int tam)
+{
+	int index;
+	int temp;
+	int mitad;
+	mitad = tam/2;
+	index = 0;
+	while(index < mitad)
+	{
+		temp = arreglo[index];
+		arreglo[index] = arreglo[tam-index];
+		arreglo[tam-index] = temp;
+		index = index + 1;
+	}
 }
 
-def int #method(){
-	//not an expression
-	// return 3FF44;
-
-	//complex call structures
-	return #adding(1, 5); 
-}
 ```
+
 http://askubuntu.com/questions/454253/how-to-run-32-bit-app-in-ubuntu-64-bit
 http://www.csee.umbc.edu/portal/help/nasm/sample.shtml
 
 http://cs.lmu.edu/~ray/notes/x86assembly/
 
+Debugging
+=====
+Para debuggear el compilador:
+`jdb -sourcepath src  -classpath bin jcomp.JComp "tests\arreglos\arreglos.jc"`
 
 How to See the Contents of Windows library (*.lib)
 DUMPBIN /EXPORTS user32.lib | vim -
 
 
 http://stackoverflow.com/questions/1023593/how-to-write-hello-world-in-assembler-under-windows
-
 
 To run a 32-bit executable file on a 64-bit multi-architecture Ubuntu system, you have to add the i386 architecture and install the three library packages libc6:i386, libncurses5:i386, and libstdc++6:i386:
 
