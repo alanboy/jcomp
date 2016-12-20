@@ -76,34 +76,33 @@ public class Sintactico
 
 
 		new Produccion("<casi_if>", "CONTROL_IF PARENTESIS_ABRE"),
-		new Produccion("<error_1>", "CONTROL_IF <id>"),
-		new Produccion("<error_1>", "CONTROL_IF <op_bool>"),
 		new Produccion("<if>", "<casi_if> <expression_booleana> PARENTESIS_CIERRA <statement_block>"),
 
 
 		new Produccion("<casi_while>", "CONTROL_WHILE PARENTESIS_ABRE"),
 		new Produccion("<while>", "<casi_while> <expression_booleana> PARENTESIS_CIERRA <statement_block>"),
 
-		new Produccion("<expression_booleana>", "<id> <op_bool> <id>"),
+		new Produccion("<expression_booleana>", "<expression> <op> <expression_booleana>"),
+		new Produccion("<expression_booleana>", "<expression> <op_bool> <expression>"),
+		new Produccion("<expression_booleana>", "<expression> <op_bool> <expression_booleana>"),
+		new Produccion("<expression_booleana>", "<expression> <op_bool> <id>"),
+		new Produccion("<expression_booleana>", "<expression> <op_bool> <llamada>"),
+		new Produccion("<expression_booleana>", "<expression_boleana> <op_bool> <expression>"),
+		new Produccion("<expression_booleana>", "<expression_boleana> <op_bool> <id>"),
+		new Produccion("<expression_booleana>", "<expression_booleana> <op> <expression>"),
+		new Produccion("<expression_booleana>", "<expression_booleana> <op> <id>"),
+		new Produccion("<expression_booleana>", "<expression_booleana> <op_bool> <expression_booleana>"),
+		new Produccion("<expression_booleana>", "<id> <op> <expression_booleana>"),
 		new Produccion("<expression_booleana>", "<id> <op_bool> <expression>"),
 		new Produccion("<expression_booleana>", "<id> <op_bool> <expression_booleana>"),
-		new Produccion("<expression_booleana>", "<expression_boleana> <op_bool> <id>"),
-		new Produccion("<expression_booleana>", "<expression> <op_bool> <expression_booleana>"),
-		new Produccion("<expression_booleana>", "<expression_boleana> <op_bool> <expression>"),
-		new Produccion("<expression_booleana>", "<expression> <op_bool> <id>"),
-		new Produccion("<expression_booleana>", "<expression> <op_bool> <expression>"),
-		new Produccion("<expression_booleana>", "PARENTESIS_ABRE <expression_booleana> PARENTESIS_CIERRA"),
-		new Produccion("<expression_booleana>", "<expression_booleana> <op_bool> <expression_booleana>"),
-
-		new Produccion("<expression_booleana>", "<llamada> <op_bool> <expression>"),
-		new Produccion("<expression_booleana>", "<llamada> <op_bool> <llamada>"),
-		new Produccion("<expression_booleana>", "<expression> <op_bool> <llamada>"),
-		new Produccion("<expression_booleana>", "<expression_booleana> <op> <expression>"),
-		new Produccion("<expression_booleana>", "<expression> <op> <expression_booleana>"),
+		new Produccion("<expression_booleana>", "<id> <op_bool> <id>"),
 		new Produccion("<expression_booleana>", "<id> <op_bool> <llamada>"),
+		new Produccion("<expression_booleana>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA <op_bool> <expression>"),
+		new Produccion("<expression_booleana>", "<llamada> <op_bool> <expression>"),
 		new Produccion("<expression_booleana>", "<llamada> <op_bool> <id>"),
-		new Produccion("<expression_booleana>", "<expression_booleana> <op> <id>"),
-		new Produccion("<expression_booleana>", "<id> <op> <expression_booleana>"),
+		new Produccion("<expression_booleana>", "<llamada> <op_bool> <llamada>"),
+		new Produccion("<expression_booleana>", "PARENTESIS_ABRE <expression_booleana> PARENTESIS_CIERRA"),
+
 		new Produccion("<id>", "PARENTESIS_ABRE <id> PARENTESIS_CIERRA"),
 
 		new Produccion("<op_bool>", "BOL_MENOR_QUE"),
@@ -112,17 +111,17 @@ public class Sintactico
 		new Produccion("<op_bool>", "BOL_MAYOR_QUE ASIGNA"),
 		new Produccion("<op_bool>", "ASIGNA ASIGNA"),
 
+		new Produccion("<asignacion>", "<id> ASIGNA <expression> CORCHETE_ABRE <id> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> ASIGNA <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> ASIGNA <id> CORCHETE_ABRE <id> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> ASIGNA <id> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> ASIGNA <llamada> PUNTUACION_PUNTO_COMA"),
-		new Produccion("<asignacion>", "<id> ASIGNA <id> CORCHETE_ABRE <id> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
-
 		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <expression> CORCHETE_CIERRA ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
-		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
-		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
-		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <id> PUNTUACION_PUNTO_COMA"),
 		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <expression> CORCHETE_CIERRA ASIGNA <id> PUNTUACION_PUNTO_COMA"),
-		new Produccion("<asignacion>", "<id> ASIGNA <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <expression> PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
+		new Produccion("<asignacion>", "<id> CORCHETE_ABRE <id> CORCHETE_CIERRA ASIGNA <id> PUNTUACION_PUNTO_COMA"),
 
 		new Produccion("<variable_declarator>", "TIPO <id> CORCHETE_ABRE <expression> CORCHETE_CIERRA PUNTUACION_PUNTO_COMA"),
 		new Produccion("<variable_declarator>", "TIPO <id> PUNTUACION_PUNTO_COMA"),
@@ -199,7 +198,6 @@ public class Sintactico
 
 		if (!resultado.endsWith("<PROGRAMA> "))
 		{
-			System.out.println("Error de Syntaxis.");
 			System.err.println("Error de Syntaxis.");
 			return 1;
 		}

@@ -4,6 +4,7 @@ import jcomp.util.Log;
 import jcomp.util.PseudoTag;
 import java.util.Hashtable;
 import java.util.Arrays;
+import java.util.Stack;
 
 public class Ensambler2
 {
@@ -234,7 +235,7 @@ public class Ensambler2
 	{
 		String [] tokens = codigo.split("\n");
 		String cseg = "";
-		String whileActual = "";
+		Stack<String> whileActualStack = new Stack<String>();
 
 		for (int a = inicio; a <= fin; a++)
 		{
@@ -270,7 +271,7 @@ public class Ensambler2
 				tokens[a] = "*";
 			}
 
-			// Esto sera necesario cuando quiera implmentar arreglos como argumentos de un metodo
+			// Arreglos como argumentos de un metodo
 			if (tokens[a].startsWith("<INT["))
 			{
 				cseg += "\n";
@@ -324,7 +325,7 @@ public class Ensambler2
 				int lineaFin = tokens[a].indexOf(">");
 				String linea = tokens[a].substring(lineaInicio, lineaFin);
 
-				whileActual = linea;
+				whileActualStack.push("while_" + linea);
 
 				cseg += "while_"+ linea +"_cond:\n";
 				tokens[a] = "*";
@@ -332,19 +333,43 @@ public class Ensambler2
 
 			if (tokens[a].startsWith("</while") )
 			{
-				cseg += "while_"+ whileActual+"_body:\n";
+				cseg += whileActualStack.peek() + "_body:\n";
+				tokens[a] = "*";
+			}
+
+			if (tokens[a].startsWith("<if") )
+			{
+				int lineaInicio = tokens[a].indexOf("linea:") + 6;
+				int lineaFin = tokens[a].indexOf(">");
+				String linea = tokens[a].substring(lineaInicio, lineaFin);
+
+				whileActualStack.push("if_" + linea);
+
+				cseg += "if_"+ linea +"_cond:\n";
+				tokens[a] = "*";
+			}
+
+			if (tokens[a].startsWith("</if") )
+			{
+				cseg += whileActualStack.peek() + "_body:\n";
 				tokens[a] = "*";
 			}
 
 			if (tokens[a].indexOf("MAYOR") != -1 )
 			{
-				tokens[a] = "<op tipo:MAYOR_"+ whileActual + "\\> n";
+				tokens[a] = "<op tipo:MAYOR_"+ whileActualStack.peek() + "> \n";
 			}
 
 			if (tokens[a].indexOf("MENOR") != -1 )
 			{
-				tokens[a] = "<op tipo:MENOR_"+ whileActual + "\\> n";
+				tokens[a] = "<op tipo:MENOR_"+ whileActualStack.peek() + "> \n";
 			}
+
+			if (tokens[a].indexOf("IGUAL") != -1 )
+			{
+				tokens[a] = "<op tipo:IGUAL_"+ whileActualStack.peek() + "> \n";
+			}
+
 
 			boolean vacio = false;
 
@@ -506,8 +531,15 @@ public class Ensambler2
 
 				if (tokens[a].indexOf("<llave") != -1)
 				{
-					tokens[a] = "\n  jmp while_"+whileActual+"_cond\n";
-					tokens[a] += "while_"+whileActual+"_fin:\n";
+					tokens[a] = "";
+					if (whileActualStack.peek().indexOf("while") >= 0)
+					{
+						tokens[a] = "\n  jmp "+whileActualStack.peek()+"_cond\n";
+					}
+
+					tokens[a] += whileActualStack.peek()+"_fin:\n";
+
+					whileActualStack.pop();
 				}
 
 				cseg += tokens[a] + "\n";

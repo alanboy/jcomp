@@ -8,14 +8,12 @@ import jcomp.util.Log;
 
 /**
  *
- * XML para las llamadas dentro de las llamadas, ejemplo:*
- * #met1(43, #met2(a) , t)*
- * se convierte en:*
- * <llamada met1> 43 , <llamada met2> a </llamada> , t</llamada>*
- * y asi se forma el arbol.*
+ * XML para las llamadas dentro de las llamadas, ejemplo:
+ * #met1(43, #met2(a) , t)
+ * se convierte en:
+ * <llamada met1> 43 , <llamada met2> a </llamada> , t</llamada>
+ * y asi se forma el arbol.
  *  *
- * YA SE QUE EL ARBOL SE DEBERIA DE HACER EN EL SINTACTICO PERO*
- * ES MAS FACIL HACERLO EN EL SEMANTICO PARA AL MISMO TIEMPO IR CHECANDO ERRORES
  *
  * */
 public class Semantico
@@ -43,10 +41,11 @@ public class Semantico
 	public int iniciar()
 	{
 		m_Debug.imprimirEncabezado("ANALISIS SEMANTICO");
+		int resultado = 0;
 
 		try
 		{
-			iniciarInterno();
+			resultado = iniciarInterno();
 		}
 		catch (Exception e)
 		{
@@ -55,7 +54,7 @@ public class Semantico
 			return 1;
 		}
 
-		return 0;
+		return 0; // resultado
 	}
 
 	private int iniciarInterno() throws Exception
@@ -531,8 +530,8 @@ public class Semantico
 	private boolean compararArgumentos(String metodoArgumentos, String llamadaArgumentos)
 	{
 		// las comas no importan, porque vamos a hacer tokens basados en `<`
-		String [] metodoArgTokens = metodoArgumentos.replaceAll("<coma>", "").split("<");
-		String [] llamadaArgTokens = llamadaArgumentos.replaceAll("<coma>", "").split("<");
+		String [] metodoArgTokens = metodoArgumentos.replaceAll("\\%", "").replaceAll("<coma>", "").split("<");
+		String [] llamadaArgTokens = llamadaArgumentos.replaceAll("\\%", "").replaceAll("<coma>", "").split("<");
 
 		if (metodoArgTokens.length != llamadaArgTokens.length)
 		{
@@ -556,6 +555,7 @@ public class Semantico
 				{
 					case "INT":
 					case "INT[":
+					case "INT[]":
 						continue nextTag;
 
 					default:
@@ -647,6 +647,14 @@ public class Semantico
 						m_Codigo += tokens[t]+"\n";
 						continue;
 					}
+
+					// excepto en los if:
+					if (tokens[t].indexOf("<if") != -1)
+					{
+						m_Codigo += tokens[t]+"\n";
+						continue;
+					}
+
 					tokens[t] = tokens[t].substring(0, tokens[t].indexOf(" linea:"))+">";
 				}
 
@@ -967,9 +975,9 @@ public class Semantico
 
 			m_Metodos[a].setLinea("<linea linea:"+m_Metodos[a].getLinea().substring(13)+">");
 
-			cuerpo = reorganizarif (cuerpo, m_Metodos[a].getLinea());
+			cuerpo = reorganizarif(cuerpo, m_Metodos[a].getLinea());
 
-			cuerpo = reorganizarwhile (cuerpo, m_Metodos[a].getLinea());
+			cuerpo = reorganizarwhile(cuerpo, m_Metodos[a].getLinea());
 
 			cuerpo = reorganizarOpBoleanas(cuerpo, m_Metodos[a].getLinea());
 
@@ -985,7 +993,7 @@ public class Semantico
 
 		} //for metodos
 
-	return 0;
+		return 0;
 	} //metodod
 
 	String quitarPuntoComaYLinea(String cuerpo)
@@ -1063,23 +1071,25 @@ public class Semantico
 		return body;
 	}
 
-	String reorganizarwhile (String body, String linea)
+	String reorganizarwhile(String body, String linea)
 	{
 		String [] token = body.split("\n");
-		body = "";
+
+		// Convertir todos los CONTROL_WHILE en <while>
 		for (int  a = 0; a<token.length; a++)
 		{
-
 			if (token[a].startsWith("<linea")) linea = token[a];
 
 			if (token[a].equals("CONTROL_WHILE"))
 			{
 				linea = linea.substring(13, linea.length() -1);
 				token[a] = "<~while linea:"+linea+">";
-				token[a+1] = "";
+				token[a+1] = ""; // Este token en PARENTESIS_ABRE
 			}
 		}
 
+		// ahora buscar los parentesis que cierran justo despues
+		// de un <while>
 		boolean cambio = true;
 		while (cambio)
 		{
@@ -1106,20 +1116,15 @@ public class Semantico
 			token[r] = "</while>";
 		}
 
-		body = "";
-		for (int b = 0; b<token.length; b++)
-			if (!token[b].equals("")) body += token[b]+"\n";
-
-		return body;
-	} //metodo
+		return String.join("\n", token);
+	}
 
 	String reorganizarif(String body, String linea)
 	{
 		String [] token = body.split("\n");
-		body = "";
-		for (int  a = 0; a<token.length; a++)
-		{
 
+		for (int  a = 0; a < token.length; a++)
+		{
 			if (token[a].startsWith("<linea")) linea = token[a];
 
 			if (token[a].equals("CONTROL_IF"))
@@ -1133,8 +1138,9 @@ public class Semantico
 		boolean cambio = true;
 		while (cambio)
 		{
-			int r = token.length-1;
+			int r = token.length - 1;
 
+			// iniciar desde el ultimo token, buscando ~if
 			for (;;r--)
 			{
 				if (r<0) { cambio = false; break; }
@@ -1156,21 +1162,20 @@ public class Semantico
 			token[r] = "</if>";
 		}
 
-		body = "";
-		for (int b = 0; b<token.length; b++)
-			if (!token[b].equals("")) body += token[b]+"\n";
-
-	return body;
+		return String.join("\n", token);
 	}
 
 	String reorganizarLineas(String body)
 	{
 		String token [] = body.split("\n");
 		body = "";
+
 		for (int a = 0; a<token.length; a++)
 		{
 			if (token[a].startsWith("NUMERO_LINEA_"))
+			{
 				token[a] = "<linea linea:" + token[a].substring(13) + ">";
+			}
 
 			body += token[a]+ "\n";
 		}
@@ -1696,7 +1701,7 @@ public class Semantico
 				}
 
 				// Asignacion simple IDENTIFICADOR_* ASIGNA ... PUNTUACION_PUNTO_COMA
-				if (BuscarPatron("IDENTIFICADOR_* ASIGNA", token, b))
+				if (BuscarPatron("IDENTIFICADOR_* ASIGNA", token, b) && !BuscarPatron("* ASIGNA ASIGNA", token, b))
 				{
 					token[b] = "<asignacion-"+linea.substring(13)+"-"+token[b].substring(14)+">";
 					token[++b] = "";
@@ -1728,7 +1733,7 @@ public class Semantico
 				//            VALOR_NUMERO_4
 				//        </derecho>
 				//    </asignacion>
-				if (BuscarPatron("</arreglo> ASIGNA", token, b))
+				if (BuscarPatron("</arreglo> ASIGNA", token, b) && !BuscarPatron("* ASIGNA ASIGNA", token, b))
 				{
 					// b = arreglo
 					int primerToken = 0, ultimoToken = 0;

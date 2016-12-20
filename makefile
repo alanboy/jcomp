@@ -113,3 +113,9 @@ test10: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos2/arreglos.jc
 	$(CMD_RUN) > TestOut.txt
 	diff --text --ignore-all-space tests/arreglos2/Ref.txt TestOut.txt
 
+gato: $(EXECUTABLE_NAME) $(TEST_DIR)/gato/gato.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/gato/gato.jc
+	$(CMD_ASSEMBLE)
+	$(CMD_LINK)
+	$(CMD_RUN)
+

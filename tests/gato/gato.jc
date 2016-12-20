@@ -1,0 +1,166 @@
+def void #putc(int c){}
+def int #getc(){return 0;}
+
+def int #main()
+{
+	#jugar();
+	return 0;
+}
+
+def int #readInt()
+{
+	int n;
+	n = #getc();
+	#getc();
+	#getc(); // puede ser que esto solo funcione en windows
+	n = n - 48;
+	return n;
+}
+
+def void #jugar()
+{
+	// iniciar el tablero
+	int tablero[9];
+	int index;
+	index = 0;
+
+	while (index < 9)
+	{
+		tablero[index] = 32; // espacio en blanco
+		index = index + 1;
+	}
+
+	int continuar;
+	continuar = 1;
+
+	while (continuar > 0)
+	{
+		#imprimir(tablero);
+
+		#jugarUsuario(tablero);
+
+		#imprimir(tablero);
+
+		continuar = #hayGanador(tablero);
+
+		#jugarCpu(tablero);
+
+		continuar = #hayGanador(tablero);
+	}
+}
+
+def int #hayGanador(int [] tablero)
+{
+	int pos;
+	int suma;
+	int x;
+	int y;
+	x = 0;
+	y = 0;
+
+	// X  = 264
+	// o  = 333
+	//' ' = 96
+
+	// Revisar horizontal
+	while (x < 3) {
+		suma = 0;
+		y = 0;
+
+		while (y < 3) {
+			pos = (x * 3) + y;
+			int temp;
+			temp = tablero[pos];
+			suma = suma + temp;
+			y = y + 1;
+		}
+
+		if (suma == 264) {
+			return 0;
+		}
+
+		x = x + 1;
+	}
+
+	x = 0;
+
+	// Revisar vertical
+	while (x < 3) {
+		suma = 0;
+		pos = x;
+
+		while (pos < 9) {
+			int temp3;
+			temp3 = tablero[pos];
+			suma = suma + temp3;
+			pos = pos + 3;
+		}
+
+		if (suma == 264) {
+			return 0;
+		}
+
+		x = x + 1;
+	}
+
+	return 1;
+}
+
+def void #jugarCpu(int [] tablero)
+{
+	int jugada;
+	jugada = 0;
+
+	int actual;
+	actual = tablero[jugada];
+	while (actual > 32)
+	{
+		jugada = jugada + 1;
+		actual = tablero[jugada];
+	}
+
+	tablero[jugada] = 111; // O
+}
+
+def void #jugarUsuario(int [] tablero)
+{
+	#putc(121);
+	#putc(111);
+	#putc(117);
+	#putc(63);
+
+	int jugada;
+	jugada = #readInt();
+	tablero[jugada] = 88; // X
+}
+
+def void #imprimir(int [] tablero)
+{
+	int fila;
+	fila = 0;
+	while (fila < 3)
+	{
+		int columna;
+		columna = 0;
+		while (columna < 3)
+		{
+			int valor;
+			int pos;
+			pos = fila * 3;
+			pos = pos + columna;
+			valor = tablero[pos];
+			#putc(32);
+			#putc(valor);
+			#putc(32);
+			#putc(124);
+
+			columna = columna + 1;
+		}
+
+		#putc(10);
+		fila = fila + 1;
+	}
+
+	#putc(10);
+}
+

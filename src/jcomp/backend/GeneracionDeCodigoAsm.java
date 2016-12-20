@@ -179,10 +179,10 @@ public class GeneracionDeCodigoAsm
 
 			if (lineas[a].indexOf("MUL") != -1 )
 			{
-				lineas[a] = "\n	pop ax\n";
-				lineas[a] += "  pop bx\n";
-				lineas[a] += "  mul bx\n";
-				lineas[a] += "  push ax\n";
+				lineas[a] = "\n  pop eax\n";
+				lineas[a] += "  pop ebx\n";
+				lineas[a] += "  imul eax, ebx\n";
+				lineas[a] += "  push eax\n";
 			}
 
 			if (lineas[a].indexOf("DIV") != -1 )
@@ -234,6 +234,18 @@ public class GeneracionDeCodigoAsm
 				lineas[a] += "  pop ebx\n";
 				lineas[a] += "  cmp ebx, eax\n";
 				lineas[a] += "  je while_" + id + "_fin\n";
+				lineas[a] += "  jg while_" + id + "_fin\n";
+			}
+
+			if (lineas[a].indexOf("IGUAL_") != -1 )
+			{
+				String id = lineas[a].trim().split("_")[1];
+				id = id.substring(0, id.length() - 2);
+
+				lineas[a] = "\n  pop eax\n";
+				lineas[a] += "  pop ebx\n";
+				lineas[a] += "  cmp ebx, eax\n";
+				lineas[a] += "  jl while_" + id + "_fin\n";
 				lineas[a] += "  jg while_" + id + "_fin\n";
 			}
 
@@ -337,10 +349,10 @@ public class GeneracionDeCodigoAsm
 
 			if (lineas[a].indexOf("MUL") != -1 )
 			{
-				lineas[a] = "\n	pop ax\n";
-				lineas[a] += "  pop bx\n";
-				lineas[a] += "  mul bx\n";
-				lineas[a] += "  push ax\n";
+				lineas[a] = "\n  pop eax\n";
+				lineas[a] += "  pop ebx\n";
+				lineas[a] += "  imul eax, ebx\n";
+				lineas[a] += "  push eax\n";
 			}
 
 			if (lineas[a].indexOf("DIV") != -1 )
@@ -364,40 +376,45 @@ public class GeneracionDeCodigoAsm
 
 			if (lineas[a].indexOf("salir") != -1 )
 			{
-				// Retornar de main sinfica hacer syscall
+				// Retornar de main signfica hacer syscall para terminar
+				// el proceso
 				lineas[a]  = "  ; ExitProcess(0)\n";
-				//lineas[a] += "  push    0\n";
 				lineas[a] += "  call    _ExitProcess@4\n";
 			}
 
 			if (lineas[a].indexOf("MAYOR_") != -1 )
 			{
-				String id = lineas[a].trim().split("_")[1];
-				id = id.substring(0, id.length() - 2);
+				String linea = lineas[a].trim();
+				String id = linea.substring(linea.indexOf("_")+1, linea.length() - 1);
 
 				lineas[a] = "\n  pop eax\n";
 				lineas[a] += "  pop ebx\n";
 		 		lineas[a] += "  cmp ebx, eax\n";
-				lineas[a] += "  je while_" + id + "_fin\n";
-				lineas[a] += "  jl while_" + id + "_fin\n";
+				lineas[a] += "  je " + id + "_fin\n";
+				lineas[a] += "  jl " + id + "_fin\n";
 			}
 
 			if (lineas[a].indexOf("MENOR_") != -1 )
 			{
-				String id = lineas[a].trim().split("_")[1];
-				id = id.substring(0, id.length() - 2);
+				String linea = lineas[a].trim();
+				String id = linea.substring(linea.indexOf("_")+1, linea.length() - 1);
 
 				lineas[a] = "\n  pop eax\n";
 				lineas[a] += "  pop ebx\n";
 				lineas[a] += "  cmp ebx, eax\n";
-				lineas[a] += "  je while_" + id + "_fin\n";
-				lineas[a] += "  jg while_" + id + "_fin\n";
+				lineas[a] += "  je " + id + "_fin\n";
+				lineas[a] += "  jg " + id + "_fin\n";
 			}
 
-			if (lineas[a].indexOf("while_fin:") != -1 )
+			if (lineas[a].indexOf("IGUAL_") != -1 )
 			{
-				lineas[a] = "\n  jmp while_cond\n";
-				lineas[a] += "while_fin:\n";
+				String linea = lineas[a].trim();
+				String id = linea.substring(linea.indexOf("_")+1, linea.length() - 1);
+
+				lineas[a] = "\n  pop eax\n";
+				lineas[a] += "  pop ebx\n";
+				lineas[a] += "  cmp ebx, eax\n";
+				lineas[a] += "  jne " + id + "_fin\n";
 			}
 
 			codigoNativo += lineas[a]+"\n";
@@ -531,10 +548,10 @@ public class GeneracionDeCodigoAsm
 
 			if (lineas[a].indexOf("MUL") != -1 )
 			{
-				lineas[a] = "\n  pop ax\n";
-				lineas[a] += "  pop bx\n";
-				lineas[a] += "  mul bx\n";
-				lineas[a] += "  push ax\n";
+				lineas[a] = "\n  pop eax\n";
+				lineas[a] += "  pop ebx\n";
+				lineas[a] += "  imul eax, ebx\n";
+				lineas[a] += "  push eax\n";
 			}
 
 			if (lineas[a].indexOf("DIV") != -1 )
@@ -586,6 +603,18 @@ public class GeneracionDeCodigoAsm
 				lineas[a] += "  pop ebx\n";
 				lineas[a] += "  cmp ebx, eax\n";
 				lineas[a] += "  je while_" + id + "_fin\n";
+				lineas[a] += "  jg while_" + id + "_fin\n";
+			}
+
+			if (lineas[a].indexOf("IGUAL_") != -1 )
+			{
+				String id = lineas[a].trim().split("_")[1];
+				id = id.substring(0, id.length() - 2);
+
+				lineas[a] = "\n  pop eax\n";
+				lineas[a] += "  pop ebx\n";
+				lineas[a] += "  cmp ebx, eax\n";
+				lineas[a] += "  jl while_" + id + "_fin\n";
 				lineas[a] += "  jg while_" + id + "_fin\n";
 			}
 
