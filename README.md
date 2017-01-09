@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/ncqyco1mxbcok61p?svg=true)](https://ci.appveyor.com/project/alanboy/jcomp)
+
 jcomp
 =====
 
