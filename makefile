@@ -7,10 +7,10 @@ TEST_DIR=tests
 #ifeq ($(OS),Windows_NT)
 CMD_DEL=del
 CMD_DEL_RECURSIVO=del /s/q
-CMD_FIND_JAVA=dir /s/b src\*.java
+CMD_FIND_JAVA=dir /s/b src\*.java 
 CMD_LINK=link /NOLOGO /SUBSYSTEM:console /ENTRY:start /DEBUG /defaultlib:kernel32.lib p.o
 CMD_RUN=p.exe
-OUTPUT_ASM=out.valdosta.x86.asm
+OUTPUT_ASM=out.windows.x86.asm
 CMD_ASSEMBLE=nasm.exe -f win32 -o p.o $(OUTPUT_ASM)
 #else
 #CMD_DEL=rm
