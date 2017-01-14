@@ -11,7 +11,7 @@ def int #readInt()
 {
 	int n;
 	n = #getc();
-	#getc();
+//	#getc();
 	#getc(); // puede ser que esto solo funcione en windows
 	n = n - 48;
 	return n;

@@ -584,45 +584,44 @@ public class GeneracionDeCodigoAsm
 
 			if (lineas[a].indexOf("MAYOR_") != -1 )
 			{
-				String id = lineas[a].trim().split("_")[1];
-				id = id.substring(0, id.length() - 2);
+				String linea = lineas[a].trim();
+				String id = linea.substring(linea.indexOf("_")+1, linea.length() - 1);
 
 				lineas[a] = "\n  pop eax\n";
 				lineas[a] += "  pop ebx\n";
 				lineas[a] += "  cmp ebx, eax\n";
-				lineas[a] += "  je while_" + id + "_fin\n";
-				lineas[a] += "  jl while_" + id + "_fin\n";
+				lineas[a] += "  je " + id + "_fin\n";
+				lineas[a] += "  jl " + id + "_fin\n";
 			}
 
 			if (lineas[a].indexOf("MENOR_") != -1 )
 			{
-				String id = lineas[a].trim().split("_")[1];
-				id = id.substring(0, id.length() - 2);
+				String linea = lineas[a].trim();
+				String id = linea.substring(linea.indexOf("_")+1, linea.length() - 1);
 
 				lineas[a] = "\n	pop eax\n";
 				lineas[a] += "  pop ebx\n";
 				lineas[a] += "  cmp ebx, eax\n";
-				lineas[a] += "  je while_" + id + "_fin\n";
-				lineas[a] += "  jg while_" + id + "_fin\n";
+				lineas[a] += "  je " + id + "_fin\n";
+				lineas[a] += "  jg " + id + "_fin\n";
 			}
 
 			if (lineas[a].indexOf("IGUAL_") != -1 )
 			{
-				String id = lineas[a].trim().split("_")[1];
-				id = id.substring(0, id.length() - 2);
+				String linea = lineas[a].trim();
+				String id = linea.substring(linea.indexOf("_")+1, linea.length() - 1);
 
 				lineas[a] = "\n  pop eax\n";
 				lineas[a] += "  pop ebx\n";
 				lineas[a] += "  cmp ebx, eax\n";
-				lineas[a] += "  jl while_" + id + "_fin\n";
-				lineas[a] += "  jg while_" + id + "_fin\n";
+				lineas[a] += "  jne " + id + "_fin\n";
 			}
 
-			if (lineas[a].indexOf("while_fin:") != -1 )
-			{
-				lineas[a] = "\n  jmp while_cond\n";
-				lineas[a] += "while_fin:\n";
-			}
+			//if (lineas[a].indexOf("while_fin:") != -1 )
+			//{
+			//	lineas[a] = "\n  jmp while_cond\n";
+			//	lineas[a] += "while_fin:\n";
+			//}
 
 			codigoNativo += lineas[a]+"\n";
 		} // for de cada linea
