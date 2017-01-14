@@ -59,7 +59,6 @@ public class Semantico
 
 	private int iniciarInterno() throws Exception
 	{
-
 		// Convertimos los tokens que me pasa el sintactico en objetos. Metodos y Variables
 		crearObjetos();
 
@@ -711,7 +710,7 @@ public class Semantico
 			int mayor = 0;
 			int mayor_token = 0;
 
-			int lugar_operacion = 0;//donde esta la operacion
+			int lugar_operacion = 0; //donde esta la operacion
 			int lugar_inicio_a = 0;
 			int lugar_fin_a = 0;
 			int lugar_inicio_b = 0;
@@ -2308,21 +2307,6 @@ public class Semantico
 		} //for de metodos
 
 		return 0;
-	}
-
-	private static String[] filtrar(String [] cadenas, String filtro)
-	{
-		ArrayList<String> resultado = new ArrayList<String>();
-
-		for (String s : cadenas)
-		{
-			if (s.indexOf(filtro) == -1)
-			{
-				resultado.add(s);
-			}
-		}
-
-		return resultado.toArray(new String[resultado.size()]);
 	}
 
 	private String nombreDeVariable(String nombreDelArreglo)
