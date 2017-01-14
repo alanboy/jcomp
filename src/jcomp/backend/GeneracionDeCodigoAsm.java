@@ -617,12 +617,6 @@ public class GeneracionDeCodigoAsm
 				lineas[a] += "  jne " + id + "_fin\n";
 			}
 
-			//if (lineas[a].indexOf("while_fin:") != -1 )
-			//{
-			//	lineas[a] = "\n  jmp while_cond\n";
-			//	lineas[a] += "while_fin:\n";
-			//}
-
 			codigoNativo += lineas[a]+"\n";
 		} // for de cada linea
 

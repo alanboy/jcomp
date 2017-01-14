@@ -26,7 +26,7 @@ CMD_ASSEMBLE=nasm.exe -f win32 -o p.o $(OUTPUT_ASM)
 
 all: clean $(EXECUTABLE_NAME) tests
 
-tests: clean-tests test1 test2 test5 test6 test7 test8 test9
+tests: clean-tests test1 test2 test5 test6 test7 test8 test9 test10
 	@echo "$(RED)============== TESTS SUCCEDED ==============$(NC)"
 
 clean: clean-tests clean-build
@@ -108,6 +108,13 @@ test9: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos/arreglos.jc
 
 test10: $(EXECUTABLE_NAME) $(TEST_DIR)/arreglos2/arreglos.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/arreglos2/arreglos.jc
+	$(CMD_ASSEMBLE)
+	$(CMD_LINK)
+	$(CMD_RUN) > TestOut.txt
+	diff --text --ignore-all-space tests/arreglos2/Ref.txt TestOut.txt
+
+test11: $(EXECUTABLE_NAME) $(TEST_DIR)/cadenas/cadena.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/cadenas/cadena.jc
 	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN) > TestOut.txt

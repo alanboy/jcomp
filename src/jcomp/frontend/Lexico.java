@@ -97,7 +97,7 @@ public class Lexico
 		m_Tokens.put("int16", "TIPO_INT16");
 		m_Tokens.put("int32", "TIPO_INT32");
 		m_Tokens.put("char", "TIPO_CHAR");
-		m_Tokens.put("String", "TIPO_STRING");
+		m_Tokens.put("string", "TIPO_STRING");
 
 		// escribir el alfabeto que se puede aceptar
 		String alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklimnopqrstuvwxyz 0123456789{}()<>=;[]#.\",_+/-*";

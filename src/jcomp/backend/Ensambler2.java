@@ -2,6 +2,7 @@ package jcomp.backend;
 
 import jcomp.util.Log;
 import jcomp.util.PseudoTag;
+import jcomp.util.HashString;
 import java.util.Hashtable;
 import java.util.Arrays;
 import java.util.Stack;
@@ -28,16 +29,11 @@ public class Ensambler2
 	{
 		debug.imprimirEncabezado("GENERACION DE CODIGO INTERMEDIO");
 
-		String dseg, cseg;
-		dseg = agregarDeclaracionesGlobales();
+		String dataSection = generacionDeSectionDeDatos();
 
-		cseg = "section .text\n";
-		cseg += "  global _start\n";
-		cseg += "  UsosExternos\n";
+		String textSection = generacionDeSectionDeTexto();
 
-		cseg += procesarMetodos();
-
-		codigo = dseg + cseg;
+		codigo = dataSection + textSection;
 
 		String lineas [] = codigo.split("\n");
 
@@ -49,7 +45,10 @@ public class Ensambler2
 		return 0;
 	}
 
-	private String agregarDeclaracionesGlobales()
+	//
+	// This section contains static data which was defined in your code
+	//
+	private String generacionDeSectionDeDatos()
 	{
 		String tokens[] = codigo.split("\n");
 		String dataSegmentTmp = "";
@@ -60,6 +59,16 @@ public class Ensambler2
 			{
 				String s [] = tokens[a].split(" ");
 				dataSegmentTmp += "  "+s[3].substring(3, s[3].length()-1)+": dd 0\n";
+			}
+
+			if (tokens[a].startsWith("<STRING valor:"))
+			{
+				PseudoTag stringTag = new PseudoTag(tokens[a]);
+				debug.imprimirLinea("Nueva literal : " + stringTag.get("valor"));
+
+				dataSegmentTmp += HashString.hash(stringTag.get("valor")) + ":\n";
+				dataSegmentTmp += "    db      '" +  stringTag.get("valor") +  "', 10\n";
+				dataSegmentTmp += HashString.hash(stringTag.get("valor")) + "_end:\n";
 			}
 		}
 
@@ -73,22 +82,30 @@ public class Ensambler2
 		return temp + "\n";
 	}//declaraciones
 
-	private String procesarMetodos()
+	//
+	// The .text section contains the actual machine instructions which make up your program.
+	//
+	private String generacionDeSectionDeTexto()
 	{
 		String cseg = "";
 		boolean returnExplicto = false;
 
+		cseg = "; The .text section contains the actual machine instructions.\n";
+		cseg += "section .text\n";
+		cseg += "  global _start\n";
+		cseg += "  UsosExternos\n";
+
 		// Declarar variables locales
 		String tokens[] = codigo.split("\n");
 
-		for (int a = 0; a<tokens.length; a++)
+		for (int a = 0; a < tokens.length; a++)
 		{
 			if (!tokens[a].startsWith("<METODO"))
 			{
 				continue;
 			}
 
-			int inicio = a+1;
+			int inicio = a + 1;
 
 			String s [] = tokens[a].split(" ");
 			String nombre = s[1].substring(3);
@@ -114,7 +131,7 @@ public class Ensambler2
 			// Prologo
 			cseg += nombre +":\n";
 			cseg += "  ; create the stack frame\n";
-			cseg += "  push ebp \n";
+			cseg += "  push ebp\n";
 			cseg += "  mov ebp, esp\n";
 
 			int espacioParaVariablesLocales = 0;
@@ -158,6 +175,7 @@ public class Ensambler2
 
 			while (!tokens[++a].equals("</METODO>"))
 			{
+				//
 				// Hay dos tipos de declaraciones, tipos primitivos y arreglos:
 				// <declaracion tipo:INT id:z linea:24>
 				// <declaracion tipo:INT[5] id:a linea:25>
@@ -169,7 +187,8 @@ public class Ensambler2
 					String variableNombre = declaracionLocalSp[2].substring(3, declaracionLocalSp[2].length()-1);
 					String variableTipo = declaracionLocalSp[1].substring(5);
 
-					if (variableTipo.contains("[")) {
+					if (variableTipo.contains("["))
+					{
 						// este es un arrelgo, y el tamano es el tamano del arreglo
 						// multiplicado por el tamano de la variable que contiene
 						int tamArreglo = Integer.parseInt(variableTipo.substring(variableTipo.indexOf("[")+1, variableTipo.length() - 1));
@@ -178,8 +197,9 @@ public class Ensambler2
 						// los arreglos no estan inicializados por el momento
 						cseg_temp += "                      "
 									+ ";  variable="+ variableNombre + ", tipo=" + variableTipo + " no ha sido inicializado\n";
-
-					} else {
+					}
+					else
+					{
 						// por ahora todas las variables locales son de 4 bytes
 						espacioParaVariablesLocales += 4;
 
@@ -191,7 +211,7 @@ public class Ensambler2
 					PseudoTag variableLocal = new PseudoTag(tokens[a]);
 					variableLocal.set("stackpos", "-" + espacioParaVariablesLocales);
 
-					debug.imprimirLinea("Nueva variable local: id=" + variableNombre + " \n posicion en stack= -" + espacioParaVariablesLocales);
+					debug.imprimirLinea("Nueva variable local, id=" + variableNombre + ", stack= -" + espacioParaVariablesLocales + ", tipo=" + variableTipo);
 
 					mapaVariablesLocales.put(variableNombre, variableLocal);
 				}
@@ -205,7 +225,7 @@ public class Ensambler2
 
 			cseg += cseg_temp;
 
-			int fin = a-1;
+			int fin = a - 1;
 
 			// Insertar el cuerpo
 			cseg += convertirNomenclatura(inicio, fin, nombre.equals("_start"));
@@ -300,13 +320,13 @@ public class Ensambler2
 					cseg += "  push eax\n";
 				}
 
-
 				tokens[a] = "*";
 			}
 
 			// <STRING valor:"asdf"> Una literal
 			if (tokens[a].startsWith("<STRING valor:"))
 			{
+				// Buscar estar literal en el mapa
 				cseg += "  empujar " + variableTag.get("valor") + "\n";
 				tokens[a] = "*";
 			}
@@ -369,7 +389,6 @@ public class Ensambler2
 			{
 				tokens[a] = "<op tipo:IGUAL_"+ whileActualStack.peek() + "> \n";
 			}
-
 
 			boolean vacio = false;
 
@@ -547,6 +566,7 @@ public class Ensambler2
 				tokens[a] = "*";
 			}
 		} //for de cada metodo
+
 		return cseg;
 	}
 
@@ -560,5 +580,5 @@ public class Ensambler2
 
 		return nombreDelArreglo;
 	}
-}//class ensambler
+}
 

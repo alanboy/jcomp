@@ -5,7 +5,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Set;
 
-
 // Parser for pseudo xml tag I use:
 //
 // Ejemplos de PseudoTag:
@@ -35,9 +34,13 @@ public class PseudoTag
 	{
 		_raw = raw.trim();
 		_hashtable = new Hashtable <String,String>();
-		try{
+
+		try
+		{
 			parse();
-		}catch(Exception e){
+		}
+		catch(Exception e)
+		{
 			if (!failSilently)
 			{
 				System.out.println("Error al parsear pseudo-tag:" + _raw);
@@ -49,7 +52,7 @@ public class PseudoTag
 	private void parse() throws Exception
 	{
 		// Test for < >
-		int len = _raw.length()-1;
+		int len = _raw.length() - 1;
 
 		if (_raw.charAt(0) != '<' || _raw.charAt(len) != '>')
 		{
@@ -64,7 +67,15 @@ public class PseudoTag
 		for(int i = 1; i < parts.length; i++)
 		{
 			String [] keyValue = parts[i].split(":");
-			_hashtable.put(keyValue[0], keyValue[1]);
+
+			String valor = keyValue[1];
+
+			if (valor.charAt(0) == '\"')
+			{
+				valor = valor.substring(1, valor.length() - 1);
+			}
+
+			_hashtable.put(keyValue[0], valor);
 		}
 	}
 
