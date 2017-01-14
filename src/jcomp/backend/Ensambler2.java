@@ -327,7 +327,22 @@ public class Ensambler2
 			if (tokens[a].startsWith("<STRING valor:"))
 			{
 				// Buscar estar literal en el mapa
-				cseg += "  empujar " + variableTag.get("valor") + "\n";
+				cseg += "  ; empujar cadena literal `" + variableTag.get("valor") + "`\n";
+				cseg += "  empujar " + HashString.hash(variableTag.get("valor")) + "\n";
+				tokens[a] = "*";
+			}
+
+			// <STRING id:somestring scope:local>
+			if (tokens[a].startsWith("<STRING id:"))
+			{
+				PseudoTag tokenTag = mapaVariablesLocales.get(variableTag.get("id"));
+				cseg += "  ; empujar apuntador a cadena " + tokenTag.get("id") + "\n";
+
+				cseg += "  mov ebx, ebp\n";
+				cseg += "  mov eax, "+tokenTag.get("stackpos")+"\n";
+				cseg += "  add eax, ebx\n";
+				cseg += "  push DWORD [eax]\n";
+
 				tokens[a] = "*";
 			}
 
@@ -411,6 +426,8 @@ public class Ensambler2
 					PseudoTag variableTag1 = new PseudoTag(tokens[a].replaceAll("-", " "));
 					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag1.get("id"));
 
+					int tamanoDelTipo = 4;
+
 					// los arreglos declarados en este metodo, la direccion esta en ebp + el offset,
 					// para los arreglos que me pasaron por arguemntos, usar esa direccion en vez de
 					// ebp
@@ -425,7 +442,7 @@ public class Ensambler2
 						cseg += "  mov eax, ecx\n";
 
 						cseg += "  pop ecx\n";
-						cseg += "  imul ecx, 4\n";
+						cseg += "  imul ecx, "+tamanoDelTipo+"\n";
 						cseg += "  add eax, ecx\n";
 						cseg += "  push DWORD [eax]\n\n";
 					}
@@ -437,7 +454,7 @@ public class Ensambler2
 						cseg += "  add eax, ebx\n";
 
 						cseg += "  pop ecx\n";
-						cseg += "  imul ecx, 4\n";
+						cseg += "  imul ecx, "+tamanoDelTipo+"\n";
 						cseg += "  add eax, ecx\n";
 						cseg += "  push DWORD [eax]\n\n";
 					}

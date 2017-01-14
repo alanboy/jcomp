@@ -11,11 +11,11 @@ public class Metodos
 
 	Metodos()
 	{
-		this.Linea = "ns";
-		this.Nombre = "ns";
-		this.TipoDeRetorno = "ns";
-		this.Argumentos = "ns";
-		this.Cuerpo = "ns";
+		this.Linea = null;
+		this.Nombre = null;
+		this.TipoDeRetorno = null;
+		this.Argumentos = null;
+		this.Cuerpo = null;
 	}
 
 	void setNumVariables(int i)

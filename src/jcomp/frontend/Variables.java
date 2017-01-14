@@ -8,9 +8,9 @@ public class Variables
 
 	Variables()
 	{
-		this.Linea = "ns";
-		this.Nombre = "ns";
-		this.Tipo = "ns";
+		this.Linea = null;
+		this.Nombre = null;
+		this.Tipo = null;
 	}
 
 	void setLinea(String s){ Linea = s; }

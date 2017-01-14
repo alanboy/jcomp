@@ -495,15 +495,21 @@ public class Semantico
 	// <llamada tipo:VOID id:putc linea:20>%<INT>%</llamada>%
 	int revisarTipoArgumentos(String llamadaAMetodoTags) throws Exception
 	{
+
+
 		String llamadaNombreMetodo = llamadaAMetodoTags.substring(llamadaAMetodoTags.indexOf(" id:")+4, llamadaAMetodoTags.indexOf(" linea:"));
 		String llamadaLinea = llamadaAMetodoTags.substring(llamadaAMetodoTags.indexOf(" linea:")+7, llamadaAMetodoTags.length()-1);
 		String llamadaArgumentos = llamadaAMetodoTags.substring(llamadaAMetodoTags.indexOf("%")+1, llamadaAMetodoTags.length()-12);
 
 		// buscar el metodo que estamos llamando para saber cuales son los argumentos correctos
 		String metodoArgumentos = "";
-		for (int b = 0; b<m_Metodos.length; b++)
+		for (int b = 0; b < m_Metodos.length; b++)
+		{
 			if (m_Metodos[b].getNombre().substring(14).equals(llamadaNombreMetodo))
+			{
 				metodoArgumentos = m_Metodos[b].getArgumentos();
+			}
+		}
 
 		if (!compararArgumentos(metodoArgumentos, llamadaArgumentos))
 		{
@@ -555,6 +561,7 @@ public class Semantico
 					case "INT":
 					case "INT[":
 					case "INT[]":
+					case "STRING":
 						continue nextTag;
 
 					default:
@@ -1654,6 +1661,16 @@ public class Semantico
 				// asignacion a un elemento de un arreglo usando expresion: a[ i ] = 3;
 				if (BuscarPatron("IDENTIFICADOR_* CORCHETE_ABRE", token, b))
 				{
+					String id = linea.substring(13);
+
+					for (int f = 0; f<m_Variables.length; f++)
+					{
+						if (linea.equals(m_Variables[f].getNombre()))
+						{
+							// Determinar el tipo
+						}
+					}
+
 					token[b] = "<arreglo-tipo:INT-linea:"+linea.substring(13)+"-id:"+token[b].substring(14) + ">";
 					token[++b] = ""; // CORCHETE_ABRE
 

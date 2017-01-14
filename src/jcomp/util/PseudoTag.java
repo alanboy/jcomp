@@ -59,6 +59,7 @@ public class PseudoTag
 			throw new Exception("Malformed string.");
 		}
 
+		// esto no funciona con cadenas
 		String parts [] = _raw.substring(1, len).split(" ");
 
 		// First part is the type
