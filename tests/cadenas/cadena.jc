@@ -3,26 +3,35 @@ def void #putc(int c){}
 
 def void #puts(string somestring)
 {
-    int c;
-    c = somestring[0];
-    #putc(c);
-    c = somestring[1];
-    #putc(c);
-    c = somestring[2];
-    #putc(c);
-    c = somestring[3];
-    #putc(c);
+	int c;
+	c = somestring[0];
+	#putc(c);
+
+	c = somestring[1];
+	#putc(c);
+
+	c = somestring[2];
+	#putc(c);
+
+	c = somestring[3];
+	#putc(c);
+
+	c = somestring[4];
+	#putc(c);
+
+	c = somestring[5];
+	#putc(c);
 }
 
 def int #main()
 {
-    string somestring;
+	string somestring;
 
-    somestring = "foobar";
+	somestring = "foobar";
 
-    #puts(somestring);
+	#puts(somestring);
 
-    return 0;
+	return 0;
 }
 
 

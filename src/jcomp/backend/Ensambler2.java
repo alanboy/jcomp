@@ -426,7 +426,18 @@ public class Ensambler2
 					PseudoTag variableTag1 = new PseudoTag(tokens[a].replaceAll("-", " "));
 					PseudoTag tokenTag = mapaVariablesLocales.get(variableTag1.get("id"));
 
-					int tamanoDelTipo = 4;
+					int tamanoDelTipo = 0;
+					switch (variableTag1.get("tipo"))
+					{
+						case "STRING" : 
+						tamanoDelTipo = 1;
+						break;
+
+						case "INT" : 
+						tamanoDelTipo = 4;
+						break;
+
+					}
 
 					// los arreglos declarados en este metodo, la direccion esta en ebp + el offset,
 					// para los arreglos que me pasaron por arguemntos, usar esa direccion en vez de

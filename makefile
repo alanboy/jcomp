@@ -26,7 +26,7 @@ CMD_ASSEMBLE=nasm.exe -f win32 -o p.o $(OUTPUT_ASM)
 
 all: clean $(EXECUTABLE_NAME) tests
 
-tests: clean-tests test1 test2 test5 test6 test7 test8 test9 test10
+tests: clean-tests test1 test2 test5 test6 test7 test8 test9 test10 test11
 	@echo "$(RED)============== TESTS SUCCEDED ==============$(NC)"
 
 clean: clean-tests clean-build
@@ -118,7 +118,7 @@ test11: $(EXECUTABLE_NAME) $(TEST_DIR)/cadenas/cadena.jc
 	$(CMD_ASSEMBLE)
 	$(CMD_LINK)
 	$(CMD_RUN) > TestOut.txt
-	diff --text --ignore-all-space tests/arreglos2/Ref.txt TestOut.txt
+	diff --text --ignore-all-space tests/cadenas/Ref.txt TestOut.txt
 
 gato: $(EXECUTABLE_NAME) $(TEST_DIR)/gato/gato.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/gato/gato.jc

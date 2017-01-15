@@ -1,5 +1,7 @@
 package jcomp.frontend;
 
+import java.util.HashMap;
+
 public class Metodos
 {
 	private String Linea;
@@ -7,7 +9,8 @@ public class Metodos
 	private String TipoDeRetorno;
 	private String Argumentos;
 	private String Cuerpo;
-	private Variables [] variables;
+
+	private HashMap<String, Variables> variablesLocales;
 
 	Metodos()
 	{
@@ -18,13 +21,14 @@ public class Metodos
 		this.Cuerpo = null;
 	}
 
-	void setNumVariables(int i)
+	void setVariablesLocales(HashMap<String, Variables> locales)
 	{
-		variables = new Variables[i];
-		for(int g=0; g<variables.length; g++)
-		{
-			variables[g] = new Variables();
-		}
+		variablesLocales = locales;
+	}
+
+	Variables getVariableLocal(String nombre)
+	{
+		return variablesLocales.get(nombre);
 	}
 
 	void setLinea(String s){ Linea = s; }

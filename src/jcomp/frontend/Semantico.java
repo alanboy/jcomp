@@ -1,8 +1,8 @@
 package jcomp.frontend;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Collections;
 import jcomp.util.Log;
 
@@ -19,8 +19,8 @@ import jcomp.util.Log;
 public class Semantico
 {
 	private String m_Codigo;
-	private Log m_Debug;
-	private Variables [] m_Variables;
+	private final Log m_Debug;
+	private Variables [] m_VariablesGlobales;
 	private Metodos [] m_Metodos;
 
 	public Semantico()
@@ -67,7 +67,7 @@ public class Semantico
 		// -------------------------------------
 
 		// Revisar que no se repitan los nombres de los metodos ni variables
-		if (revisarDefiniciones() != 0) return 1;
+		if (buscarNombresDuplicadosEnSimbolosGlobales() != 0) return 1;
 
 		// -------------------------------------
 		// Modifica el codigo
@@ -608,10 +608,10 @@ public class Semantico
 		m_Codigo = "";
 
 		// Bsucar declaracion de variables globales
-		for (int a = 0; a<m_Variables.length; a++)
+		for (int a = 0; a<m_VariablesGlobales.length; a++)
 		{
-			m_Codigo += "<declaracion global tipo:"+m_Variables[a].getTipo().substring(5)
-				+ " id:" +m_Variables[a].getNombre().substring(14)+">\n";
+			m_Codigo += "<declaracion global tipo:"+m_VariablesGlobales[a].getTipo().substring(5)
+				+ " id:" +m_VariablesGlobales[a].getNombre().substring(14)+">\n";
 		}
 
 		// Buscar declaracion de metodos
@@ -867,7 +867,7 @@ public class Semantico
 			String [] args = m_Metodos[a].getArgumentos().split(" ");
 
 			// Total de variables locales es numero de <declaraciones> + el numero de Argumentos + variables globales.
-			int total = token.length + args.length - 1 + m_Variables.length;
+			int total = token.length + args.length - 1 + m_VariablesGlobales.length;
 			if (m_Metodos[a].getArgumentos().equals("NADA"))
 			{
 				total--;
@@ -888,10 +888,10 @@ public class Semantico
 			}
 
 			// Creo que estas son las variables globales
-			for (int z = 0; z<m_Variables.length; z++)
+			for (int z = 0; z<m_VariablesGlobales.length; z++)
 			{
-				variables[declaracion_actual][0] = m_Variables[z].getNombre().substring(14);
-				variables[declaracion_actual][1] = m_Variables[z].getTipo().substring(5);
+				variables[declaracion_actual][0] = m_VariablesGlobales[z].getNombre().substring(14);
+				variables[declaracion_actual][1] = m_VariablesGlobales[z].getTipo().substring(5);
 				variables[declaracion_actual][2] = "global";
 				declaracion_actual++;
 			}
@@ -1661,17 +1661,23 @@ public class Semantico
 				// asignacion a un elemento de un arreglo usando expresion: a[ i ] = 3;
 				if (BuscarPatron("IDENTIFICADOR_* CORCHETE_ABRE", token, b))
 				{
-					String id = linea.substring(13);
+					String nombre = token[b].substring(14);
 
-					for (int f = 0; f<m_Variables.length; f++)
+					Variables estaVariable = m_Metodos[a].getVariableLocal(nombre);
+
+					if (estaVariable == null)
 					{
-						if (linea.equals(m_Variables[f].getNombre()))
-						{
-							// Determinar el tipo
-						}
+						System.out.println(nombre  + " no encontrada");
 					}
 
-					token[b] = "<arreglo-tipo:INT-linea:"+linea.substring(13)+"-id:"+token[b].substring(14) + ">";
+					String tipo = estaVariable.getTipo();
+					if (tipo.contains("["))
+					{
+					tipo = tipo.substring(0, tipo.indexOf("["));
+					}
+
+					token[b] = "<arreglo-tipo:"+ tipo +"-linea:"+linea.substring(13)+"-id:"+token[b].substring(14) + ">";
+
 					token[++b] = ""; // CORCHETE_ABRE
 
 					while (!token[b].equals("CORCHETE_CIERRA")) { b++; }
@@ -1873,7 +1879,7 @@ public class Semantico
 	//   IDENTIFICADOR_metodo <----- definicion de metodo termina
 	//   PARENTESIS_ABRE
 	//
-	// y popular los arreglos m_Metodos y m_Variables
+	// y popular los arreglos m_Metodos y m_VariablesGlobales
 	//
 	void crearObjetos()
 	{
@@ -1905,8 +1911,6 @@ public class Semantico
 							defCuerpo.indexOf("LLAVE_ABRE") + 11,
 							defCuerpo.lastIndexOf("LLAVE_CIERRA")));
 
-				met.setCuerpo(met.getCuerpo());
-
 				met.setLinea(ultimoNumeroDeLinea);
 
 				listaDeMetodos.add(met);
@@ -1932,11 +1936,11 @@ public class Semantico
 			}
 		}
 
-		m_Variables = listaDeVariables.toArray(new Variables[listaDeVariables.size()]);
+		m_VariablesGlobales = listaDeVariables.toArray(new Variables[listaDeVariables.size()]);
 		m_Metodos = listaDeMetodos.toArray(new Metodos[listaDeMetodos.size()]);
 	}
 
-	int revisarDefiniciones()
+	int buscarNombresDuplicadosEnSimbolosGlobales()
 	{
 		// Revisar metodos con el mismo nombre
 		for (int a = 0; a < m_Metodos.length; a++)
@@ -1959,16 +1963,16 @@ public class Semantico
 		}
 
 		// Revisar variables con el mismo nombre
-		for (int a = 0; a < m_Variables.length; a++)
+		for (int a = 0; a < m_VariablesGlobales.length; a++)
 		{
-			String comp = m_Variables[a].getNombre();
-			for (int b = 0; b<m_Variables.length; b++)
+			String comp = m_VariablesGlobales[a].getNombre();
+			for (int b = 0; b<m_VariablesGlobales.length; b++)
 			{
 				if (a == b) b++;
-				if (b == m_Variables.length) break;
-				if (comp.equals(m_Variables[b].getNombre()))
+				if (b == m_VariablesGlobales.length) break;
+				if (comp.equals(m_VariablesGlobales[b].getNombre()))
 				{
-					System.err.println("Linea: "+m_Variables[b].getLinea().substring(13));
+					System.err.println("Linea: "+m_VariablesGlobales[b].getLinea().substring(13));
 					System.err.println("Variable "+comp.substring(14)+" ya esta definido en este programa.");
 					m_Debug.imprimirLinea("\nVariable ya definida !!!");
 					return 1;
@@ -1977,59 +1981,39 @@ public class Semantico
 		}
 
 		return 0;
-	} //revisarDefiniciones()
+	} //buscarNombresDuplicadosEnSimbolosGlobales()
 
 	// revisar que dentro del cuerpo de los metodos no se declaren las variables dos veces
 	// acuerdate que los argumentos que recibe el metodo son tambien declaraciones
 	// y que no pueden tener el mismo nombre que declaraciones globales def
 	int revisarCuerpoVariables()
 	{
-		String cuerpo = "";
 		String linea = "";
-		int declaracion;
+		HashMap<String, Variables> variablesLocales = new HashMap<>();
 
 		for (int d = 0; d < m_Metodos.length; d++)
 		{
 			String [] tokens = m_Metodos[d].getCuerpo().split("\n");
-			declaracion = 0;
+			String [] argumentos = m_Metodos[d].getArgumentos().split(" ");
 
-			String argumentos [] = m_Metodos[d].getArgumentos().split(" ");
 			for (int h = 0; h < argumentos.length; h++)
 			{
-				// cuantas declaraciones en los argumentos que recibe el metodo
-				if (BuscarPatron("TIPO_* IDENTIFICADOR_*", argumentos, h))
+                if (BuscarPatron("TIPO_* IDENTIFICADOR_*", argumentos, h))
 				{
-					declaracion++;
-				}
-			}
-
-			for (int a = 0; a<tokens.length; a++)
-			{
-				//contar cuantas declaraciones hay en el cuerpo
-				if (BuscarPatron("TIPO_* IDENTIFICADOR_* PUNTUACION_PUNTO_COMA", tokens, a))
-				{
-					declaracion++;
+					Variables v = new Variables();
+					v.setTipo(argumentos[h].substring(5));
+					v.setNombre(argumentos[h+1].substring(14));
+					v.setLinea(m_Metodos[d].getLinea());
+					variablesLocales.put(v.getNombre(), v);
 				}
 
-				//contar cuantas declaraciones tipo arreglo
-				if (BuscarPatron("TIPO_* IDENTIFICADOR_* CORCHETE_ABRE * CORCHETE_CIERRA PUNTUACION_PUNTO_COMA", tokens, a))
+				if (BuscarPatron("TIPO_* CORCHETE_ABRE CORCHETE_CIERRA IDENTIFICADOR_*", argumentos, h))
 				{
-					declaracion++;
-				}
-			}
-
-			//crear un vector bidimensional.. declaracion-> linea, tipo, id
-			String [][] declaraciones = new String[declaracion][3];
-
-			int inicio = 0;
-			for (int h = 0; h<argumentos.length; h++)
-			{
-				if (argumentos[h].startsWith("TIPO_") && argumentos[h+1].startsWith("IDENTIFICADOR_"))
-				{
-					declaraciones[inicio][0] = m_Metodos[d].getLinea();
-					declaraciones[inicio][1] = argumentos[h];
-					declaraciones[inicio][2] = argumentos[h+1];
-					inicio++;
+					Variables v = new Variables();
+					v.setTipo(argumentos[h].substring(5));
+					v.setNombre(argumentos[h+3].substring(14));
+					v.setLinea(m_Metodos[d].getLinea());
+					variablesLocales.put(v.getNombre(), v);
 				}
 			}
 
@@ -2043,104 +2027,84 @@ public class Semantico
 
 				if (BuscarPatron("TIPO_* IDENTIFICADOR_* PUNTUACION_PUNTO_COMA", tokens, a))
 				{
-					declaraciones[inicio][0] = linea;
-					declaraciones[inicio][1] = tokens[a];
-					declaraciones[inicio][2] = tokens[a+1];
-					inicio++;
+					Variables v = new Variables();
+					v.setTipo(tokens[a].substring(5));
+					v.setNombre(tokens[a+1].substring(14));
+					v.setLinea(linea);
+					variablesLocales.put(v.getNombre(), v);
+
+					tokens[a] = "<declaracion-"+linea+"-"+tokens[a].substring(5)+"-"+tokens[a+1].substring(14)+">";
+					tokens[a+1] = tokens[a+2] = "";
 				}
 
-				if (BuscarPatron("TIPO_* IDENTIFICADOR_* CORCHETE_ABRE * CORCHETE_CIERRA PUNTUACION_PUNTO_COMA", tokens, a))
+				if (BuscarPatron("TIPO_* IDENTIFICADOR_* CORCHETE_ABRE VALOR_NUMERO_* CORCHETE_CIERRA PUNTUACION_PUNTO_COMA", tokens, a))
 				{
-					declaraciones[inicio][0] = linea;
-					declaraciones[inicio][1] = tokens[a];
-					declaraciones[inicio][2] = tokens[a+1];
-					inicio++;
-				}
-			} //cada token
+					int tamArreglo = Integer.parseInt(tokens[a+3].substring(13));
 
-			// por fin !! ya tengo la declaraciones de este metodo... ahora ver que no sean iguales
-			// o que no sean iguales a alguna definicion global
-			// las declaraciones globales estan en el el arreglo m_Variables[].getNombre()
-			for (int p = 0; p<declaraciones.length; p++)
-			{
-				String id = declaraciones[p][2];
-				for (int q = 0; q<declaraciones.length; q++)
+					Variables v = new Variables();
+					v.setTipo(tokens[a].substring(5)+"["+tamArreglo+"]");
+					v.setNombre(tokens[a+1].substring(14));
+					v.setLinea(tokens[a].substring(5));
+					variablesLocales.put(v.getNombre(), v);
+
+					tokens[a] = "<declaracion-"+linea+"-"+tokens[a].substring(5)+"["+tamArreglo+"]-"+tokens[a+1].substring(14)+">";
+					tokens[a+1] = tokens[a+2] = tokens[a+3] = tokens[a+4] = tokens[a+5] = "";
+				}
+
+				if (BuscarPatron("TIPO_* IDENTIFICADOR_* NUMERO_LINEA_* PUNTUACION_PUNTO_COMA", tokens, a))
 				{
-					if (p == q) q++;
-					if (q == declaraciones.length) break;
-					if (id.equals(declaraciones[q][2]))
-					{
-						System.err.println("Linea: "+declaraciones[q][0].substring(13));
-						System.err.println("Variable "+ declaraciones[p][2].substring(14)+" ya esta definida localmente.");
-						return 1;
-					}
+					tokens[a] = "<declaracion-"+linea+"-"+tokens[a].substring(5)+"-"+tokens[a+1].substring(14)+">";
+					tokens[a+1] = tokens[a+2];
+					tokens[a+2] = tokens[a+3] = "";
+
+					Variables v = new Variables();
+					v.setTipo(tokens[a].substring(5));
+					v.setNombre(tokens[a+1].substring(14));
+					v.setLinea(linea);
+					variablesLocales.put(v.getNombre(), v);
 				}
 
-				for (int f = 0; f<m_Variables.length; f++)
+				if (BuscarPatron("TIPO_* NUMERO_LINEA_* IDENTIFICADOR_* PUNTUACION_PUNTO_COMA", tokens, a))
 				{
-					if (id.equals(m_Variables[f].getNombre()))
-					{
-						System.err.println("Linea: "+declaraciones[p][0].substring(13));
-						System.err.println("Variable "+ declaraciones[p][2].substring(14)+" ya esta definida globalmente, en la linea "+m_Variables[f].getLinea().substring(13)+".");
-						return 1;
-					}
-				}
-			} // for de comprobaciones
+					tokens[a] = "<declaracion-"+linea+"-"+tokens[a].substring(5)+"-"+tokens[a+2].substring(14)+">";
+					tokens[a+1] = tokens[a+1]; // Mantener el numero de linea
+					tokens[a+2] = tokens[a+3] = "";
 
-			// en vez de tener 3 tokens, hacer unos solo
-			// que contenga <declaracion-linea-tipo-id>
-			linea = m_Metodos[d].getLinea();
-			for (int x = 0; x < tokens.length; x++)
-			{
-				if (tokens[x].startsWith("NUMERO_LINEA_"))
+					Variables v = new Variables();
+					v.setTipo(tokens[a].substring(5));
+					v.setNombre(tokens[a+2].substring(14));
+					v.setLinea(linea);
+					variablesLocales.put(v.getNombre(), v);
+				}
+
+				if (BuscarPatron("TIPO_* NUMERO_LINEA_* IDENTIFICADOR_* NUMERO_LINEA_* PUNTUACION_PUNTO_COMA", tokens, a))
 				{
-					linea = tokens[x].substring(13);
-					continue;
+					tokens[a] = "<declaracion-"+linea+"-"+tokens[a].substring(5)+"-"+tokens[a+2].substring(14)+">";
+					tokens[a+1] = tokens[a+3];
+					tokens[a+2] = tokens[a+3] = tokens[a+4] = "";
+
+					Variables v = new Variables();
+					v.setTipo(tokens[a].substring(5));
+					v.setNombre(tokens[a+2].substring(14));
+					v.setLinea(linea);
+					variablesLocales.put(v.getNombre(), v);                    
 				}
 
-				// Declaracion de un arreglo:
-				if (BuscarPatron("TIPO_* IDENTIFICADOR_* CORCHETE_ABRE VALOR_NUMERO_* CORCHETE_CIERRA PUNTUACION_PUNTO_COMA", tokens, x))
+				if (BuscarPatron("TIPO_* CORCHETE_ABRE CORCHETE_CIERRA IDENTIFICADOR_* PUNTUACION_PUNTO_COMA", tokens, a))
 				{
-					int tamArreglo = Integer.parseInt(tokens[x+3].substring(13));
-					tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"["+tamArreglo+"]-"+tokens[x+1].substring(14)+">";
-					tokens[x+1] = tokens[x+2] = tokens[x+3] = tokens[x+4] = tokens[x+5] = "";
-				}
+					tokens[a] = "<declaracion-"+linea+"-"+tokens[a].substring(5)+"[]-"+tokens[a+3].substring(14)+">";
+					tokens[a+1] = "NUMERO_LINEA_" + linea;
+					tokens[a+2] = tokens[a+3] = tokens[a+4] = "";
 
-				if (BuscarPatron("TIPO_* IDENTIFICADOR_* PUNTUACION_PUNTO_COMA", tokens, x))
-				{
-					tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+1].substring(14)+">";
-					tokens[x+1] = tokens[x+2] = "";
+					Variables v = new Variables();
+					v.setTipo(tokens[a].substring(5) + "[]");
+					v.setNombre(tokens[a+3].substring(14));
+					v.setLinea(linea);
+					variablesLocales.put(v.getNombre(), v);
 				}
+			} //cada token de este metodo
 
-				if (BuscarPatron("TIPO_* IDENTIFICADOR_* NUMERO_LINEA_* PUNTUACION_PUNTO_COMA", tokens, x))
-				{
-					tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+1].substring(14)+">";
-					tokens[x+1] = tokens[x+2];
-					tokens[x+2] = tokens[x+3] = "";
-				}
-
-				if (BuscarPatron("TIPO_* NUMERO_LINEA_* IDENTIFICADOR_* PUNTUACION_PUNTO_COMA", tokens, x))
-				{
-					tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+2].substring(14)+">";
-					tokens[x+1] = tokens[x+1];
-					tokens[x+2] = tokens[x+3] = "";
-				}
-
-				if (BuscarPatron("TIPO_* NUMERO_LINEA_* IDENTIFICADOR_* NUMERO_LINEA_* PUNTUACION_PUNTO_COMA", tokens, x))
-				{
-					tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"-"+tokens[x+2].substring(14)+">";
-					tokens[x+1] = tokens[x+3];
-					tokens[x+2] = tokens[x+3] = tokens[x+4] = "";
-				}
-
-				if (BuscarPatron("TIPO_* CORCHETE_ABRE CORCHETE_CIERRA IDENTIFICADOR_* PUNTUACION_PUNTO_COMA", tokens, x))
-				{
-					tokens[x] = "<declaracion-"+linea+"-"+tokens[x].substring(5)+"[]-"+tokens[x+3].substring(14)+">";
-					tokens[x+1] = "NUMERO_LINEA_" + linea;
-					tokens[x+2] = tokens[x+3] = tokens[x+4] = "";
-				}
-			}
-
+			m_Metodos[d].setVariablesLocales(variablesLocales);
 			m_Metodos[d].setCuerpo(String.join("\n", tokens));
 		} //for de cada cuerpo de cada metodo
 
@@ -2235,7 +2199,7 @@ public class Semantico
 			String [] token = m_Metodos[a].getCuerpo().split("<declaracion-");
 			String [] args = m_Metodos[a].getArgumentos().split(" ");
 
-			int total = token.length + args.length - 1 + m_Variables.length;
+			int total = token.length + args.length - 1 + m_VariablesGlobales.length;
 			if (m_Metodos[a].getArgumentos().equals("NADA"))
 				total--;
 
@@ -2250,9 +2214,9 @@ public class Semantico
 
 			token = m_Metodos[a].getCuerpo().split("\n");
 
-			for (int z = 0; z < m_Variables.length; z++)
+			for (int z = 0; z < m_VariablesGlobales.length; z++)
 			{
-				variablesDeclaradas.add(m_Variables[z].getNombre().substring(14));
+				variablesDeclaradas.add(m_VariablesGlobales[z].getNombre().substring(14));
 			}
 
 			args = m_Metodos[a].getArgumentos().split(" ");
@@ -2409,12 +2373,12 @@ public class Semantico
 			}
 		}
 
-		for (int z = 0; z<m_Variables.length; z++)
+		for (int z = 0; z<m_VariablesGlobales.length; z++)
 		{
 			m_Debug.imprimirLinea("\n Variable "+z);
-			m_Debug.imprimirLinea(" Linea: " + m_Variables[z].getLinea());
-			m_Debug.imprimirLinea(" Nombre: " + m_Variables[z].getNombre());
-			m_Debug.imprimirLinea(" Tipo: " + m_Variables[z].getTipo());
+			m_Debug.imprimirLinea(" Linea: " + m_VariablesGlobales[z].getLinea());
+			m_Debug.imprimirLinea(" Nombre: " + m_VariablesGlobales[z].getNombre());
+			m_Debug.imprimirLinea(" Tipo: " + m_VariablesGlobales[z].getTipo());
 		}
 	}
 }
