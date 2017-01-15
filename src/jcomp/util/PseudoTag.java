@@ -21,7 +21,7 @@ import java.util.Set;
 //
 public class PseudoTag
 {
-	private String _raw;
+	private String raw;
 	private Hashtable <String, String> _hashtable;
 	private String _type;
 
@@ -32,7 +32,7 @@ public class PseudoTag
 
 	public PseudoTag(String raw, boolean failSilently)
 	{
-		_raw = raw.trim();
+		this.raw = raw.trim();
 		_hashtable = new Hashtable <String,String>();
 
 		try
@@ -43,7 +43,7 @@ public class PseudoTag
 		{
 			if (!failSilently)
 			{
-				System.out.println("Error al parsear pseudo-tag:" + _raw);
+				System.out.println("Error al parsear pseudo-tag:" + raw);
 				System.out.println(e);
 			}
 		}
@@ -51,32 +51,41 @@ public class PseudoTag
 
 	private void parse() throws Exception
 	{
-		// Test for < >
-		int len = _raw.length() - 1;
-
-		if (_raw.charAt(0) != '<' || _raw.charAt(len) != '>')
+		if (raw.charAt(0) != '<' || raw.charAt(raw.length() - 1) != '>')
 		{
-			throw new Exception("Malformed string.");
+			throw new Exception("Malformed string");
 		}
+		
+		_type = raw.substring(1, raw.indexOf(' '));
 
-		// esto no funciona con cadenas
-		String parts [] = _raw.substring(1, len).split(" ");
+		String propiedades = raw.substring(raw.indexOf(' ') + 1, raw.length() - 1);
+		int inicio = 0;
+		int idx = 0;
 
-		// First part is the type
-		_type = parts[0];
-
-		for(int i = 1; i < parts.length; i++)
+		while (idx < propiedades.length())
 		{
-			String [] keyValue = parts[i].split(":");
-
-			String valor = keyValue[1];
-
-			if (valor.charAt(0) == '\"')
+			while (propiedades.charAt(idx) != ':')
 			{
-				valor = valor.substring(1, valor.length() - 1);
+				idx++;
 			}
 
-			_hashtable.put(keyValue[0], valor);
+			String llave = propiedades.substring(inicio, idx);
+			idx++;
+			boolean esCadena = propiedades.charAt(idx) == '\"';
+			char busqueda = esCadena ? '\"' : ' ';
+
+			if (esCadena) idx++;
+			
+			inicio = idx++;
+
+			while (idx < propiedades.length() && propiedades.charAt(idx) != busqueda)
+			{
+				idx++;
+			}
+
+			_hashtable.put(llave, propiedades.substring(inicio, idx));
+
+			inicio = idx + 1;
 		}
 	}
 

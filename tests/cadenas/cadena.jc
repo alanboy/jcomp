@@ -1,37 +1,28 @@
 
 def void #putc(int c){}
 
-def void #puts(string somestring)
+def void #puts(string somestring, int len)
 {
-	int c;
-	c = somestring[0];
-	#putc(c);
+	int i;
+	i = 0;
 
-	c = somestring[1];
-	#putc(c);
-
-	c = somestring[2];
-	#putc(c);
-
-	c = somestring[3];
-	#putc(c);
-
-	c = somestring[4];
-	#putc(c);
-
-	c = somestring[5];
-	#putc(c);
+	while (i < len)
+	{
+		int c;
+		c = somestring[i];
+		#putc(c);
+		i = i +1;
+	}
 }
 
 def int #main()
 {
 	string somestring;
 
-	somestring = "foobar";
+	somestring = "esta es una cadena muy larga";
 
-	#puts(somestring);
+	#puts(somestring, 28);
 
 	return 0;
 }
-
 
