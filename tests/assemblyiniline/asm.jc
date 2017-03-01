@@ -1,0 +1,16 @@
+
+def void #putc(int c)
+{
+}
+
+def int #main()
+{
+    asm {
+        mov eax, ebx
+        inc eax
+    };
+
+    #putc(65);
+    return 0;
+}
+

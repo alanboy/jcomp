@@ -9,13 +9,12 @@ import jcomp.util.Log;
 /**
  *
  * XML para las llamadas dentro de las llamadas, ejemplo:
- * #met1(43, #met2(a) , t)
+ * #met1(43, #met2(a), t)
  * se convierte en:
  * <llamada met1> 43 , <llamada met2> a </llamada> , t</llamada>
  * y asi se forma el arbol.
- *  *
  *
- * */
+ **/
 public class Semantico
 {
 	private String m_Codigo;
@@ -72,6 +71,11 @@ public class Semantico
 		// -------------------------------------
 		// Modifica el codigo
 		// -------------------------------------
+
+		// reemplazar el token de ENSAMBLADOR_n
+		// por <asm id="n">, para que sea consistente
+		// con los demas tags xml
+		if (convertirAsm() != 0) return 1;
 
 		// revisar las declaraciones del cuerpo que no sean iguales, tambien
 		// convierte declaraciones en el nuevo tag <declaracion>
@@ -1599,6 +1603,7 @@ public class Semantico
 		return 0;
 	} //revisarArgumentosDeLLamadas()
 
+
 	int convertirArreglos()
 	{
 		for (int a = 0; a<m_Metodos.length; a++)
@@ -1639,6 +1644,28 @@ public class Semantico
 
 					token[b] = "</arreglo>";
 				}
+			}
+
+			m_Metodos[a].setCuerpo(String.join("\n", token));
+		}
+		return 0;
+	}
+
+	int convertirAsm()
+	{
+		for (int a = 0; a < m_Metodos.length; a++)
+		{
+			String [] token = m_Metodos[a].getCuerpo().split("\n");
+			String linea = m_Metodos[a].getLinea();
+
+			for (int b = 0; b < token.length; b++)
+			{
+				if (!token[b].startsWith("ENSAMBLADOR_"))
+				{
+					continue;
+				}
+				String indice = token[b].substring(token[b].indexOf("_")+1);
+				token[b] = "<asm id=\""+ indice +"\">";
 			}
 
 			m_Metodos[a].setCuerpo(String.join("\n", token));
@@ -2164,7 +2191,6 @@ public class Semantico
 			// si no, es porque, o aun no ha sido declarada, o nunca ha sido declarada
 			HashSet<String> variablesDeclaradas = new HashSet<String>();
 
-			int declaracion_actual = 0;
 			String linea = m_Metodos[a].getLinea();
 
 			token = m_Metodos[a].getCuerpo().split("\n");
@@ -2192,7 +2218,11 @@ public class Semantico
 
 			for (int b = 0; b < token.length; b++)
 			{
-				if (token[b].startsWith("NUMERO_LINEA")) linea = token[b];
+				if (token[b].startsWith("NUMERO_LINEA"))
+				{
+					linea = token[b];
+					continue;
+				}
 
 				if (token[b].startsWith("<declaracion-"))
 				{

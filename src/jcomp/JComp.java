@@ -40,7 +40,7 @@ public class JComp
 				+ VersionRevision
 				+ " for x86");
 		System.out.println("Alan Gonzalez 2010 - 2016");
-		System.out.println("");
+		System.out.println();
 	}
 
 	static void uso()
@@ -49,7 +49,6 @@ public class JComp
 
 		System.out.println("options:");
 		System.out.println("-v mostrar salida detallada (verbose)");
-		System.out.println("-a nasm|masm generar ensamblador compatible con masm o nasm, el default es nasm");
 		System.out.println("-h mostrar ayuda");
 	}
 
@@ -111,6 +110,7 @@ public class JComp
 		// BackEnd: Generacion de codigo intermedio
 		//
 		Ensambler2 en = new Ensambler2(a_sem.getCodigo());
+		en.setEnsambladorInline(a_lex.getEnsambladorInline());
 		en.iniciar();
 
 		//

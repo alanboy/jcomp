@@ -120,6 +120,13 @@ test11: $(EXECUTABLE_NAME) $(TEST_DIR)/cadenas/cadena.jc
 	$(CMD_RUN) > TestOut.txt
 	diff --text --ignore-all-space tests/cadenas/Ref.txt TestOut.txt
 
+test12: $(EXECUTABLE_NAME) $(TEST_DIR)/assemblyiniline/asm.jc
+	java -cp bin jcomp.JComp $(TEST_DIR)/assemblyiniline/asm.jc
+	$(CMD_ASSEMBLE)
+	$(CMD_LINK)
+	$(CMD_RUN)
+
+
 gato: $(EXECUTABLE_NAME) $(TEST_DIR)/gato/gato.jc
 	java -cp bin jcomp.JComp $(TEST_DIR)/gato/gato.jc
 	$(CMD_ASSEMBLE)

@@ -30,7 +30,7 @@ public class Automata
 		tokens = cadena.split(" ");
 		pila.push("$");
 
-		int numero_linea=1;
+		int numero_linea =1;
 		boolean cambio;
 
 		for (int index = 0; index < tokens.length; index++)
@@ -51,13 +51,6 @@ public class Automata
 
 			while (cambio)
 			{
-				if (pila.peek().startsWith("<error_"))
-				{
-					System.out.println("ERROR");
-					System.out.println("en linea : " + numero_linea);
-					return "error";
-				}
-
 				verPila();
 
 				cambio = false;

@@ -15,16 +15,23 @@ import jcomp.util.Log;
  * */
 public class Lexico
 {
-	HashMap<String, String> m_Tokens;
-	HashSet<Character> m_Alfabeto;
-	String PROGRAMA_FUENTE;
-	Log debug;
+	private HashMap<String, String> m_Tokens;
+	private HashSet<Character> m_Alfabeto;
+	private HashMap<Integer,StringBuilder> m_EnsambladorInline;
+	private String PROGRAMA_FUENTE;
+	private Log debug;
 
 	public Lexico(String source)
 	{
 		m_Alfabeto = new HashSet<Character>();
 		this.debug = Log.getInstance();
 		PROGRAMA_FUENTE = source;
+		this.m_EnsambladorInline = new HashMap<>();
+	}
+
+	public HashMap<Integer,StringBuilder> getEnsambladorInline()
+	{
+		return m_EnsambladorInline;
 	}
 
 	public int iniciar()
@@ -35,6 +42,8 @@ public class Lexico
 
 		// cargar archivos necesarios para analizar
 		cargarConfiguracion();
+
+		guardarEnsambladorInline();
 
 		// elimina comentarios, regresa 0 si todo salio bien
 		if (eliminarComentarios() != 0) return 1;
@@ -98,6 +107,7 @@ public class Lexico
 		m_Tokens.put("int32", "TIPO_INT32");
 		m_Tokens.put("char", "TIPO_CHAR");
 		m_Tokens.put("string", "TIPO_STRING");
+		m_Tokens.put("asm", "ENSAMBLADOR");
 
 		// escribir el alfabeto que se puede aceptar
 		String alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklimnopqrstuvwxyz 0123456789{}()<>=;[]#.\",_+/-*";
@@ -110,6 +120,40 @@ public class Lexico
 		{
 			m_Alfabeto.add(c);
 		}
+	}
+
+	int guardarEnsambladorInline()
+	{
+		StringBuilder codigoFinal = new StringBuilder();
+		String [] lineas = PROGRAMA_FUENTE.split("\n");
+
+		for (int i = 0; i < lineas.length; i++)
+		{
+			if (!lineas[i].trim().startsWith("asm"))
+			{
+				codigoFinal.append(lineas[i]);
+				continue;
+			}
+
+			StringBuilder asmActual = new StringBuilder();
+
+			i++;
+
+			while (!lineas[i].trim().startsWith("}"))
+			{
+				System.out.println(lineas[i]);
+				asmActual.append(lineas[i] + "\n");
+				i++;
+			}
+
+			int indice = m_EnsambladorInline.size();
+			codigoFinal.append("ENSAMBLADOR_" + indice);
+			m_EnsambladorInline.put(indice, asmActual);
+		}
+
+		PROGRAMA_FUENTE = codigoFinal.toString();
+
+		return 0;
 	}
 
 	int eliminarComentarios()
@@ -305,11 +349,21 @@ public class Lexico
 			else
 			{
 				// si no encontro palabra puede ser un
-				// identificador, un valor, o una estupidez
-				// para tronar el programa ahhh o el numero de linea, o una cadena
+				//  * identificador
+				//  * un valor
+				//  * el numero de linea,
+				//  * una cadena
+				//  * el token de ENSAMBLADOR_
 
 				String token = lineas[a];
 				boolean yaloencontre = false;
+
+				// intentemos ver si es el token de ENSAMBLADOR_
+				if (lineas[a].startsWith("ENSAMBLADOR_"))
+				{
+					pf += lineas[a] + "\n";
+					continue;
+				}
 
 				// intentemos ver si es un numero
 				try

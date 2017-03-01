@@ -6,12 +6,14 @@ import jcomp.util.HashString;
 import java.util.Hashtable;
 import java.util.Arrays;
 import java.util.Stack;
+import java.util.HashMap;
 
 public class Ensambler2
 {
 	private Log debug;
 	private String codigo;
 	private Hashtable<String, PseudoTag> mapaVariablesLocales;
+	private HashMap<Integer,StringBuilder> m_EnsambladorInline;
 
 	public Ensambler2(String codigo)
 	{
@@ -23,6 +25,11 @@ public class Ensambler2
 	public String getCodigo()
 	{
 		return codigo;
+	}
+
+	public void setEnsambladorInline(HashMap<Integer,StringBuilder> ensambladorInlineMap)
+	{
+		m_EnsambladorInline = ensambladorInlineMap;
 	}
 
 	public int iniciar()
@@ -43,6 +50,15 @@ public class Ensambler2
 		}
 
 		return 0;
+	}
+	private String ReemplazarEnsamblador(String asmTag)
+	{
+		int indice = Integer.parseInt(
+						asmTag.substring(
+							asmTag.indexOf("\"")+1,
+							asmTag.lastIndexOf("\"")));
+
+		return m_EnsambladorInline.get(indice).toString();
 	}
 
 	//
@@ -175,6 +191,14 @@ public class Ensambler2
 
 			while (!tokens[++a].equals("</METODO>"))
 			{
+				if (tokens[a].startsWith("<asm"))
+				{
+					cseg_temp += "  ; inline assembly inicia:\n";
+					cseg_temp += ReemplazarEnsamblador(tokens[a]);
+					cseg_temp += "  ; inline assembly termina.\n";
+					continue;
+				}
+
 				//
 				// Hay dos tipos de declaraciones, tipos primitivos y arreglos:
 				// <declaracion tipo:INT id:z linea:24>
@@ -576,7 +600,7 @@ public class Ensambler2
 					tokens[a] += "\n";
 				}
 
-				if (tokens[a].indexOf("<llave") != -1)
+				if (whileActualStack.size() > 0 && tokens[a].indexOf("<llave") != -1)
 				{
 					tokens[a] = "";
 					if (whileActualStack.peek().indexOf("while") >= 0)

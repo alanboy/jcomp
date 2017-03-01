@@ -1,11 +1,12 @@
 
-def void #putc(int c){}
+def void #putc(int c)
+{
+}
 
 def void #puts(string somestring, int len)
 {
 	int i;
 	i = 0;
-
 	while (i < len)
 	{
 		int c;
@@ -18,11 +19,8 @@ def void #puts(string somestring, int len)
 def int #main()
 {
 	string somestring;
-
-	somestring = "esta es una cadena muy larga";
-
+	somestring = "esta es una cadena muy larga  abc";
 	#puts(somestring, 28);
-
 	return 0;
 }
 
