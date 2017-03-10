@@ -131,7 +131,7 @@ public class Lexico
 		{
 			if (!lineas[i].trim().startsWith("asm"))
 			{
-				codigoFinal.append(lineas[i]);
+				codigoFinal.append(lineas[i] + "\n");
 				continue;
 			}
 
