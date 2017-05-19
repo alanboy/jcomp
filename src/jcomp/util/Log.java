@@ -13,7 +13,7 @@ public class Log
 	{
 		if (instance == null)
 		{
-			instance = new Log("build.out");
+			instance = new Log("out\\build.out");
 		}
 		return instance;
 	}

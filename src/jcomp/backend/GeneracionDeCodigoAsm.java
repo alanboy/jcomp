@@ -22,7 +22,7 @@ public class GeneracionDeCodigoAsm
 
 		try
 		{
-			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(nombreDeArchivo)));
+			PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter("out\\" + nombreDeArchivo)));
 			pw.print(codigo);
 			pw.close();
 		}
