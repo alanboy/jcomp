@@ -19,7 +19,12 @@ JCOMP_COMPILE=jc.cmd
 #NC='\033[0m' # No Color
 #endif
 
-all: clean $(EXECUTABLE_NAME) tests
+all: clean $(EXECUTABLE_NAME) publish tests
+
+publish:
+	cd bin
+	jar cfe ..\jc.jar jcomp.JComp .
+	cd ..
 
 tests: clean-tests test1 test2 test3 test5 test6 test7 test8 test9 test10 test11 test12
 	@echo "$(RED)============== TESTS SUCCEDED ==============$(NC)"
